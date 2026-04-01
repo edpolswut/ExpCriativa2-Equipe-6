@@ -25,7 +25,7 @@ document.getElementById("formulario").addEventListener("submit", function(event)
         document.getElementById("erro-senha").textContent = "Senha é obrigatória.";
         valido = false;
     } else if (senha.length < 8) {
-        document.getElementById("erro-senha").textContent = "Senha deve ter pelo menos 6 caracteres.";
+        document.getElementById("erro-senha").textContent = "Senha deve ter pelo menos 8 caracteres.";
         valido = false;
     }
 
