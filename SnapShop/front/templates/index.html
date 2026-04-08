@@ -1,11 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Snapshop</title>
+    <link rel="stylesheet" href="/front/style/indexCadastroLoja.css">
 </head>
 <body>
-    <i>teste <b>teste</b> teste</i>
+    <header>
+        <div class="left">
+            <button class="logo">
+                <img src="img/logo.png" alt="Página Principal" />
+            </button>
+        </div>
+
+        <div class="center">
+            <button>Sobre</button>
+            <button>Contato</button>
+        </div>
+
+        <div class="right">
+            <button onclick="showLoginModal()">Entrar</button>
+            <a href="/CadastroLoja">
+                <button>Criar conta</button>
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <img src="img/banner.png" alt="Banner"/>
+        </section>
+
+        <section class="carousel">
+            <div class="carousel-container">
+                <div class="card">
+                    <img src="img/lendas.png"/>
+                    <p>Loja de parafuso</p>
+                </div>
+
+                <div class="card">
+                    <img src="img/randall.png"/>
+                    <p>Site de Bet</p>
+                </div>
+
+                <div class="card">
+                    <img src="img/herois.png"/>
+                    <p>PUCPR</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>©2026 - Snapshop</p>
+    </footer>
+
+    <script src="/front/script/indexscript.js"></script>
 </body>
 </html>

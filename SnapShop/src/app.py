@@ -27,10 +27,24 @@ DB_CONFIG = {
 def get_db():
     return pymysql.connect(**DB_CONFIG)
 
-@app.get("/forms", response_class=HTMLResponse)
-async def forms(request: Request):
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    #if request.session.get("user_logged_in"):
+        #return RedirectResponse(url="/mainpage", status_code=303)
 
-    return templates.TemplateResponse("forms.html", {
+    #login_error = request.session.pop("login_error", None)
+    #show_login_modal = request.session.pop("show_login_modal", False)
+
+    return templates.TemplateResponse("index.html", {
+        "request": request#,
+        #"login_error": login_error,
+        #"show_login_modal": "block" if show_login_modal else "none"
+    })
+
+@app.get("/CadastroLoja", response_class=HTMLResponse)
+async def cadastroLoja(request: Request):
+
+    return templates.TemplateResponse("cadastroLoja.html", {
         "request": request
     })
 
