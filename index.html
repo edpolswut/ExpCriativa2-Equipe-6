@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Main Page</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="header-container">
+            <div class="logo">Brinquedo<span class="logo-highlight">Shop</span></div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#produtos">Produtos</a></li>
+                    <li><a href="#ofertas">Ofertas</a></li>
+                    <li><a href="#contato">Contato</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="main-layout">
+        
+        <aside class="sidebar-filters">
+            <h2 class="filters-title">Filtros</h2>
+
+            <div class="filter-section">
+                <div class="filter-header" onclick="toggleFilter(this)">
+                    <h3>Categorias</h3>
+                    <span class="toggle-icon">-</span>
+                </div>
+                <div class="filter-content">
+                    <label class="filter-option"><input type="checkbox"> XXXX </label>
+                    <label class="filter-option"><input type="checkbox"> YYYY </label>
+                    <label class="filter-option"><input type="checkbox"> ZZZZ </label>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <div class="filter-header" onclick="toggleFilter(this)">
+                    <h3>Marcas</h3>
+                    <span class="toggle-icon">-</span>
+                </div>
+                <div class="filter-content">
+                    <label class="filter-option"><input type="checkbox"> Looney </label>
+                    <label class="filter-option"><input type="checkbox"> Tunes </label>
+                    <label class="filter-option"><input type="checkbox"> Disney </label>
+                    <label class="filter-option"><input type="checkbox"> Marvel </label>
+                    <label class="filter-option"><input type="checkbox"> DC</label>
+                    <button class="see-more-btn"><span class="arrow-down">&#709;</span> Ver mais</button>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <div class="filter-header" onclick="toggleFilter(this)">
+                    <h3>Preço</h3>
+                    <span class="toggle-icon">-</span>
+                </div>
+                <div class="filter-content">
+                    <label class="filter-option"><input type="checkbox"> Até R$ 100,00 </label>
+                    <label class="filter-option"><input type="checkbox"> De R$ 100,00 até R$ 200,00 </label>
+                    <label class="filter-option"><input type="checkbox"> De R$ 200,00 até R$ 300,00 </label>
+                </div>
+            </div>
+        </aside>
+        
+
+        <main>
+            <div class="carousel-wrapper">
+                <button class="nav-button prev-button" id="prevBtn">&#10094;</button>
+
+                <div class="carousel-container">
+                    <div class="carousel-track" id="track">
+                        <div class="product-card"><img src="images\big.jpg" alt="Coelho"></div>
+                        <div class="product-card"><img src="images\marci.jpg" alt="Marciano1"></div>
+                        <div class="product-card"><img src="images\taz.jpg" alt="Taz"></div>
+                        <div class="product-card"><img src="images\pato.webp" alt="Pato"></div>
+                        <div class="product-card"><img src="images\lola.jpg" alt="Coelho2"></div>
+                        <div class="product-card"><img src="images\michael.jpg" alt="Michael"></div>
+                    </div>
+                </div>
+
+                <button class="nav-button next-button" id="nextBtn">&#10095;</button>
+            </div>
+        </main>
+
+    </div>
+
+    <footer class="site-footer">
+        <p>&copy; SnapShop. Todos os direitos reservados.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
