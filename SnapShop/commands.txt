@@ -1,0 +1,10 @@
+
+//instalar as bibliotecas
+pip install --upgrade -r requirements.txt
+
+//rodar servidor
+abrir o cmd
+
+trocar para a pasta do projeto com o cd:
+
+python -m uvicorn app:app --app-dir src
