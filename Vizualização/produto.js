@@ -15,3 +15,16 @@ function trocarImagem(miniaturaClicada) {
     // 4. Adiciona a borda azul apenas na miniatura que acabou de ser clicada
     miniaturaClicada.classList.add('active');
 }
+
+// Função para carregar o footer
+function carregarFooter() {
+    fetch('footer.html')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('footer-container').innerHTML = data;
+        })
+        .catch(error => console.error('Erro ao carregar o footer:', error));
+}
+
+// Executa a função quando a página terminar de carregar
+document.addEventListener('DOMContentLoaded', carregarFooter);
