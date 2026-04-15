@@ -1,180 +1,55 @@
-html, body {
-    height: 100%;
+/* RESET */
+* {
     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
+/* BODY */
 body {
-    display: flex;
-    flex-direction: column;
     background-color: rgb(241, 241, 241);
 }
 
-main {
-    flex: 1;
-    margin-top: clamp(50px, 8vh, 80px);
-}
-
-header {
-    background-color: #FFD166;
-    color: black;
-    position: fixed;
-    width: 100%;
-    top: 0;
-
-    padding: 0 5vw;
-    height: clamp(50px, 8vh, 80px);
-
+/* CONTAINER CENTRAL */
+.container {
+    min-height: 100vh;
     display: flex;
-    align-items: center;
-
-    box-sizing: border-box;
-}
-
-header button {
-    background: transparent;
-    border: none;
-
-    height: 100%;
-    padding: 0 clamp(10px, 2vw, 25px);
-
-    cursor: pointer;
-    font-size: clamp(12px, 1vw, 16px);
-    color: black;
-
-    display: flex;
-    align-items: center;
     justify-content: center;
-
-    transition: background 0.2s ease;
 }
 
-header button:not(:first-child) {
-    border-left: 1px solid #e6b84f;
+.box {
+    margin: auto;
+    width: 100%;
+    max-width: 400px;
 }
 
-header button:hover {
-    background-color: #e6b84f;
-}
-
-.logo {
-    height: 100%;
-    padding: 0 20px;
-}
-
-.logo img {
-    height: 100%;
-    width: auto;
-    display: block;
-}
-
-footer {
-    background-color: #FFD166;
-    color: black;
+.box h1 {
     text-align: center;
-    padding: 20px 5vw;
-    border-top: 1px solid #e6b84f;
-}
-
-footer p {
-    margin: 0;
-    font-size: 14px;
-}
-
-.left,
-.center,
-.right {
-    flex: 1;
-    display: flex;
-    height: 100%;
-}
-
-.center {
-    justify-content: center;
-}
-
-.right {
-    justify-content: flex-end;
-}
-
-.hero {
-    height: 100vh;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    overflow: hidden;
-}
-
-.hero img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center 30%;
-}
-
-.carousel {
-    padding: 40px 0;
-    display: flex;
-    justify-content: center;
-}
-
-.carousel-container {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-
-    width: 90%;
-    max-width: 1200px;
-
-    scroll-snap-type: x mandatory;
-
-    justify-content: center;
-}
-
-.card {
-    min-width: 250px;
-    flex-shrink: 0;
-    scroll-snap-align: center;
-}
-
-.carousel-container::-webkit-scrollbar {
-    display: none;
+    margin-bottom: 20px;
 }
 
 
-.card img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-}
-
-.card p {
-    padding: 10px;
-    margin: 0;
-    text-align: center;
-}
-
-/* ===== CADASTRO ===== */
-
+/* FORM */
 form {
     background-color: white;
     padding: 30px;
     border-radius: 10px;
 
-    width: 90%;
-    max-width: 400px;
-
-    margin: 100px auto 40px auto;
+    width: 100%;
 
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* LABEL */
 form label {
     font-weight: bold;
     font-size: 14px;
+    display: block;
+    text-align: left;
 }
 
+/* INPUT */
 form input {
     width: 100%;
     padding: 10px;
@@ -183,23 +58,23 @@ form input {
 
     border: 1px solid #ccc;
     border-radius: 5px;
-
-    box-sizing: border-box;
 }
 
+/* FOCO */
 form input:focus {
     outline: none;
     border-color: #FFD166;
 }
 
-/* Mensagens de erro */
+/* ERRO */
 form p {
-    margin: 0 0 10px 0;
+    margin-bottom: 10px;
     font-size: 12px;
     color: red;
+    text-align: left;
 }
 
-/* Botão cadastrar */
+/* BOTÃO */
 form button {
     width: 100%;
     padding: 12px;
@@ -211,17 +86,16 @@ form button {
     cursor: pointer;
     font-weight: bold;
 
-    transition: background 0.2s;
+    transition: 0.2s;
 }
 
 form button:hover {
     background-color: #e6b84f;
 }
 
-/* Botão voltar */
+/* VOLTAR */
 #voltar {
-    display: block;
-    margin: 0 auto 40px auto;
+    margin-top: 15px;
 
     padding: 10px 20px;
 
@@ -232,9 +106,38 @@ form button:hover {
     cursor: pointer;
     font-weight: bold;
 
-    transition: all 0.2s;
+    transition: 0.2s;
 }
 
 #voltar:hover {
     background-color: #FFD166;
+}
+
+
+@media (max-width: 600px) {
+
+    .box {
+        padding: 0 15px;
+    }
+
+    form {
+        padding: 20px;
+    }
+
+    form input {
+        padding: 12px;
+        font-size: 16px;
+    }
+
+    form button {
+        padding: 14px;
+        font-size: 16px;
+    }
+    .box h1 {
+        font-size: 22px;
+    }
+
+    #voltar {
+        width: 100%;
+    }
 }

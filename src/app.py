@@ -30,10 +30,28 @@ async def index(request: Request):
         #"show_login_modal": "block" if show_login_modal else "none"
     })
 
+@app.get("/cadastro", response_class=HTMLResponse)
+async def cadastro(request: Request):
+    return templates.TemplateResponse("cadastro.html", {
+        "request": request
+    })
+
 @app.get("/CadastroLoja", response_class=HTMLResponse)
 async def cadastroLoja(request: Request):
 
     return templates.TemplateResponse("cadastroLoja.html", {
+        "request": request
+    })
+
+@app.get("/perfil", response_class=HTMLResponse)
+async def perfil(request: Request):
+    return templates.TemplateResponse("perfil.html", {
+        "request": request
+    })
+
+@app.get("/mainpage", response_class=HTMLResponse)
+async def mainpage(request: Request):
+    return templates.TemplateResponse("mainpage.html", {
         "request": request
     })
 
@@ -49,7 +67,7 @@ async def CriarUsuario(
     try:
         with db.cursor() as cursor:
 
-            cursor.execute("SELECT Email FROM Usuario WHERE Email = %s", (Email)) # executa um comando SQL, %s é um placeholder para evitar SQL injection
+            cursor.execute("SELECT Email FROM Usuario WHERE Email = %s", (Email,)) # executa um comando SQL, %s é um placeholder para evitar SQL injection
             if cursor.fetchone():
                 return RedirectResponse(url="/forms", status_code=303)
 
@@ -59,7 +77,7 @@ async def CriarUsuario(
 
             return RedirectResponse(url="/forms", status_code=303)
 
-    except Exception as e:
+    except Exception as e: 
         return RedirectResponse(url="/forms", status_code=303)
 
     finally:

@@ -5,11 +5,8 @@ document.addEventListener("DOMContentLoaded", function () {
     form.addEventListener("submit", function (event) {
         event.preventDefault();
 
-        let nome = document.getElementById("nome").value.trim();
-        let email = document.getElementById("email").value.trim();
-        let senha = document.getElementById("senha").value.trim();
-        let confirmarSenha = document.getElementById("confirmarSenha").value.trim();
-        let dataNascimento = document.getElementById("dataNascimento").value;
+        let nomeLoja = document.getElementById("nomeLoja").value.trim();
+        let emailLoja = document.getElementById("emailLoja").value.trim();
         let cnpj = document.getElementById("cnpj").value.trim();
         let logradouro = document.getElementById("logradouro").value.trim();
         let cep = document.getElementById("cep").value.trim();
@@ -18,11 +15,8 @@ document.addEventListener("DOMContentLoaded", function () {
         let valido = true;
 
         // Limpar erros
-        document.getElementById("erro-nome").textContent = "";
-        document.getElementById("erro-email").textContent = "";
-        document.getElementById("erro-senha").textContent = "";
-        document.getElementById("erro-confirmar-senha").textContent = "";
-        document.getElementById("erro-data").textContent = "";
+        document.getElementById("erro-nomeLoja").textContent = "";
+        document.getElementById("erro-emailLoja").textContent = "";
         document.getElementById("erro-cnpj").textContent = "";
         document.getElementById("erro-logradouro").textContent = "";
         document.getElementById("erro-cep").textContent = "";
@@ -65,63 +59,25 @@ document.addEventListener("DOMContentLoaded", function () {
         return resultado == digitos.charAt(1);
         }
 
-        // Nome
-        if (nome === "") {
-            document.getElementById("erro-nome").textContent = "Nome é obrigatório.";
+        // nomeLoja
+        if (nomeLoja === "") {
+            document.getElementById("erro-nomeLoja").textContent = "Nome da loja é obrigatório.";
             valido = false;
-        } else if (nome.length < 5) {
-            document.getElementById("erro-nome").textContent = "Nome deve ter pelo menos 5 caracteres.";
-            valido = false;
-        }
-
-        // Email
-        let regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (email === "") {
-            document.getElementById("erro-email").textContent = "Email é obrigatório.";
-            valido = false;
-        } else if (!regexEmail.test(email)) {
-            document.getElementById("erro-email").textContent = "Email inválido.";
+        } else if (nomeLoja.length > 20) {
+            document.getElementById("erro-nomeLoja").textContent = "Nome da loja deve ter menos de 20 caractéres.";
             valido = false;
         }
 
-        // Senha
-        if (senha === "") {
-            document.getElementById("erro-senha").textContent = "Senha é obrigatória.";
+        // emailLoja
+        let regexEmailLoja = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (emailLoja === "") {
+            document.getElementById("erro-emailLoja").textContent = "E-mail da loja é obrigatório.";
             valido = false;
-        } else if (senha.length < 8) {
-            document.getElementById("erro-senha").textContent = "Senha deve ter pelo menos 8 caracteres.";
-            valido = false;
-        }
-
-        // Confirmar senha
-        if (confirmarSenha === "") {
-            document.getElementById("erro-confirmar-senha").textContent = "Confirme sua senha.";
-            valido = false;
-        } else if (senha !== confirmarSenha) {
-            document.getElementById("erro-confirmar-senha").textContent = "As senhas não coincidem.";
+        } else if (!regexEmailLoja.test(emailLoja)) {
+            document.getElementById("erro-emailLoja").textContent = "E-mail da loja inválido.";
             valido = false;
         }
 
-        // Data de nascimento
-        if (dataNascimento === "") {
-            document.getElementById("erro-data").textContent = "Data de nascimento é obrigatória.";
-            valido = false;
-        } else {
-            let hoje = new Date();
-            let nascimento = new Date(dataNascimento);
-
-            let idade = hoje.getFullYear() - nascimento.getFullYear();
-            let mes = hoje.getMonth() - nascimento.getMonth();
-
-            if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
-                idade--;
-            }
-
-            if (idade < 18) {
-                document.getElementById("erro-data").textContent = "Você deve ter pelo menos 18 anos.";
-                valido = false;
-            }
-        }
 
         // CNPJ
         if (cnpj === "") {

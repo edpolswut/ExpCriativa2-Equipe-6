@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - Snapshop</title>
+    <link rel="stylesheet" href="/front/style/indexCadastroLoja.css">
+</head>
+<body>
+
+    <main class="container">
+        <div class="box">
+
+            <h1>Cadastro</h1>
+
+            <form id="formulario" method="POST" action="/CriarUsuario">
+
+                <label>Nome:</label>
+                <input type="text" id="nome" name="Nome">
+                <p id="erro-nome"></p>
+
+                <label>Email:</label>
+                <input type="text" id="email" name="Email">
+                <p id="erro-email"></p>
+
+                <label>Senha:</label>
+                <input type="password" id="senha" name="Senha">
+                <p id="erro-senha"></p>
+
+                <label>Confirmar Senha:</label>
+                <input type="password" id="confirmarSenha">
+                <p id="erro-confirmar-senha"></p>
+                    
+                <label>Data de Nascimento:</label>
+                <input type="date" id="dataNascimento" name="DataNascimento">
+                <p id="erro-data"></p>
+
+                <button type="submit">Cadastrar</button>
+            </form>
+
+            <a href="/index">
+                <button id="voltar">Voltar</button>
+            </a>
+
+        </div>
+    </main>
+
+    <script src="/front/script/formsscript.js"></script>
+</body>
+</html>

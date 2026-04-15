@@ -1,4 +1,4 @@
-
+// Mova para o topo para garantir visibilidade global
 const productSlideIndices = {};
 
 // Função para mover fotos INTERNAS do produto
@@ -17,7 +17,7 @@ function moveInternalSlide(productId, step) {
     container.style.transform = `translateX(-${offset}%)`;
 }
 
-// Lógica do Carrossel PRINCIPAL
+// Lógica do Carrossel PRINCIPAL (esperando o DOM)
 document.addEventListener('DOMContentLoaded', () => {
     const track = document.getElementById('track');
     const prevBtn = document.getElementById('prevBtn');
@@ -45,3 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
         track.style.transform = `translateX(${currentPosition}px)`;
     });
 });
+
+function toggleMobileFilter() {
+    const sidebar = document.getElementById('sidebarFilters');
+    const overlay = document.getElementById('filterOverlay');
+    
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+}

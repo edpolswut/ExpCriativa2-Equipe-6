@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil - Snapshop</title>
+    <link rel="stylesheet" href="/front/style/perfilStyle.css">
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="left">
+            <button class="logo">
+                SnapShop
+            </button>
+        </div>
+
+        <div class="center">
+            <button>Sobre</button>
+            <button>Contato</button>
+        </div>
+
+        <div class="right">
+            <button onclick="showLoginModal()">Entrar</button>
+            <a href="/cadastro">
+                <button>Criar conta</button>
+            </a>
+        </div>
+    </header>
+
+    <!-- PERFIL -->
+    <section class="perfil-container">
+        <div class="perfil-box">
+            <img src="https://via.placeholder.com/60" alt="Foto de perfil">
+            <div class="perfil-info">
+                <h3>Keeras</h3>
+            </div>
+            <a href="/CadastroLoja">
+                <button class="btn-criar">Criar Loja</button>
+            </a>
+        </div>
+    </section>
+
+    <!-- LOJAS -->
+    <section class="lojas-container">
+        <a href ="/mainpage">
+        <div class="loja-card">
+            <div class="loja-img"></div>
+            <h4>Brinquedo Shop</h4>
+            <span>39 itens</span>
+        </div>
+        </a>
+        <div class="loja-card">
+            <div class="loja-img"></div>
+            <h4>Minha Loja</h4>
+            <span>118 itens</span>
+        </div>
+
+        <div class="loja-card">
+            <div class="loja-img"></div>
+            <h4>RPG Store</h4>
+            <span>195 itens</span>
+        </div>
+    </section>
+
+</body>
+</html>
