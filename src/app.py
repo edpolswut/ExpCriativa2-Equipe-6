@@ -112,12 +112,6 @@ async def perfil(request: Request, db = Depends(get_db)):
         "usuario": usuario
     })
 
-@app.get("/mainpage", response_class=HTMLResponse)
-async def mainpage(request: Request):
-    return templates.TemplateResponse("mainpage.html", {
-        "request": request
-    })
-
 #Insert de usuário
 @app.post("/CriarUsuario", name="CriarUsuario")
 async def CriarUsuario(
