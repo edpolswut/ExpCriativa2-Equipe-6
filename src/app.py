@@ -5,14 +5,59 @@ import gerencProdutos
 from mangum import Mangum
 from fastapi import FastAPI, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+import os
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
 from database import get_db
+
+#Hash
+def gerar_hash(senha: str) -> str:
+    salt = os.urandom(16)
+
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=64,
+        salt=salt,
+        iterations=100_000,
+    )
+
+    hash_bytes = kdf.derive(senha.encode())
+
+    # junta salt + hash e codifica
+    return base64.b64encode(salt + hash_bytes).decode()
+
+
+def verificar_senha(senha: str, hash_salvo: str) -> bool:
+    decoded = base64.b64decode(hash_salvo.encode())
+
+    salt = decoded[:16]
+    hash_original = decoded[16:]
+
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=64,
+        salt=salt,
+        iterations=100_000,
+    )
+
+    try:
+        kdf.verify(senha.encode(), hash_original)
+        return True
+    except Exception:
+        return False
 
 templates = Jinja2Templates(directory="front/templates")
 
 app = FastAPI()
+
+from starlette.middleware.sessions import SessionMiddleware
+app.add_middleware(SessionMiddleware, secret_key="teste123")
+
 app.mount("/front", StaticFiles(directory="front"), name="view")
 app.include_router(gerencProdutos.router)
 
@@ -30,6 +75,18 @@ async def index(request: Request):
         #"show_login_modal": "block" if show_login_modal else "none"
     })
 
+@app.get("/cadastro", response_class=HTMLResponse)
+async def cadastro(request: Request):
+    return templates.TemplateResponse("cadastro.html", {
+        "request": request
+    })
+
+@app.get("/login", response_class=HTMLResponse)
+async def login(request: Request):
+    return templates.TemplateResponse("login.html", {
+        "request": request
+    })
+
 @app.get("/CadastroLoja", response_class=HTMLResponse)
 async def cadastroLoja(request: Request):
 
@@ -37,11 +94,36 @@ async def cadastroLoja(request: Request):
         "request": request
     })
 
+@app.get("/perfil", response_class=HTMLResponse)
+async def perfil(request: Request, db = Depends(get_db)):
 
+    #muda a página perfil pelo login feito
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=303)
+
+    with db.cursor(pymysql.cursors.DictCursor) as cursor:
+        cursor.execute("SELECT Nome, Email FROM Usuario WHERE Id_Usuario = %s", (user_id,))
+        usuario = cursor.fetchone()
+
+    return templates.TemplateResponse("perfil.html", {
+        "request": request,
+        "usuario": usuario
+    })
+
+@app.get("/mainpage", response_class=HTMLResponse)
+async def mainpage(request: Request):
+    return templates.TemplateResponse("mainpage.html", {
+        "request": request
+    })
+
+#Insert de usuário
 @app.post("/CriarUsuario", name="CriarUsuario")
 async def CriarUsuario(
     request: Request,
-    Nome: str = Form(...), 
+    Nome: str = Form(...),
+    CPF: str = Form(...), 
     Email: str = Form(...), 
     Senha: str = Form(...), 
     db = Depends(get_db)
@@ -49,21 +131,53 @@ async def CriarUsuario(
     try:
         with db.cursor() as cursor:
 
-            cursor.execute("SELECT Email FROM Usuario WHERE Email = %s", (Email)) # executa um comando SQL, %s é um placeholder para evitar SQL injection
-            if cursor.fetchone():
+            cursor.execute("SELECT Email FROM Usuario WHERE Email = %s", (Email,)) # executa um comando SQL, %s é um placeholder para evitar SQL injection
+            if cursor.fetchone():   
                 return RedirectResponse(url="/forms", status_code=303)
 
-            sql = "INSERT INTO Usuario (Nome, Email, Senha_Hash, Dat_Criacao, Cpf, Status) VALUES (%s, %s, %s, current_date(), 1, 1)"
-            cursor.execute(sql, (Nome, Email, Senha))
+            senha_hash = gerar_hash(Senha)
+
+            sql = "INSERT INTO Usuario (Nome, Cpf, Email, Senha_Hash, Dat_Criacao, Status) VALUES (%s, %s, %s, %s, current_date(), 1)"
+            cursor.execute(sql, (Nome, CPF, Email, senha_hash))
             db.commit()
 
-            return RedirectResponse(url="/forms", status_code=303)
+            return RedirectResponse(url="/", status_code=303)
 
-    except Exception as e:
-        return RedirectResponse(url="/forms", status_code=303)
+    except Exception as e: 
+        print("ERRO AO CRIAR USUARIO:", e)
+        return RedirectResponse(url="/", status_code=303)
 
     finally:
         db.close()
+
+#Login
+@app.post("/Login")
+async def Login(
+    request: Request,
+    Email: str = Form(...),
+    Senha: str = Form(...),
+    db = Depends(get_db)
+):
+    try:
+        with db.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT * FROM Usuario WHERE Email = %s", (Email,))
+            usuario = cursor.fetchone()
+
+            if not usuario:
+                return RedirectResponse(url="/login?erro=1", status_code=303)
+
+            if not verificar_senha(Senha, usuario["Senha_Hash"]):
+                return RedirectResponse(url="/login?erro=1", status_code=303)
+
+            request.session["user_id"] = usuario["Id_Usuario"]
+            request.session["user_nome"] = usuario["Nome"]
+
+            return RedirectResponse(url="/perfil", status_code=303)
+
+    except Exception as e:
+        print("ERRO VERIFY:", e)
+        return False
+
 
 @app.get("/mainpage", name="mainpage", response_class=HTMLResponse)
 async def mainpage(request: Request, db = Depends(get_db)):

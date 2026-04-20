@@ -8,7 +8,7 @@ CREATE TABLE Usuario (
     Nome VARCHAR(100) NOT NULL,
     Cpf VARCHAR(14) NOT NULL UNIQUE, -- Unique adicionado
     Email VARCHAR(100) NOT NULL UNIQUE, -- Unique adicionado
-    Senha_Hash CHAR(100) NOT NULL,
+    Senha_Hash CHAR(255) NOT NULL,
     Dat_Criacao DATE NOT NULL,
     Status INT NOT NULL
 );
