@@ -1,61 +1,81 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snapshop</title>
-    <link rel="stylesheet" href="/front/style/indexCadastroLoja.css">
+
+    <link rel="stylesheet" href="/front/style/headerStyle.css">
+    <link rel="stylesheet" href="/front/style/indexStyle.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header>
-        <div class="left">
-            <button class="logo">
-                <img src="img/logo.png" alt="Página Principal" />
-            </button>
-        </div>
 
-        <div class="center">
-            <button>Sobre</button>
-            <button>Contato</button>
-        </div>
+<header class="site-header">
+    <div class="left">
+        <a href="/" class="logo">
+            <span class="snap">Snap</span><span class="shop">shop</span>
+        </a>
+    </div>
 
-        <div class="right">
-            <button onclick="showLoginModal()">Entrar</button>
-            <a href="/CadastroLoja">
-                <button>Criar conta</button>
-            </a>
-        </div>
-    </header>
+    <nav class="center">
+        <a href="#" class="nav-btn">Sobre</a>
+        <a href="#" class="nav-btn">Contato</a>
+    </nav>
 
-    <main>
-        <section class="hero">
-            <img src="img/banner.png" alt="Banner"/>
-        </section>
+    <div class="right">
+        <a href="/login" class="nav-btn">Entrar</a>
+        <a href="/cadastro" class="nav-btn">Criar conta</a>
+    </div>
+</header>
 
-        <section class="carousel">
-            <div class="carousel-container">
+<main>
+    <section class="hero">
+        <h1>Crie sua loja online<br>do seu jeito</h1>
+
+        <p class="subtitle">
+            Escolha entre diversos templates e gerencie seu marketplace com facilidade.
+        </p>
+
+        <a href="/cadastro" class="cta-btn">Comece já</a>
+
+        <p class="mini-text">Comece grátis. Sem complicações.</p>
+    </section>
+
+    <section class="showcase">
+        <h2>Descubra lojas criadas com o Snapshop</h2>
+
+        <div class="carousel">
+            <button class="arrow" id="prev">&#10094;</button>
+
+            <div class="carousel-track" id="track">
+
                 <div class="card">
-                    <img src="img/lendas.png"/>
-                    <p>Loja de parafuso</p>
+                    <img src="https://via.placeholder.com/300x180">
+                    <div class="card-title">Loja Moderna</div>
                 </div>
 
-                <div class="card">
-                    <img src="img/randall.png"/>
-                    <p>Site de Bet</p>
-                </div>
+                <a href="/exemplo" class="card">
+                    <img src="https://via.placeholder.com/300x180">
+                    <div class="card-title">Ver exemplo real</div>
+                </a>
 
                 <div class="card">
-                    <img src="img/herois.png"/>
-                    <p>PUCPR</p>
+                    <img src="https://via.placeholder.com/300x180">
+                    <div class="card-title">Loja Minimalista</div>
                 </div>
+
             </div>
-        </section>
-    </main>
 
-    <footer>
-        <p>©2026 - Snapshop</p>
-    </footer>
+            <button class="arrow" id="next">&#10095;</button>
+        </div>
+    </section>
+</main>
 
-    <script src="/front/script/indexscript.js"></script>
+<footer>
+    <p>&copy; SnapShop. Todos os direitos reservados.</p>
+</footer>
+
+<script src="/index/indexJS.js"></script>
 </body>
 </html>
