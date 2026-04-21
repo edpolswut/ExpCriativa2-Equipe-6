@@ -1,6 +1,40 @@
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("formulario");
 
+    // ====== BUSCA DE CEP (ViaCEP) ======
+    const cepInput = document.getElementById("cep");
+
+    cepInput.addEventListener("blur", function () {
+        let cep = cepInput.value.replace(/\D/g, "");
+
+        if (cep.length !== 8) return;
+
+        fetch(`https://viacep.com.br/ws/${cep}/json/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.erro) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "CEP não encontrado",
+                        text: "Verifique o CEP digitado."
+                    });
+                    return;
+                }
+
+                document.getElementById("logradouro").value = data.logradouro || "";
+                document.getElementById("bairro").value = data.bairro || "";
+                document.getElementById("cidade").value = data.localidade || "";
+            })
+            .catch(() => {
+                Swal.fire({
+                    icon: "error",
+                    title: "Erro ao buscar CEP",
+                    text: "Não foi possível consultar o CEP."
+                });
+            });
+    });
+
+    // ====== VALIDAÇÃO DE CNPJ ======
     function validarCNPJ(cnpj) {
         cnpj = cnpj.replace(/[^\d]+/g, "");
 
@@ -35,6 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return resultado === Number(digitos.charAt(1));
     }
 
+    // ====== SUBMIT DO FORMULÁRIO ======
     form.addEventListener("submit", function (event) {
         event.preventDefault();
 
