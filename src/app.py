@@ -213,7 +213,7 @@ async def editar_loja(request: Request, id_loja: int, db = Depends(get_db)):
             if config.get("Logo"):
                 config["Logo_B64"] = base64.b64encode(config["Logo"]).decode('utf-8')
             if config.get("Banner"):
-                config["Banner_B64"] = baseSafeb64encode(config["Banner"]).decode('utf-8')
+                config["Banner_B64"] = base64.b64encode(config["Banner"]).decode('utf-8')
 
     return templates.TemplateResponse(
         request=request,
