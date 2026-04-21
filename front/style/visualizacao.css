@@ -1,6 +1,7 @@
 
 .product-page {
-    width: 1200px;
+    width: 100%;
+    max-width: 1200px; 
     margin: 40px auto;
     display: flex;
     gap: 50px;
@@ -8,6 +9,7 @@
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-sizing: border-box; 
 }
 
 .product-gallery {
@@ -121,4 +123,55 @@
     margin-top: 20px;
     border-top: 1px solid #eaeaea;
     padding-top: 20px;
+}
+
+/* --- Responsividade Visualização --- */
+
+/* Telas médias (Tablets) */
+@media (max-width: 900px) {
+    .product-page {
+        flex-direction: column; /* Empilha foto e detalhes */
+        gap: 30px;
+        padding: 20px;
+    }
+
+    .product-gallery, 
+    .product-details {
+        width: 100%; /* Ocupam a tela inteira */
+    }
+
+    .main-image-container {
+        height: 400px; /* Reduz a altura da imagem principal */
+    }
+}
+
+/* Telas pequenas (Celulares) */
+@media (max-width: 480px) {
+    .product-page {
+        margin: 20px auto;
+        padding: 15px;
+    }
+
+    .main-image-container {
+        height: 300px;
+        padding: 10px;
+    }
+
+    .thumb {
+        width: 60px;
+        height: 60px;
+    }
+
+    .product-details h1 {
+        font-size: 20px;
+    }
+
+    .price-box .current-price {
+        font-size: 28px;
+    }
+
+    .btn-comprar {
+        padding: 15px;
+        font-size: 16px;
+    }
 }
