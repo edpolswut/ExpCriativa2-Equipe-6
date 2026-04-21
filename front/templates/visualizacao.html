@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes do Produto - BrinquedoShop</title>
+    <link rel="stylesheet" href="/front/style/mainpage.css">
+    <link rel="stylesheet" href="/front/style/visualizacao.css">
+</head>
+<body>
+    <div id="header-container"></div> 
+
+    <main class="product-page">
+        <div class="product-gallery">
+            <div class="main-image-container">
+                {% if produto.lista_imagens %}
+                    <img id="imagem-principal" src="data:image/jpeg;base64,{{ produto.lista_imagens[0] }}" alt="{{ produto.Nome }}">
+                {% else %}
+                    <img id="imagem-principal" src="../images/sem-imagem.jpg" alt="Sem Imagem">
+                {% endif %}
+            </div>
+            
+            <div class="thumbnails">
+                {% for img_b64 in produto.lista_imagens %}
+                    <img src="data:image/jpeg;base64,{{ img_b64 }}" alt="Foto {{ loop.index }}" class="thumb {% if loop.first %}active{% endif %}" onclick="trocarImagem(this)">
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="product-details">
+            <span class="produto-condicao">Disponível: {{ produto.Qtd_Estoque }} em estoque</span>
+            <h1>{{ produto.Nome }}</h1>
+            
+            <div class="price-box">
+                <span class="current-price">R$ {{ "%.2f"|format(produto.Preco) }}</span>
+            </div>
+
+            {% if produto.Qtd_Estoque > 0 %}
+                <button class="btn-comprar">Comprar Agora</button>
+            {% else %}
+                <button class="btn-comprar" style="background-color: gray; cursor: not-allowed;" disabled>Esgotado</button>
+            {% endif %}
+
+            <div class="description-box">
+                <h3>Descrição do Produto</h3>
+                <p>Produto carregado diretamente da base de dados SnapShop.</p>
+            </div>
+        </div>
+    </main>
+    
+    <div id="footer-container"></div>
+
+    <script src="/front/script/mainpage.js"></script>
+    <script src="/front/script/visualizacao.js"></script>
+</body>
+</html>
