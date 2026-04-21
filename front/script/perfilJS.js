@@ -8,18 +8,23 @@ document.addEventListener("DOMContentLoaded", function () {
         "#EF476F", "#8338EC", "#FF9F1C"
     ];
 
-    if (nomeElemento && avatar) {
-        const nome = nomeElemento.textContent.trim();
+    if (!nomeElemento || !avatar) return;
 
-        if (nome.length > 0) {
-            const inicial = nome.charAt(0).toUpperCase();
-            avatar.textContent = inicial;
+    let nome = nomeElemento.dataset.nome;
 
-            const index = inicial.charCodeAt(0) % cores.length;
-            avatar.style.backgroundColor = cores[index];
-        } else {
-            avatar.textContent = "U";
-        }
+    if (!nome || nome.trim() === "") {
+        nome = nomeElemento.textContent.trim();
+    }
+
+    if (nome && nome.length > 0) {
+        const inicial = nome.charAt(0).toUpperCase();
+
+        avatar.textContent = inicial;
+
+        const index = inicial.charCodeAt(0) % cores.length;
+        avatar.style.backgroundColor = cores[index];
+    } else {
+        avatar.textContent = "U";
     }
 
 });
