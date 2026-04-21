@@ -11,23 +11,7 @@
 </head>
 <body>
 
-<header class="site-header">
-    <div class="left">
-        <a href="/" class="logo">
-            <span class="snap">Snap</span><span class="shop">shop</span>
-        </a>
-    </div>
-
-    <nav class="center">
-        <a href="#" class="nav-btn">Sobre</a>
-        <a href="#" class="nav-btn">Contato</a>
-    </nav>
-
-    <div class="right">
-        <a href="/login" class="nav-btn">Entrar</a>
-        <a href="/cadastro" class="nav-btn">Criar conta</a>
-    </div>
-</header>
+{% include 'headerFooter/header.html' %}
 
 <main>
     <section class="hero">
@@ -72,9 +56,7 @@
     </section>
 </main>
 
-<footer>
-    <p>&copy; SnapShop. Todos os direitos reservados.</p>
-</footer>
+{% include 'headerFooter/footer.html' %}
 
 <script src="/front/script/indexJS.js"></script>
 </body>

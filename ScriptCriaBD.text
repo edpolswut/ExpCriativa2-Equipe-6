@@ -100,7 +100,7 @@ CREATE TABLE Endereco (
 /* Tabelas Associativas e Relacionamentos */
 
 CREATE TABLE Usuario_Perfil (
-    Id_Usuario_Perfil INTEGER AUTO_INCREMENT PRIMARY KEY,
+    Id_Usuario_Perfil INTEGER PRIMARY KEY,
     fk_Perfil_Id_Perfil INTEGER,
     fk_Usuario_Id_Usuario INTEGER,
     fk_Loja_Id_Loja INTEGER

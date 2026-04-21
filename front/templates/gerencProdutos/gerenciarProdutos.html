@@ -2,96 +2,63 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Produtos - SnapShop</title>
-    <link rel="stylesheet" href="/front/style/headerStyle.css">
-    <link rel="stylesheet" href="/front/style/perfilStyle.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        /* Mesma base da tela de edição */
-        body { margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; background-color: var(--fundo); }
-        .app-body { display: flex; flex: 1; overflow: hidden; }
-        .sidebar { width: 250px; background-color: #292929; color: white; padding: 20px; flex-shrink: 0; display: flex; flex-direction: column; }
-        .sidebar h2 { font-size: 1.1em; border-bottom: 1px solid #444; padding-bottom: 15px; margin-bottom: 15px; color: var(--primaria); text-transform: uppercase; letter-spacing: 1px;}
-        .sidebar a { display: block; color: #ddd; text-decoration: none; padding: 12px 15px; transition: 0.3s; border-radius: 6px; margin-bottom: 5px; font-size: 15px;}
-        .sidebar a i { width: 25px; }
-        .sidebar a:hover, .sidebar a.active { background-color: #494949; color: white; }
-        .content { flex: 1; padding: 40px; overflow-y: auto; }
-        
-        /* Card e Tabela */
-        .card-painel { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); max-width: 1000px;}
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 15px 10px; text-align: left; border-bottom: 1px solid #eee; }
-        .btn-acao { background: none; border: none; cursor: pointer; color: #555; margin-right: 15px; font-size: 18px;}
-        .btn-acao:hover { color: var(--primaria); }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Produtos - Snapshop</title>
+    <link rel="stylesheet" href="/front/style/gerencProdutos/gerencProdutos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-
-    <header class="site-header">
-        <div class="left">
-            <a href="/" class="logo">Snap<span class="shop">shop</span></a>
+    <div class="admin-container">
+        <div class="header-actions">
+            <h1>Gestão de Inventário</h1>
+            <a href="/FormProduto" class="btn-novo">+ Novo Produto</a>
         </div>
-        <div class="center">
-            </div>
-        <div class="right">
-            <a href="/perfilLojista" class="nav-btn">
-                <i class="fas fa-arrow-left"></i> Voltar
-            </a>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Nome</th>
+                        <th>Preço</th>
+                        <th>Estoque</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prod in produtos %}
+                    <tr>
+                        <td data-label="Produto">
+                            {% if prod['Imagem_base64'] %}
+                            <img src="data:image/jpeg;base64,{{ prod['Imagem_base64'] }}" class="img-thumb" alt="Miniatura">
+                            {% else %}
+                            <div class="img-thumb" style="display:flex; align-items:center; justify-content:center; background:#eee; color:#999; font-size:10px;">Sem Foto</div>
+                            {% endif %}
+                        </td>
+                        <td data-label="Nome"><strong>{{ prod['Nome'] }}</strong></td>
+                        <td data-label="Preço">R$ {{ "%.2f"|format(prod['Preco']) }}</td>
+                        <td data-label="Estoque">{{ prod['Qtd_Estoque'] }} un.</td>
+                        <td data-label="Ações">
+                            <a href="/FormProduto?id={{ prod['Id_Produto'] }}" class="btn-edit" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button class="btn-delete" onclick="confirmarExclusao('{{ prod.Id_Produto }}')" title="Excluir">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-    </header>
-
-    <div class="app-body">
-        
-        <nav class="sidebar">
-            <h2><i class="fas fa-store"></i> Painel da Loja</h2>
-            <a href="/EditarLoja/{{ id_loja }}"><i class="fas fa-sliders-h"></i> Configurações</a>
-            <a href="/GerenciarProdutos?id_loja={{ id_loja }}" class="active"><i class="fas fa-box-open"></i> Produtos</a>
-        </nav>
-
-        <main class="content">
-            
-            <div class="card-painel">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="margin: 0;"><i class="fas fa-box-open"></i> Meus Produtos</h3>
-                    <a href="/FormProduto?id_loja={{ id_loja }}" class="cta-btn pequeno"><i class="fas fa-plus"></i> Novo Produto</a>
-                </div>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Foto</th>
-                            <th>Produto</th>
-                            <th>Estoque</th>
-                            <th>Preço</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for p in produtos %}
-                        <tr>
-                            <td>
-                                {% if p.Imagem_base64 %}
-                                    <img src="data:image/jpeg;base64,{{ p.Imagem_base64 }}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd;">
-                                {% else %}
-                                    <div style="width: 45px; height: 45px; background: #eee; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #aaa;"><i class="fas fa-camera"></i></div>
-                                {% endif %}
-                            </td>
-                            <td style="font-weight: bold; color: #333;">{{ p.Nome }}</td>
-                            <td>{{ p.Qtd_Estoque }} un.</td>
-                            <td>R$ {{ p.Preco }}</td>
-                            <td>
-                                <a href="/FormProduto?id_loja={{ id_loja }}&id={{ p.Id_Produto }}" class="btn-acao" title="Editar"><i class="fas fa-edit"></i></a>
-                                <a href="/DeletarProduto/{{ p.Id_Produto }}" class="btn-acao" title="Excluir" style="color: #dc3545;"><i class="fas fa-trash"></i></a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-        </main>
     </div>
 
+    <script>
+        function confirmarExclusao(id) {
+            if(confirm("Deseja mover este produto para o arquivo? (Exclusão Lógica)")) {
+                window.location.href = "/DeletarProduto/" + id;
+            }
+        }
+    </script>
 </body>
 </html>
