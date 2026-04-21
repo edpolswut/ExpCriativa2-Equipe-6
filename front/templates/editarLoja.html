@@ -3,38 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <title>Configurações da Loja - SnapShop</title>
+
     <link rel="stylesheet" href="/front/style/headerStyle.css">
     <link rel="stylesheet" href="/front/style/perfilStyle.css">
+    <link rel="stylesheet" href="/front/style/editarLojaStyle.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { margin: 0; display: flex; flex-direction: column; min-height: 100vh; background-color: var(--fundo); }
-        .app-body { display: flex; flex: 1; overflow: hidden; }
-        .sidebar { width: 250px; background-color: #292929; color: white; padding: 20px; flex-shrink: 0; }
-        .sidebar h2 { font-size: 1.1em; border-bottom: 1px solid #444; padding-bottom: 15px; margin-bottom: 15px; color: var(--primaria); text-transform: uppercase; }
-        .sidebar a { display: block; color: #ddd; text-decoration: none; padding: 12px 15px; transition: 0.3s; border-radius: 6px; margin-bottom: 5px; }
-        .sidebar a:hover, .sidebar a.active { background-color: #494949; color: white; }
-        
-        .content { flex: 1; padding: 40px; overflow-y: auto; }
-        .card-painel { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 30px; max-width: 900px; }
-        
-        .secao-titulo { border-left: 4px solid var(--primaria); padding-left: 15px; margin-bottom: 25px; color: #333; }
-        .grid-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 14px; color: #555; }
-        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
-        
-        .preview-img { width: 100px; height: 100px; border-radius: 12px; object-fit: cover; border: 2px solid #eee; margin-bottom: 10px; }
-        .btn-salvar { background-color: var(--herobtn); color: white; border: none; padding: 15px 30px; border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
-        .btn-salvar:hover { background-color: var(--herohover); transform: translateY(-2px); }
+                :root{
+            --primaria: #FFD166;
+            --hover: #e6b84f;
+            --herobtn: #494949;
+            --herohover: #292929;
+            --fundo: #FFF8E7;
+        }
     </style>
 </head>
+
 <body>
     <header class="site-header">
         <div class="left">
             <a href="/" class="logo">Snap<span class="shop">shop</span></a>
         </div>
-        <div class="center">
-            </div>
+
+        <div class="center"></div>
+
         <div class="right">
             <a href="/perfilLojista" class="nav-btn">
                 <i class="fas fa-arrow-left"></i> Voltar
@@ -45,33 +38,47 @@
     <div class="app-body">
         <nav class="sidebar">
             <h2><i class="fas fa-store"></i> Painel da Loja</h2>
-            <a href="/EditarLoja/{{ id_loja }}" class="active"><i class="fas fa-sliders-h"></i> Configurações</a>
-            <a href="/GerenciarProdutos?id_loja={{ id_loja }}"><i class="fas fa-box-open"></i> Produtos</a>
+
+            <a href="/EditarLoja/{{ id_loja }}" class="active">
+                <i class="fas fa-sliders-h"></i> Configurações
+            </a>
+
+            <a href="/GerenciarProdutos?id_loja={{ id_loja }}">
+                <i class="fas fa-box-open"></i> Produtos
+            </a>
         </nav>
 
         <main class="content">
             <form action="/SalvarEdicaoLoja" method="POST" enctype="multipart/form-data">
+
                 <input type="hidden" name="Id_Loja" value="{{ loja.Id_Loja }}">
 
                 <div class="card-painel">
-                    <h3 class="secao-titulo"><i class="fas fa-id-card"></i> Dados da Empresa</h3>
+                    <h3 class="secao-titulo">
+                        <i class="fas fa-id-card"></i> Dados da Empresa
+                    </h3>
+
                     <div class="grid-campos">
                         <div class="form-group">
                             <label>Nome da Loja</label>
                             <input type="text" name="Nome" value="{{ loja.Nome }}" required>
                         </div>
+
                         <div class="form-group">
                             <label>Razão Social</label>
                             <input type="text" name="Razao_Social" value="{{ loja.Razao_Social }}" required>
                         </div>
+
                         <div class="form-group">
                             <label>CNPJ</label>
                             <input type="text" name="Cnpj" value="{{ loja.Cnpj }}" required>
                         </div>
+
                         <div class="form-group">
                             <label>E-mail Comercial</label>
                             <input type="email" name="Email" value="{{ loja.Email }}" required>
                         </div>
+
                         <div class="form-group">
                             <label>Telefone</label>
                             <input type="text" name="Telefone" value="{{ loja.Telefone }}" required>
@@ -80,28 +87,36 @@
                 </div>
 
                 <div class="card-painel">
-                    <h3 class="secao-titulo"><i class="fas fa-map-marker-alt"></i> Localização</h3>
+                    <h3 class="secao-titulo">
+                        <i class="fas fa-map-marker-alt"></i> Localização
+                    </h3>
+
                     <div class="grid-campos">
                         <div class="form-group">
                             <label>CEP</label>
                             <input type="text" name="Cep" value="{{ endereco.Cep if endereco else '' }}" required>
                         </div>
+
                         <div class="form-group">
                             <label>Cidade</label>
                             <input type="text" name="Cidade" value="{{ endereco.Cidade if endereco else '' }}" required>
                         </div>
+
                         <div class="form-group">
                             <label>Bairro</label>
                             <input type="text" name="Bairro" value="{{ endereco.Bairro if endereco else '' }}" required>
                         </div>
+
                         <div class="form-group">
-                            <label>Logradouro (Rua)</label>
+                            <label>Rua</label>
                             <input type="text" name="Rua" value="{{ endereco.Rua if endereco else '' }}" required>
                         </div>
+
                         <div class="form-group">
                             <label>Número</label>
                             <input type="number" name="Numero" value="{{ endereco.Numero if endereco else 0 }}" required>
                         </div>
+
                         <div class="form-group">
                             <label>Complemento</label>
                             <input type="text" name="Complemento" value="{{ endereco.Complemento if endereco else '' }}">
@@ -110,50 +125,51 @@
                 </div>
 
                 <div class="card-painel">
-                    <h3 class="secao-titulo"><i class="fas fa-paint-brush"></i> Identidade Visual & Tema</h3>
+                    <h3 class="secao-titulo">
+                        <i class="fas fa-paint-brush"></i> Identidade Visual
+                    </h3>
+
                     <div class="grid-campos">
                         <div class="form-group">
-                            <label>URL da Loja (Link Amigável)</label>
+                            <label>URL da Loja</label>
                             <input type="text" name="Url" value="{{ config.Url if config else '' }}" required>
                         </div>
+
                         <div class="form-group">
                             <label>Nome do Tema</label>
                             <input type="text" name="Nom_Tema" value="{{ config.Nom_Tema if config else 'Padrão' }}" required>
                         </div>
+
                         <div class="form-group">
                             <label>Cor Principal</label>
-                            <input type="color" name="Cor_Principal" value="{{ config.Cor_Principal if config else '#FFD166' }}" 
-                                style="width: 100%; height: 60px; padding: 0; border: 2px solid #ddd; border-radius: 8px; cursor: pointer;">
+                            <input type="color" name="Cor_Principal" value="{{ config.Cor_Principal if config else '#FFD166' }}">
                         </div>
 
                         <div class="form-group">
                             <label>Cor Secundária</label>
-                            <input type="color" name="Cor_Secundaria" value="{{ config.Cor_Secundaria if config else '#FFF8E7' }}" 
-                                style="width: 100%; height: 60px; padding: 0; border: 2px solid #ddd; border-radius: 8px; cursor: pointer;">
+                            <input type="color" name="Cor_Secundaria" value="{{ config.Cor_Secundaria if config else '#FFF8E7' }}">
                         </div>
                     </div>
 
                     <div class="grid-campos">
                         <div class="form-group">
-                            <label>Logo Atual</label>
-                            {% if config and config.Logo_B64 %}
-                                <img src="data:image/jpeg;base64,{{ config.Logo_B64 }}" class="preview-img">
-                            {% endif %}
+                            <label>Logo</label>
                             <input type="file" name="Logo" accept="image/*">
                         </div>
+
                         <div class="form-group">
-                            <label>Banner Atual</label>
-                            {% if config and config.Banner_B64 %}
-                                <img src="data:image/jpeg;base64,{{ config.Banner_B64 }}" class="preview-img" style="width: 200px;">
-                            {% endif %}
+                            <label>Banner</label>
                             <input type="file" name="Banner" accept="image/*">
                         </div>
                     </div>
                 </div>
 
-                <div style="text-align: right; margin-top: 20px;">
-                    <button type="submit" class="btn-salvar"><i class="fas fa-save"></i> Atualizar Todas as Informações</button>
+                <div class="btn-area">
+                    <button type="submit" class="btn-salvar">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
                 </div>
+
             </form>
         </main>
     </div>

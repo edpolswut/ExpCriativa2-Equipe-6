@@ -38,6 +38,12 @@ async def index(request: Request):
         #"show_login_modal": "block" if show_login_modal else "none"
     })
 
+@app.get("/sobre", response_class=HTMLResponse)
+async def login(request: Request):
+    return templates.TemplateResponse("sobre.html", {
+        "request": request
+    })
+
 @app.get("/mainpage", name="mainpage", response_class=HTMLResponse)
 async def mainpage(request: Request, db = Depends(get_db)):
     with db.cursor(pymysql.cursors.DictCursor) as cursor:
