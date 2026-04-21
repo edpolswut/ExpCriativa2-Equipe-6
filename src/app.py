@@ -3,10 +3,11 @@ import base64
 import gerencProdutos
 
 from mangum import Mangum
-from fastapi import FastAPI, Request, Form, Depends
+from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+
 
 from database import get_db
 
@@ -91,5 +92,34 @@ async def mainpage(request: Request, db = Depends(get_db)):
         "request": request, 
         "produtos": produtos
     })
+
+@app.get("/produto/{id_produto}")
+async def detalhes_produto(request: Request, id_produto: int, db = Depends(get_db)):
+    # Usamos o DictCursor para devolver os dados em formato de dicionário
+    with db.cursor(pymysql.cursors.DictCursor) as cursor:
+        # 1. Procurar os dados principais do Produto
+        sql_produto = "SELECT Id_Produto, Nome, Preco, Qtd_Estoque FROM Produto WHERE Id_Produto = %s"
+        cursor.execute(sql_produto, (id_produto,))
+        produto = cursor.fetchone()
+        
+        if not produto:
+            raise HTTPException(status_code=404, detail="Produto não encontrado")
+
+        # 2. Procurar as imagens associadas a este produto
+        sql_imagens = "SELECT Imagem FROM Imagem_Produto WHERE fk_Produto_Id_Produto = %s"
+        cursor.execute(sql_imagens, (id_produto,))
+        imagens_blob = cursor.fetchall()
+        
+        # 3. Converter as imagens de BLOB para Base64
+        produto["lista_imagens"] = [
+            base64.b64encode(img["Imagem"]).decode('utf-8') 
+            for img in imagens_blob if img["Imagem"]
+        ]
+
+    # Renderizar o template passando o dicionário do produto
+    return templates.TemplateResponse(
+        "visualizacao.html", 
+        {"request": request, "produto": produto}
+    )
 
 handler = Mangum(app)
