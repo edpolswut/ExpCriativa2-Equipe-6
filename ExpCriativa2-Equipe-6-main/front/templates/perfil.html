@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil - Snapshop</title>
+    <link rel="stylesheet" href="/front/style/headerStyle.css">
+    <link rel="stylesheet" href="/front/style/perfilStyle.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+{% include 'header/header.html' %}
+
+<main>
+
+    <!-- PERFIL -->
+    <section class="perfil-section">
+        <div class="perfil-box">
+            <div class="perfil-avatar" id="perfilAvatar">U</div>
+
+            <div class="perfil-info">
+                <h2 id="nomeUsuario">{{ usuario.Nome }}</h2>
+                <span>Bem-vindo de volta</span>
+            </div>
+
+            <a href="/CadastroLoja" class="cta-btn pequeno">
+                Criar loja
+            </a>
+        </div>
+    </section>
+
+    <!-- LOJAS -->
+    <section class="showcase">
+        <h2>Suas lojas</h2>
+
+        <div class="lojas-grid">
+
+            <a href="/mainpage" class="card">
+                <div class="card-img"></div>
+                <div class="card-title">Brinquedo Shop</div>
+            </a>
+
+            <a href="/mainpage" class="card">
+                <div class="card-img"></div>
+                <div class="card-title">Minha Loja</div>
+            </a>
+
+            <a href="/mainpage" class="card">
+                <div class="card-img"></div>
+                <div class="card-title">RPG Store</div>
+            </a>
+
+        </div>
+    </section>
+
+</main>
+
+{% include 'headerFooter/footer.html' %}
+
+<script src="/perfil/perfilJS.js"></script>
+
+</body>
+</html>
