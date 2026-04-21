@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="/front/style/visualizacao.css">
 </head>
 <body>
-    <div id="header-container"></div> 
+
+     {% include 'header/headerloja.html'%}
+ 
 
     <main class="product-page">
         <div class="product-gallery">
@@ -47,7 +49,7 @@
         </div>
     </main>
     
-    <div id="footer-container"></div>
+    {% include 'footer/footer.html'%}
 
     <script src="/front/script/mainpage.js"></script>
     <script src="/front/script/visualizacao.js"></script>
