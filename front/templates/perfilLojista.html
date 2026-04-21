@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Meu Perfil - SnapShop</title>
+    <link rel="stylesheet" href="/front/style/headerStyle.css">
+    <link rel="stylesheet" href="/front/style/perfilStyle.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="left">
+            <a href="/" class="logo">Snap<span class="shop">shop</span></a>
+        </div>
+        <div class="center">
+            <a href="/" class="nav-btn">Sobre</a>
+            <a href="/" class="nav-btn">Contato</a>
+        </div>
+        <div class="right">
+            <a href="/logout" class="nav-btn"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="perfil-section">
+            <div class="perfil-box">
+                <div class="perfil-avatar">
+                    {{ usuario.Nome[0]|upper }}
+                </div>
+                <div class="perfil-info">
+                    <h2>{{ usuario.Nome }}</h2>
+                    <span>Bem-vindo de volta</span>
+                </div>
+                <a href="/CadastroLoja" class="cta-btn"><i class="fas fa-plus"></i> Criar loja</a>
+            </div>
+        </section>
+
+        <section class="showcase">
+            <h2>Minhas Lojas</h2>
+            
+            {% if lojas %}
+            <div class="lojas-grid">
+                {% for loja in lojas %}
+                <div class="card" style="padding-bottom: 20px;">
+                    <div class="card-img" style="display: flex; align-items: center; justify-content: center; background: #eee;">
+                        <i class="fas fa-store fa-3x" style="color: #ccc;"></i>
+                    </div>
+                    <div class="card-title">
+                        {{ loja.Nome }} <br>
+                        <span style="font-weight: normal; font-size: 13px; color: #666;">CNPJ: {{ loja.Cnpj }}</span>
+                    </div>
+                    <a href="/EditarLoja/{{ loja.Id_Loja }}" class="cta-btn pequeno"><i class="fas fa-cog"></i> Gerenciar</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+                <p>Você ainda não possui nenhuma loja.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

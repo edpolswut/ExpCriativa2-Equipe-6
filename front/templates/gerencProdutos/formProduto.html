@@ -2,86 +2,98 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Produto - Snapshop</title>
-    <link rel="stylesheet" href="/front/style/gerencProdutos/gerencProdutos.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Produto - SnapShop</title>
+    <link rel="stylesheet" href="/front/style/headerStyle.css">
+    <link rel="stylesheet" href="/front/style/perfilStyle.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Base do Layout (Idêntico ao Editar Loja) */
+        body { margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; background-color: var(--fundo); }
+        .app-body { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Sidebar */
+        .sidebar { width: 250px; background-color: #292929; color: white; padding: 20px; flex-shrink: 0; display: flex; flex-direction: column; }
+        .sidebar h2 { font-size: 1.1em; border-bottom: 1px solid #444; padding-bottom: 15px; margin-bottom: 15px; color: var(--primaria); text-transform: uppercase; letter-spacing: 1px;}
+        .sidebar a { display: block; color: #ddd; text-decoration: none; padding: 12px 15px; transition: 0.3s; border-radius: 6px; margin-bottom: 5px; font-size: 15px;}
+        .sidebar a i { width: 25px; }
+        .sidebar a:hover, .sidebar a.active { background-color: #494949; color: white; }
+        
+        /* Área de Conteúdo */
+        .content { flex: 1; padding: 40px; overflow-y: auto; }
+
+        /* Card do Formulário */
+        .form-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); max-width: 800px; }
+        .campo-grupo { margin-bottom: 20px; }
+        .campo-grupo label { display: block; font-weight: bold; margin-bottom: 8px; }
+        .campo-grupo input, .campo-grupo select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; }
+        .row { display: flex; gap: 20px; }
+        .row div { flex: 1; }
+        
+        /* Botão Voltar Ajustado */
+        .btn-voltar { background: #ccc; color: black; text-decoration: none; padding: 10px 20px; border-radius: 25px; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn-voltar:hover { background: #bbb; }
+    </style>
 </head>
 <body>
-    <div class="admin-container form-container">
-        <h1>{{ "Editar Produto" if produto else "Novo Produto" }}</h1>
+    
+    <header class="site-header">
+        <div class="left">
+            <a href="/" class="logo">Snap<span class="shop">shop</span></a>
+        </div>
+        <div class="center">
+            </div>
+        <div class="right">
+            <a href="/perfilLojista" class="nav-btn">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </header>
+
+    <div class="app-body">
         
-        <form id="formularioProduto" action="/SalvarProduto" method="post" enctype="multipart/form-data">
-            <input type="hidden" name="Id_Produto" value="{{ produto['Id_Produto'] if produto else '' }}">
-            
-            <div class="campo-grupo">
-                <label for="Nome">Nome do Componente:</label>
-                <input type="text" id="Nome" name="Nome" value="{{ produto['Nome'] if produto else '' }}" required>
-            </div>
+        <nav class="sidebar">
+            <h2><i class="fas fa-store"></i> Painel da Loja</h2>
+            <a href="/EditarLoja/{{ id_loja }}"><i class="fas fa-sliders-h"></i> Configurações</a>
+            <a href="/GerenciarProdutos?id_loja={{ id_loja }}" class="active"><i class="fas fa-box-open"></i> Produtos</a>
+        </nav>
 
-            <div class="form-row">
-                <div class="campo-grupo">
-                    <label for="Preco">Preço (R$):</label>
-                    <input type="number" id="Preco" name="Preco" step="0.01" value="{{ produto['Preco'] if produto else '' }}" required>
-                </div>
-                <div class="campo-grupo">
-                    <label for="Qtd_Estoque">Estoque Atual:</label>
-                    <input type="number" id="Qtd_Estoque" name="Qtd_Estoque" value="{{ produto['Qtd_Estoque'] if produto else '' }}" required>
-                </div>
-            </div>
+        <main class="content">
+            <div class="form-card">
+                <h2 style="margin-bottom: 20px; color: #333;"><i class="fas fa-box"></i> {{ "Editar Produto" if produto else "Novo Produto" }}</h2>
+                
+                <form action="/SalvarProduto" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="Id_Produto" value="{{ produto.Id_Produto if produto else '' }}">
+                    <input type="hidden" name="id_loja" value="{{ id_loja }}">
 
-            <div class="campo-grupo">
-                <label>Categorias: <small>(Mantenha Ctrl pressionado)</small></label>
-                <select name="Categorias" multiple class="select-multiplas">
-                    {% for cat in categorias %}
-                    <option value="{{ cat['Id_Categoria'] }}" {% if cat.Id_Categoria in categorias_vinculadas %} selected {% endif %}>
-                        {{ cat['Nome'] }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="campo-grupo">
-                <label>Adicionar Fotos:</label>
-                <input type="file" name="Imagens" accept="image/*" multiple>
-            </div>
-            
-            {% if imagens %}
-                <div class="image-container">
-                    {% for img in imagens %}
-                    <div class="image-item" id="img-container-{{ img['id'] }}">
-                        <img src="data:image/jpeg;base64,{{ img['base64'] }}" alt="Imagem do produto">
-                        
-                        <button type="button" class="btn-delete-img" 
-                                onclick="marcarParaExclusao('{{ img.id }}')" 
-                                title="Remover imagem">
-                            <i class="fas fa-times"></i>
-                        </button>
+                    <div class="campo-grupo">
+                        <label>Nome do Produto</label>
+                        <input type="text" name="Nome" value="{{ produto.Nome if produto else '' }}" required>
                     </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
 
-            <div class="form-actions">
-                <button type="submit" class="btn-save">Salvar Alterações</button>
-                <a href="/GerenciarProdutos" class="btn-cancel">Cancelar</a>
+                    <div class="row">
+                        <div class="campo-grupo">
+                            <label>Preço (R$)</label>
+                            <input type="number" name="Preco" step="0.01" value="{{ produto.Preco if produto else '' }}" required>
+                        </div>
+                        <div class="campo-grupo">
+                            <label>Estoque</label>
+                            <input type="number" name="Qtd_Estoque" value="{{ produto.Qtd_Estoque if produto else '' }}" required>
+                        </div>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label>Fotos</label>
+                        <input type="file" name="Imagens" multiple accept="image/*">
+                    </div>
+
+                    <div style="display: flex; gap: 15px; margin-top: 30px;">
+                        <button type="submit" class="cta-btn"><i class="fas fa-check"></i> Salvar Produto</button>
+                        <a href="/GerenciarProdutos?id_loja={{ id_loja }}" class="btn-voltar">Cancelar</a>
+                    </div>
+                </form>
             </div>
-        </form>
+        </main>
     </div>
-
-    <script>
-        function marcarParaExclusao(idImagem) {
-            if(confirm("A imagem será removida permanentemente ao salvar. Confirmar?")) {
-                document.getElementById('img-container-' + idImagem).style.display = 'none';
-                
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'ImagensParaDeletar';
-                input.value = idImagem;
-                
-                document.getElementById('formularioProduto').appendChild(input);
-            }
-        }
-    </script>
+    
 </body>
 </html>
