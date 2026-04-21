@@ -4,7 +4,7 @@ import gerencProdutos
 
 from mangum import Mangum
 from fastapi import APIRouter, FastAPI, Request, Form, Depends
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -34,6 +34,9 @@ async def login(request: Request):
 
 @router.get("/CadastroLoja", response_class=HTMLResponse)
 async def cadastroLoja(request: Request):
+
+    if not request.session.get("user_id"):
+        return RedirectResponse(url="/login", status_code=303)
 
     return templates.TemplateResponse("cadastroLoja.html", {
         "request": request
@@ -92,7 +95,7 @@ async def CriarLoja(
 ):
     user_id = request.session.get("user_id")
     if not user_id:
-        return RedirectResponse(url="/login", status_code=303)
+        return JSONResponse(status_code=401, content={"erro": "sessao_expirada"})
 
     try:
         with db.cursor() as cursor:
@@ -123,12 +126,12 @@ async def CriarLoja(
             ))
 
             db.commit()
-            return RedirectResponse(url="/perfilLojista", status_code=303)
+            return JSONResponse(content={"sucesso": True})
 
     except Exception as e:
-        print(f"Erro ao criar loja e endereço: {e}")
-        db.rollback() # Cancela tudo se der erro
-        return RedirectResponse(url="/CadastroLoja?erro=1", status_code=303)
+        print(f"Erro: {e}")
+        db.rollback()
+        return JSONResponse(status_code=500, content={"erro": "sistema"})
     finally:
         db.close()
 
@@ -221,7 +224,7 @@ async def salvar_edicao_loja(
 
             if existe_config:
                 cursor.execute("""
-                    UPDATE Config_Lo_ja SET Nom_Tema=%s, Cor_Principal=%s, Cor_Secundaria=%s, Url=%s 
+                    UPDATE Config_Loja SET Nom_Tema=%s, Cor_Principal=%s, Cor_Secundaria=%s, Url=%s 
                     WHERE fk_Loja_Id_Loja=%s
                 """, (Nom_Tema, Cor_Principal, Cor_Secundaria, Url, Id_Loja))
                 if logo_data:
@@ -241,8 +244,6 @@ async def salvar_edicao_loja(
         print(f"Erro ao salvar: {e}")
         return RedirectResponse(url=f"/EditarLoja/{Id_Loja}?erro=1", status_code=303)
 
-
-#Insert de usuário
 @router.post("/CriarUsuario", name="CriarUsuario")
 async def CriarUsuario(
     request: Request,
@@ -254,27 +255,27 @@ async def CriarUsuario(
 ):
     try:
         with db.cursor() as cursor:
-
-            cursor.execute("SELECT Email FROM Usuario WHERE Email = %s", (Email,)) # executa um comando SQL, %s é um placeholder para evitar SQL injection
+            # Verifica se email já existe
+            cursor.execute("SELECT Email FROM Usuario WHERE Email = %s", (Email,)) 
             if cursor.fetchone():   
-                return RedirectResponse(url="/forms", status_code=303)
+                return JSONResponse(status_code=400, content={"erro": "email_existe"})
+            
+            cursor.execute("SELECT Cpf FROM Usuario WHERE Cpf = %s", (CPF,)) 
+            if cursor.fetchone():   
+                return JSONResponse(status_code=400, content={"erro": "cpf_existe"})
 
             senha_hash = gerar_hash(Senha)
-
             sql = "INSERT INTO Usuario (Nome, Cpf, Email, Senha_Hash, Dat_Criacao, Status) VALUES (%s, %s, %s, %s, current_date(), 1)"
             cursor.execute(sql, (Nome, CPF, Email, senha_hash))
             db.commit()
 
-            return RedirectResponse(url="/", status_code=303)
-
-    except Exception as e: 
-        print("ERRO AO CRIAR USUARIO:", e)
-        return RedirectResponse(url="/", status_code=303)
-
+            return JSONResponse(content={"sucesso": True})
+    except Exception:
+        return JSONResponse(status_code=500, content={"erro": "sistema"})
     finally:
         db.close()
 
-#Login
+# Login
 @router.post("/Login")
 async def Login(
     request: Request,
@@ -287,11 +288,9 @@ async def Login(
             cursor.execute("SELECT * FROM Usuario WHERE Email = %s", (Email,))
             usuario = cursor.fetchone()
 
-            if not usuario:
-                return RedirectResponse(url="/login?erro=1", status_code=303)
-
-            if not verificar_senha(Senha, usuario["Senha_Hash"]):
-                return RedirectResponse(url="/login?erro=1", status_code=303)
+            # SE USUÁRIO NÃO EXISTIR OU SENHA ESTIVER ERRADA (Redireciona com erro)
+            if not usuario or not verificar_senha(Senha, usuario["Senha_Hash"]):
+                return RedirectResponse(url="/login?erro=credenciais", status_code=303)
 
             request.session["user_id"] = usuario["Id_Usuario"]
             request.session["user_nome"] = usuario["Nome"]
@@ -300,7 +299,83 @@ async def Login(
 
     except Exception as e:
         print("ERRO VERIFY:", e)
-        return False
+        return RedirectResponse(url="/login?erro=sistema", status_code=303)
+    
+# --- ROTA GET: Carrega o formulário com os dados atuais do utilizador ---
+@router.get("/EditarUsuario", response_class=HTMLResponse)
+async def editar_usuario_form(request: Request, db = Depends(get_db)):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=303)
+
+    with db.cursor(pymysql.cursors.DictCursor) as cursor:
+        cursor.execute("SELECT Nome, Email, Cpf FROM Usuario WHERE Id_Usuario = %s", (user_id,))
+        usuario = cursor.fetchone()
+
+    return templates.TemplateResponse("editarUsuario.html", {"request": request, "usuario": usuario})
+
+# --- ROTA POST: Guarda as alterações (Nome, Email e Opcionalmente Senha) ---
+@router.post("/SalvarEdicaoUsuario")
+async def salvar_edicao_usuario(
+    request: Request,
+    Nome: str = Form(...),
+    Email: str = Form(...),
+    Senha: str = Form(None), # Senha é opcional na edição
+    db = Depends(get_db)
+):
+    user_id = request.session.get("user_id")
+    try:
+        with db.cursor() as cursor:
+            # Atualiza dados básicos
+            sql = "UPDATE Usuario SET Nome=%s, Email=%s WHERE Id_Usuario=%s"
+            cursor.execute(sql, (Nome, Email, user_id))
+            
+            # Se o utilizador preencheu uma nova senha, gera o hash e atualiza
+            if Senha and Senha.strip() != "":
+                novo_hash = gerar_hash(Senha)
+                cursor.execute("UPDATE Usuario SET Senha_Hash=%s WHERE Id_Usuario=%s", (novo_hash, user_id))
+            
+            db.commit()
+            request.session["user_nome"] = Nome # Atualiza o nome na sessão
+        return RedirectResponse(url="/perfilLojista?sucesso=1", status_code=303)
+    except Exception as e:
+        print(f"Erro ao editar utilizador: {e}")
+        return RedirectResponse(url="/EditarUsuario?erro=1", status_code=303)
+
+@router.get("/DeletarUsuario")
+async def deletar_usuario(request: Request, db = Depends(get_db)):
+    user_id = request.session.get("user_id")
+    
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=303)
+
+    try:
+        with db.cursor() as cursor:
+            # 1. Desativa as lojas vinculadas a este usuário
+            sql_lojas = """
+                UPDATE Loja L
+                INNER JOIN Usuario_Perfil UP ON L.Id_Loja = UP.fk_Loja_Id_Loja
+                SET L.Status = 0
+                WHERE UP.fk_Usuario_Id_Usuario = %s
+            """
+            cursor.execute(sql_lojas, (user_id,))
+
+            # 2. Desativa o próprio usuário
+            cursor.execute("UPDATE Usuario SET Status = 0 WHERE Id_Usuario = %s", (user_id,))
+            
+            db.commit()
+            
+        request.session.clear() 
+        return RedirectResponse(url="/?conta_eliminada=1", status_code=303)
+
+    except Exception as e:
+        print(f"Erro ao deletar usuário: {e}")
+        return RedirectResponse(url="/perfilLojista?erro=exclusao", status_code=303)
+
+@router.get("/logout")
+async def logout(request: Request):
+    request.session.clear() 
+    return RedirectResponse(url="/login", status_code=303)
 
 #Hash
 def gerar_hash(senha: str) -> str:

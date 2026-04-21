@@ -33,15 +33,46 @@
 
     <main>
         <section class="perfil-section">
-            <div class="perfil-box">
-                <div class="perfil-avatar">
-                    {{ usuario.Nome[0]|upper }}
+            <div class="perfil-box" style="flex-direction: column; align-items: stretch;">
+                <div id="info-perfil-atual" style="display: flex; align-items: center; gap: 20px;">
+                    <div class="perfil-avatar" id="perfilAvatar">{{ usuario.Nome[0] }}</div>
+                    <div class="perfil-info">
+                        <h1 id="nomeUsuario" data-nome="{{ usuario.Nome }}">{{ usuario.Nome }}</h1>
+                        <span>{{ usuario.Email }}</span>
+                        <br>
+                        <button onclick="toggleEdicaoPerfil()" style="background: none; border: none; font-size: 13px; color: #494949; text-decoration: underline; cursor: pointer; padding: 0;">
+                            <i class="fas fa-user-edit"></i> Editar Perfil
+                        </button>
+                    </div>
+                    <a href="/CadastroLoja" class="cta-btn" style="margin-left: auto;"><i class="fas fa-plus"></i> Criar loja</a>
                 </div>
-                <div class="perfil-info">
-                    <h2>{{ usuario.Nome }}</h2>
-                    <span>Bem-vindo de volta</span>
+
+                <div id="form-edicao-perfil" style="display: none; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+                    <form action="/SalvarEdicaoUsuario" method="POST">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="campo-grupo" style="display: flex; flex-direction: column;">
+                                <label style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">Nome:</label>
+                                <input type="text" name="Nome" value="{{ usuario.Nome }}" required style="padding: 8px; border: 1px solid #ccc; border-radius: 8px;">
+                            </div>
+                            <div class="campo-grupo" style="display: flex; flex-direction: column;">
+                                <label style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">Email:</label>
+                                <input type="email" name="Email" value="{{ usuario.Email }}" required style="padding: 8px; border: 1px solid #ccc; border-radius: 8px;">
+                            </div>
+                            <div class="campo-grupo" style="display: flex; flex-direction: column; grid-column: span 2;">
+                                <label style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">Nova Senha (deixe vazio para manter):</label>
+                                <input type="password" name="Senha" style="padding: 8px; border: 1px solid #ccc; border-radius: 8px;">
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 20px; display: flex; gap: 10px;">
+                            <button type="submit" class="cta-btn pequeno">Guardar Alterações</button>
+                            <button type="button" class="cta-btn pequeno" style="background: #666;" onclick="toggleEdicaoPerfil()">Cancelar</button>
+                            <button type="button" onclick="confirmarExclusao()" style="background: none; border: 1px solid #d93025; color: #d93025; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: 0.3s;" onmouseover="this.style.background='#d93025'; this.style.color='white'" onmouseout="this.style.background='none'; this.style.color='#d93025'">
+                                <i class="fas fa-trash-alt"></i> Eliminar Minha Conta
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <a href="/CadastroLoja" class="cta-btn"><i class="fas fa-plus"></i> Criar loja</a>
             </div>
         </section>
 
@@ -68,5 +99,8 @@
             {% endif %}
         </section>
     </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/front/script/perfilJS.js"></script>
 </body>
 </html>

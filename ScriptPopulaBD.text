@@ -7,3 +7,7 @@ INSERT INTO Categoria (fk_Loja_Id_Loja, Nome, Status) VALUES
 (1, 'Categoria 1', 1),
 (1, 'Categoria 2', 1),
 (1, 'Categoria 3', 1);
+
+INSERT INTO perfil (Id_Perfil, Nom_Perfil) VALUES (1, 'Administrador');
+INSERT INTO perfil (Id_Perfil, Nom_Perfil) VALUES (2, 'Lojista');
+INSERT INTO perfil (Id_Perfil, Nom_Perfil) VALUES (3, 'Cliente');

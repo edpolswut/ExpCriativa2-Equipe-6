@@ -4,84 +4,105 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Produto - Snapshop</title>
+    <link rel="stylesheet" href="/front/style/headerStyle.css">
+    <link rel="stylesheet" href="/front/style/perfilStyle.css">
     <link rel="stylesheet" href="/front/style/gerencProdutos/gerencProdutos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <div class="admin-container form-container">
-        <h1>{{ "Editar Produto" if produto else "Novo Produto" }}</h1>
-        
-        <form id="formularioProduto" action="/SalvarProduto" method="post" enctype="multipart/form-data">
-            <input type="hidden" name="Id_Produto" value="{{ produto['Id_Produto'] if produto else '' }}">
+
+    <header class="site-header">
+        <div class="left">
+            <a href="/" class="logo">Snap<span class="shop">shop</span></a>
+        </div>
+
+        <div class="center"></div>
+
+        <div class="right">
+            <a href="/perfilLojista" class="nav-btn">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </header>
+
+    <div class="app-body">
+        <nav class="sidebar">
+            <h2><i class="fas fa-store"></i> Painel da Loja</h2>
+
+            <a href="/EditarLoja/{{ id_loja }}">
+                <i class="fas fa-sliders-h"></i> Configurações
+            </a>
+
+            <a href="/GerenciarProdutos?id_loja={{ id_loja }}" class="active">
+                <i class="fas fa-box-open"></i> Produtos
+            </a>
+        </nav>
+
+        <div class="admin-container form-container">
+            <h1>{{ "Editar Produto" if produto else "Novo Produto" }}</h1>
             
-            <div class="campo-grupo">
-                <label for="Nome">Nome do Componente:</label>
-                <input type="text" id="Nome" name="Nome" value="{{ produto['Nome'] if produto else '' }}" required>
-            </div>
-
-            <div class="form-row">
+            <form id="formularioProduto" action="/SalvarProduto" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="Id_Produto" value="{{ produto['Id_Produto'] if produto else '' }}">
+                
                 <div class="campo-grupo">
-                    <label for="Preco">Preço (R$):</label>
-                    <input type="number" id="Preco" name="Preco" step="0.01" value="{{ produto['Preco'] if produto else '' }}" required>
+                    <label for="Nome">Nome do Produto:</label>
+                    <input type="text" id="Nome" name="Nome" value="{{ produto['Nome'] if produto else '' }}" required>
                 </div>
-                <div class="campo-grupo">
-                    <label for="Qtd_Estoque">Estoque Atual:</label>
-                    <input type="number" id="Qtd_Estoque" name="Qtd_Estoque" value="{{ produto['Qtd_Estoque'] if produto else '' }}" required>
-                </div>
-            </div>
 
-            <div class="campo-grupo">
-                <label>Categorias: <small>(Mantenha Ctrl pressionado)</small></label>
-                <select name="Categorias" multiple class="select-multiplas">
-                    {% for cat in categorias %}
-                    <option value="{{ cat['Id_Categoria'] }}" {% if cat.Id_Categoria in categorias_vinculadas %} selected {% endif %}>
-                        {{ cat['Nome'] }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="campo-grupo">
-                <label>Adicionar Fotos:</label>
-                <input type="file" name="Imagens" accept="image/*" multiple>
-            </div>
-            
-            {% if imagens %}
-                <div class="image-container">
-                    {% for img in imagens %}
-                    <div class="image-item" id="img-container-{{ img['id'] }}">
-                        <img src="data:image/jpeg;base64,{{ img['base64'] }}" alt="Imagem do produto">
-                        
-                        <button type="button" class="btn-delete-img" 
-                                onclick="marcarParaExclusao('{{ img.id }}')" 
-                                title="Remover imagem">
-                            <i class="fas fa-times"></i>
-                        </button>
+                <div class="form-row">
+                    <div class="campo-grupo">
+                        <label for="Preco">Preço (R$):</label>
+                        <input type="number" id="Preco" name="Preco" step="0.01" value="{{ produto['Preco'] if produto else '' }}" required>
                     </div>
-                    {% endfor %}
+                    <div class="campo-grupo">
+                        <label for="Qtd_Estoque">Estoque Atual:</label>
+                        <input type="number" id="Qtd_Estoque" name="Qtd_Estoque" value="{{ produto['Qtd_Estoque'] if produto else '' }}" required>
+                    </div>
                 </div>
-                {% endif %}
 
-            <div class="form-actions">
-                <button type="submit" class="btn-save">Salvar Alterações</button>
-                <a href="/GerenciarProdutos" class="btn-cancel">Cancelar</a>
-            </div>
-        </form>
+                <div class="campo-grupo">
+                    <label>Categorias: <small>(Mantenha Ctrl pressionado)</small></label>
+                    <select name="Categorias" multiple class="select-multiplas">
+                        {% for cat in categorias %}
+                        <option value="{{ cat['Id_Categoria'] }}" {% if cat.Id_Categoria in categorias_vinculadas %} selected {% endif %}>
+                            {{ cat['Nome'] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="campo-grupo">
+                    <label>Adicionar Fotos:</label>
+                    <input type="file" name="Imagens" accept="image/*" multiple>
+                </div>
+                
+                {% if imagens %}
+                    <div class="image-container">
+                        {% for img in imagens %}
+                        <div class="image-item" id="img-container-{{ img['id'] }}">
+                            <img src="data:image/jpeg;base64,{{ img['base64'] }}" alt="Imagem do produto">
+                            
+                            <button type="button" class="btn-delete-img" 
+                                    onclick="marcarParaExclusao('{{ img.id }}')" 
+                                    title="Remover imagem">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                    
+                <input type="hidden" name="id_loja" value="{{ id_loja }}">
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-save">Salvar Alterações</button>
+                    <a href="/GerenciarProdutos?id_loja={{ id_loja }}" class="btn-cancel">Cancelar</a>
+                </div>
+            </form>
+        </div>  
     </div>
 
-    <script>
-        function marcarParaExclusao(idImagem) {
-            if(confirm("A imagem será removida permanentemente ao salvar. Confirmar?")) {
-                document.getElementById('img-container-' + idImagem).style.display = 'none';
-                
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'ImagensParaDeletar';
-                input.value = idImagem;
-                
-                document.getElementById('formularioProduto').appendChild(input);
-            }
-        }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/front/script/formProduto.js"></script>
 </body>
 </html>

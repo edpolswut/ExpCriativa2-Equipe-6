@@ -1,13 +1,20 @@
-    <header class="site-header">
-        <div class="header-container">
-            <div class="logo">Brinquedo<span class="logo-highlight">Shop</span></div>
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="#inicio">Início</a></li>
-                    <li><a href="#produtos">Produtos</a></li>
-                    <li><a href="#ofertas">Ofertas</a></li>
-                    <li><a href="#contato">Contato</a></li>
-                </ul>
-            </nav>
+<header class="site-header">
+    <div class="header-container">
+        
+        <div class="logo" style="display: flex; align-items: center; gap: 12px; font-size: 20px;">
+            {% if loja and loja.Logo_B64 %}
+                <img src="data:image/jpeg;base64,{{ loja.Logo_B64 }}" alt="Logo" style="height: 40px; width: 40px; border-radius: 8px; object-fit: cover;">
+            {% endif %}
+            <span>{{ loja.Nome if loja else 'Nossa Loja' }}</span>
         </div>
-    </header>
+
+        <nav class="main-nav">
+            <ul>
+                <li><a href="#inicio">Início</a></li>
+                <li><a href="#produtos">Produtos</a></li>
+                <li><a href="#ofertas">Ofertas</a></li>
+                <li><a href="#contato">Contato</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>

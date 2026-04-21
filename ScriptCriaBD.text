@@ -78,8 +78,8 @@ CREATE TABLE Config_Loja (
     Nom_Tema VARCHAR(50) NOT NULL,
     Cor_Principal VARCHAR(50) NOT NULL,
     Cor_Secundaria VARCHAR(50) NOT NULL,
-    Logo BLOB NOT NULL,
-    Banner BLOB NOT NULL,
+    Logo LONGBLOB NOT NULL,
+    Banner LONGBLOB NOT NULL,
     Url VARCHAR(100) NOT NULL UNIQUE -- Unique adicionado
 );
 
@@ -93,14 +93,14 @@ CREATE TABLE Endereco (
     Numero INT NOT NULL,
     Cidade VARCHAR(100) NOT NULL,
     Bairro VARCHAR(100) NOT NULL,
-    Complemento VARCHAR(100), -- Removido NOT NULL pois nem todo lugar tem comp.
+    Complemento VARCHAR(100),
     Status INT NOT NULL
 );
 
 /* Tabelas Associativas e Relacionamentos */
 
 CREATE TABLE Usuario_Perfil (
-    Id_Usuario_Perfil INTEGER PRIMARY KEY,
+    Id_Usuario_Perfil INTEGER AUTO_INCREMENT PRIMARY KEY,
     fk_Perfil_Id_Perfil INTEGER,
     fk_Usuario_Id_Usuario INTEGER,
     fk_Loja_Id_Loja INTEGER

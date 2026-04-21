@@ -1,4 +1,76 @@
 document.addEventListener("DOMContentLoaded", function () {
+
+    const inputCep = document.getElementById("cep");
+    const inputTelefone = document.getElementById("telefone");
+    
+    inputCep.addEventListener("blur", function() {
+        // Remove tudo o que não for número
+        let cepVal = this.value.replace(/\D/g, "");
+
+        if (cepVal.length === 8) {
+            // Mostra um feedback visual simples enquanto procura
+            document.getElementById("logradouro").value = "A procurar...";
+            document.getElementById("bairro").value = "A procurar...";
+            document.getElementById("cidade").value = "A procurar...";
+
+            fetch(`https://viacep.com.br/ws/${cepVal}/json/`)
+                .then(resposta => resposta.json())
+                .then(dados => {
+                    if (!dados.erro) {
+                        // Preenche os campos automaticamente
+                        document.getElementById("logradouro").value = dados.logradouro;
+                        document.getElementById("bairro").value = dados.bairro;
+                        document.getElementById("cidade").value = dados.localidade; // ViaCEP chama a cidade de 'localidade'
+                        
+                        // Move o foco para o campo "Número" para facilitar a vida do utilizador
+                        document.getElementById("numero").focus();
+                    } else {
+                        // Se o CEP não existir
+                        limparCamposEndereco();
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'CEP não encontrado',
+                            text: 'Verifique se digitou corretamente.',
+                            confirmButtonColor: '#FFD166'
+                        });
+                    }
+                })
+                .catch(erro => {
+                    console.error("Erro na API ViaCEP:", erro);
+                    limparCamposEndereco();
+                });
+        }
+    });
+    
+    function limparCamposEndereco() {
+        document.getElementById("logradouro").value = "";
+        document.getElementById("bairro").value = "";
+        document.getElementById("cidade").value = "";
+    }
+
+    inputTelefone.addEventListener("input", function () {
+        let valor = this.value.replace(/\D/g, "");
+        if (valor.length > 11) valor = valor.slice(0, 11);
+
+        if (valor.length > 10) {
+            valor = valor.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1) $2-$3");
+        } else if (valor.length > 6) {
+            valor = valor.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1) $2-$3");
+        } else if (valor.length > 2) {
+            valor = valor.replace(/^(\d{2})(\d{0,5}).*/, "($1) $2");
+        }
+        this.value = valor;
+    });
+
+    inputCep.addEventListener("input", function () {
+        let valor = this.value.replace(/\D/g, "");
+        if (valor.length > 8) valor = valor.slice(0, 8);
+        if (valor.length > 5) {
+            valor = valor.replace(/^(\d{5})(\d{3}).*/, "$1-$2");
+        }
+        this.value = valor;
+    });
+
     const form = document.getElementById("formulario");
 
     function validarCNPJ(cnpj) {
@@ -35,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return resultado === Number(digitos.charAt(1));
     }
 
-    form.addEventListener("submit", function (event) {
+    form.addEventListener("submit", async function (event) {
         event.preventDefault();
 
         let nomeLoja = document.getElementById("nomeLoja").value.trim();
@@ -109,16 +181,32 @@ document.addEventListener("DOMContentLoaded", function () {
             valido = false;
         }
 
-        // Envio com SweetAlert
         if (valido) {
-            Swal.fire({
-                title: "Cadastro realizado com sucesso!",
-                text: "Os dados da loja foram enviados.",
-                icon: "success",
-                confirmButtonText: "OK"
-            }).then(() => {
-                form.submit();
-            });
+            const formData = new FormData(form);
+            try {
+                const response = await fetch("/CriarLoja", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const resultado = await response.json();
+
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Loja Criada!',
+                        text: 'Sua loja foi cadastrada com sucesso.',
+                        confirmButtonColor: '#FFD166'
+                    }).then(() => {
+                        window.location.href = "/perfilLojista";
+                    });
+                } else {
+                    let msg = resultado.erro === 'sistema' ? 'Erro interno no servidor.' : 'Falha ao cadastrar loja.';
+                    Swal.fire({ icon: 'error', title: 'Erro', text: msg });
+                }
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Erro', text: 'Falha na conexão com o servidor.' });
+            }
         }
     });
 });

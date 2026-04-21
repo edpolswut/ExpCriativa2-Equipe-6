@@ -154,12 +154,18 @@
                     <div class="grid-campos">
                         <div class="form-group">
                             <label>Logo</label>
-                            <input type="file" name="Logo" accept="image/*">
+                            <div class="preview-container">
+                                <img id="preview-logo" src="{% if config and config.Logo_B64 %}data:image/jpeg;base64,{{ config.Logo_B64 }}{% endif %}" class="img-preview">
+                            </div>
+                            <input type="file" name="Logo" id="input-logo" accept="image/*">
                         </div>
 
                         <div class="form-group">
                             <label>Banner</label>
-                            <input type="file" name="Banner" accept="image/*">
+                            <div class="preview-container">
+                                <img id="preview-banner" src="{% if config and config.Banner_B64 %}data:image/jpeg;base64,{{ config.Banner_B64 }}{% endif %}" class="img-preview banner-size">
+                            </div>
+                            <input type="file" name="Banner" id="input-banner" accept="image/*">
                         </div>
                     </div>
                 </div>
@@ -173,5 +179,7 @@
             </form>
         </main>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/front/script/editarLoja.js"></script>
 </body>
 </html>

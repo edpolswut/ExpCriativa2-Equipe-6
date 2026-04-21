@@ -5,7 +5,7 @@
     <title>Main Page</title>
     <link rel="stylesheet" href="/front/style/mainpage.css">
     <style>
-                :root{
+        :root{
             --azul: #0b3d91;
             --branco: #fff;
             --amarelo: #ffd700;
@@ -22,21 +22,9 @@
         }
     </style>    
 </head>
-<body>
+<body style="--azul: {% if loja and loja.Cor_Principal %}{{ loja.Cor_Principal }}{% else %}#0b3d91{% endif %}; --amarelo: {% if loja and loja.Cor_Secundaria %}{{ loja.Cor_Secundaria }}{% else %}#ffd700{% endif %};">
 
-    <header class="site-header">
-        <div class="header-container">
-            <div class="logo">Brinquedo<span class="logo-highlight">Shop</span></div>
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="#inicio">Início</a></li>
-                    <li><a href="#produtos">Produtos</a></li>
-                    <li><a href="#ofertas">Ofertas</a></li>
-                    <li><a href="#contato">Contato</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+    {% include 'header/headerloja.html' %}
 
     <div class="main-layout">
 
@@ -83,7 +71,7 @@
             </div>
         </aside>
         
-        <main>
+        <!-- <main>
             <div class="carousel-wrapper">
                 <button class="nav-button prev-button" id="prevBtn">&#10094;</button>
 
@@ -125,6 +113,45 @@
                 </div>
 
                 <button class="nav-button next-button" id="nextBtn">&#10095;</button>
+            </div>
+        </main> -->
+
+        <main style="width: 100%;">
+            <div class="product-grid">
+                {% for prod in produtos %}
+                <div class="product-card">
+                    <a href="/produto/{{ prod.Id_Produto }}" style="text-decoration: none; color: inherit;">
+                        <div class="product-image-container" style="position: relative; height: 200px; overflow: hidden;">
+                            {% if prod.lista_imagens %}
+                                <div class="product-slides" id="slides-{{ prod.Id_Produto }}" style="display: flex; transition: transform 0.3s ease;">
+                                    {% for img_base64 in prod.lista_imagens %}
+                                        <img src="data:image/jpeg;base64,{{ img_base64 }}" 
+                                            style="min-width: 100%; height: 200px; object-fit: cover;" 
+                                            alt="{{ prod.Nome }}">
+                                    {% endfor %}
+                                </div>
+                                
+                                {% if prod.lista_imagens|length > 1 %}
+                                    <button class="inner-nav prev" onclick="event.preventDefault(); moveInternalSlide('{{ prod.Id_Produto }}', -1)" 
+                                            style="position: absolute; left: 5px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.7); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">&#10094;</button>
+                                    <button class="inner-nav next" onclick="event.preventDefault(); moveInternalSlide('{{ prod.Id_Produto }}', 1)" 
+                                            style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.7); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">&#10095;</button>
+                                {% endif %}
+                            {% else %}
+                                <div style="width:100%; height:100%; background:#eee; display:flex; align-items:center; justify-content:center; color:#999;">Sem Foto</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="product-info">
+                            <h4 class="product-title">{{ prod.Nome }}</h4>
+                            <div class="product-price">
+                                <span class="current-price">R$ {{ "%.2f"|format(prod.Preco) }}</span>
+                                <span class="installments">ou 12x de R$ {{ "%.2f"|format(prod.Preco / 12) }}</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
             </div>
         </main>
 

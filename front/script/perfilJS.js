@@ -28,3 +28,30 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 });
+
+function toggleEdicaoPerfil() {
+    const form = document.getElementById('form-edicao-perfil');
+    
+    if (form.style.display === "none") {
+        form.style.display = "block";
+    } else {
+        form.style.display = "none";
+    }
+}
+
+function confirmarExclusao() {
+    Swal.fire({
+        title: 'Excluir conta?',
+        text: "Todas as suas lojas serão desativadas imediatamente!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sim, excluir!',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = "/DeletarUsuario";
+        }
+    });
+}

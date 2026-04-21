@@ -25,18 +25,17 @@
         }
     </style> 
 </head>
-<body>
+<body style="--azul: {% if loja and loja.Cor_Principal %}{{ loja.Cor_Principal }}{% else %}#0b3d91{% endif %}; --amarelo: {% if loja and loja.Cor_Secundaria %}{{ loja.Cor_Secundaria }}{% else %}#ffd700{% endif %};">
 
      {% include 'header/headerloja.html'%}
  
-
     <main class="product-page">
         <div class="product-gallery">
             <div class="main-image-container">
                 {% if produto.lista_imagens %}
                     <img id="imagem-principal" src="data:image/jpeg;base64,{{ produto.lista_imagens[0] }}" alt="{{ produto.Nome }}">
                 {% else %}
-                    <img id="imagem-principal" src="../images/sem-imagem.jpg" alt="Sem Imagem">
+                    <img id="imagem-principal" src="/front/images/sem-imagem.jpg" alt="Sem Imagem">
                 {% endif %}
             </div>
             

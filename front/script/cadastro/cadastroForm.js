@@ -6,6 +6,41 @@ document.addEventListener("DOMContentLoaded", function () {
     const inputCpf = document.getElementById("cpf");
     const inputData = document.getElementById("dataNascimento");
 
+    const urlParams = new URLSearchParams(window.location.search);
+    
+
+    if (urlParams.has('sucesso')) {
+        Swal.fire({
+            title: "Cadastro realizado!",
+            text: "Sua conta foi criada com sucesso.",
+            icon: "success",
+            confirmButtonText: "Ir para Login"
+        }).then(() => {
+            window.location.href = "/login";
+        });
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    else if (urlParams.has('erro')) {
+        let erro = urlParams.get('erro');
+        if (erro === 'email_existe') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Atenção',
+                text: 'Este e-mail já está cadastrado em nosso sistema!',
+                confirmButtonColor: '#FFD166'
+            });
+        }
+        else if (erro === 'cpf_existe') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Atenção',
+                text: 'Este CPF já está cadastrado em nosso sistema!',
+                confirmButtonColor: '#FFD166'
+            });
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     botoesSenha.forEach(function (botao) {
         botao.addEventListener("click", function () {
             const targetId = botao.getAttribute("data-target");
@@ -61,7 +96,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    form.addEventListener("submit", function (event) {
+    form.addEventListener("submit", async function (event) {
         event.preventDefault();
 
         let nome = inputNome.value.trim();
@@ -156,14 +191,33 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (valido) {
-            Swal.fire({
-                title: "Cadastro realizado com sucesso!",
-                text: "Seus dados foram enviados.",
-                icon: "success",
-                confirmButtonText: "OK"
-            }).then(() => {
-                form.submit();
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch("/CriarUsuario", {
+                method: "POST",
+                body: formData
             });
+
+            const resultado = await response.json();
+
+            if (response.ok) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Cadastro realizado!",
+                    text: "Sua conta foi criada.",
+                    confirmButtonText: "Ir para Login"
+                }).then(() => {
+                    window.location.href = "/login";
+                });
+            } else {
+                let msg = resultado.erro === 'email_existe' ? 'E-mail já cadastrado.' 
+                        : resultado.erro === 'cpf_existe' ? 'CPF já cadastrado.' : 'Erro no servidor.';
+                Swal.fire({ icon: 'error', title: 'Atenção', text: msg });
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Erro', text: 'Falha na conexão.' });
         }
+    }
     });
 });

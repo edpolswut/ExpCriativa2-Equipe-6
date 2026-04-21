@@ -4,58 +4,89 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciar Produtos - Snapshop</title>
+    <link rel="stylesheet" href="/front/style/headerStyle.css">
+    <link rel="stylesheet" href="/front/style/perfilStyle.css">
     <link rel="stylesheet" href="/front/style/gerencProdutos/gerencProdutos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <div class="admin-container">
-        <div class="header-actions">
-            <h1>Gestão de Inventário</h1>
-            <a href="/FormProduto" class="btn-novo">+ Novo Produto</a>
+
+    <header class="site-header">
+        <div class="left">
+            <a href="/" class="logo">Snap<span class="shop">shop</span></a>
         </div>
 
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Produto</th>
-                        <th>Nome</th>
-                        <th>Preço</th>
-                        <th>Estoque</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for prod in produtos %}
-                    <tr>
-                        <td data-label="Produto">
-                            {% if prod['Imagem_base64'] %}
-                            <img src="data:image/jpeg;base64,{{ prod['Imagem_base64'] }}" class="img-thumb" alt="Miniatura">
-                            {% else %}
-                            <div class="img-thumb" style="display:flex; align-items:center; justify-content:center; background:#eee; color:#999; font-size:10px;">Sem Foto</div>
-                            {% endif %}
-                        </td>
-                        <td data-label="Nome"><strong>{{ prod['Nome'] }}</strong></td>
-                        <td data-label="Preço">R$ {{ "%.2f"|format(prod['Preco']) }}</td>
-                        <td data-label="Estoque">{{ prod['Qtd_Estoque'] }} un.</td>
-                        <td data-label="Ações">
-                            <a href="/FormProduto?id={{ prod['Id_Produto'] }}" class="btn-edit" title="Editar">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <button class="btn-delete" onclick="confirmarExclusao('{{ prod.Id_Produto }}')" title="Excluir">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="center"></div>
+
+        <div class="right">
+            <a href="/perfilLojista" class="nav-btn">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </header>
+
+    <div class="app-body">
+        <nav class="sidebar">
+            <h2><i class="fas fa-store"></i> Painel da Loja</h2>
+
+            <a href="/EditarLoja/{{ id_loja }}">
+                <i class="fas fa-sliders-h"></i> Configurações
+            </a>
+
+            <a href="/GerenciarProdutos?id_loja={{ id_loja }}" class="active">
+                <i class="fas fa-box-open"></i> Produtos
+            </a>
+        </nav>
+
+        <div class="admin-container">
+            <div class="header-actions">
+                <h1>Gestão de Inventário</h1>
+                <a href="/FormProduto?id_loja={{ id_loja }}" class="btn-novo">+ Novo Produto</a>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Nome</th>
+                            <th>Preço</th>
+                            <th>Estoque</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prod in produtos %}
+                        <tr>
+                            <td data-label="Produto">
+                                {% if prod['Imagem_base64'] %}
+                                <img src="data:image/jpeg;base64,{{ prod['Imagem_base64'] }}" class="img-thumb" alt="Miniatura">
+                                {% else %}
+                                <div class="img-thumb" style="display:flex; align-items:center; justify-content:center; background:#eee; color:#999; font-size:10px;">Sem Foto</div>
+                                {% endif %}
+                            </td>
+                            <td data-label="Nome"><strong>{{ prod['Nome'] }}</strong></td>
+                            <td data-label="Preço">R$ {{ "%.2f"|format(prod['Preco']) }}</td>
+                            <td data-label="Estoque">{{ prod['Qtd_Estoque'] }} un.</td>
+                            <td data-label="Ações">
+                                <a href="/FormProduto?id_loja={{ id_loja }}&id={{ prod['Id_Produto'] }}" class="btn-edit" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn-delete" onclick="confirmarExclusao('{{ prod.Id_Produto }}')" title="Excluir">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script>
         function confirmarExclusao(id) {
-            if(confirm("Deseja mover este produto para o arquivo? (Exclusão Lógica)")) {
+            if(confirm("Deseja mover este produto para o arquivo?")) {
                 window.location.href = "/DeletarProduto/" + id;
             }
         }

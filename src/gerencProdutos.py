@@ -1,3 +1,5 @@
+from urllib import request
+
 import pymysql
 import base64
 
@@ -16,33 +18,48 @@ templates = Jinja2Templates(directory="front/templates")
 
 router = APIRouter()
 
-
 @router.get("/GerenciarProdutos", response_class=HTMLResponse)
-async def gerenciar_produtos(request: Request, db = Depends(get_db)):
+async def gerenciar_produtos(request: Request, id_loja: int, db = Depends(get_db)):
+
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=303)
+    
     with db.cursor(pymysql.cursors.DictCursor) as cursor:
         sql = """
             SELECT P.*, 
             (SELECT Imagem FROM Imagem_Produto WHERE fk_Produto_Id_Produto = P.Id_Produto LIMIT 1) as Imagem
-            FROM Produto P WHERE fk_Loja_Id_Loja = 1 AND Status = 1
+            FROM Produto P WHERE fk_Loja_Id_Loja = %s AND Status = 1
         """
-        cursor.execute(sql)
+        cursor.execute(sql, (id_loja,))
         produtos = cursor.fetchall()
         
         for p in produtos:
             if p["Imagem"]:
                 p["Imagem_base64"] = base64.b64encode(p["Imagem"]).decode('utf-8')
 
-    return templates.TemplateResponse("gerencProdutos/gerenciarProdutos.html", {"request": request, "produtos": produtos})
+    return templates.TemplateResponse("gerencProdutos/gerenciarProdutos.html", {
+        "request": request, 
+        "produtos": produtos,
+        "id_loja": id_loja
+    })
 
 @router.get("/FormProduto", response_class=HTMLResponse)
-async def form_produto(request: Request, id: int = None, db = Depends(get_db)):
+# 1. ADICIONADO o id_loja aqui nos parâmetros
+async def form_produto(request: Request, id_loja: int, id: int = None, db = Depends(get_db)):
+
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=303)
+
     produto = None
     imagens_prod = []
     categorias_todas = []
     categorias_vinculadas = []
     
     with db.cursor(pymysql.cursors.DictCursor) as cursor:
-        cursor.execute("SELECT * FROM Categoria WHERE fk_Loja_Id_Loja = 1 AND Status = 1")
+        # 2. SUBSTITUÍDO o '1' pelo '%s' e passado o id_loja
+        cursor.execute("SELECT * FROM Categoria WHERE fk_Loja_Id_Loja = %s AND Status = 1", (id_loja,))
         categorias_todas = cursor.fetchall()
 
         if id:
@@ -65,11 +82,13 @@ async def form_produto(request: Request, id: int = None, db = Depends(get_db)):
         "produto": produto, 
         "imagens": imagens_prod,
         "categorias": categorias_todas,
-        "categorias_vinculadas": categorias_vinculadas
+        "categorias_vinculadas": categorias_vinculadas,
+        "id_loja": id_loja
     })
 
 @router.post("/SalvarProduto")
 async def salvar_produto(
+    id_loja: int = Form(...),
     Id_Produto: str = Form(None),
     Nome: str = Form(...),
     Preco: float = Form(...),
@@ -86,8 +105,8 @@ async def salvar_produto(
                 cursor.execute(sql, (Nome, Preco, Qtd_Estoque, Id_Produto))
                 id_final = Id_Produto
             else:
-                sql = "INSERT INTO Produto (fk_Loja_Id_Loja, Nome, Preco, Qtd_Estoque, Status) VALUES (1, %s, %s, %s, 1)"
-                cursor.execute(sql, (Nome, Preco, Qtd_Estoque))
+                sql = "INSERT INTO Produto (fk_Loja_Id_Loja, Nome, Preco, Qtd_Estoque, Status) VALUES (%s, %s, %s, %s, 1)"
+                cursor.execute(sql, (id_loja, Nome, Preco, Qtd_Estoque))
                 id_final = cursor.lastrowid
 
             cursor.execute("DELETE FROM Produto_Categoria WHERE fk_Produto_Id_Produto = %s", (id_final,))
@@ -103,13 +122,24 @@ async def salvar_produto(
                     cursor.execute("INSERT INTO Imagem_Produto (fk_Produto_Id_Produto, Imagem) VALUES (%s, %s)", (id_final, content))
             
             db.commit()
-        return RedirectResponse(url="/GerenciarProdutos", status_code=303)
+        return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
     finally:
         db.close()
 
 @router.get("/DeletarProduto/{id}")
 async def deletar_produto(id: int, db = Depends(get_db)):
-    with db.cursor() as cursor:
-        cursor.execute("UPDATE Produto SET Status = 0 WHERE Id_Produto = %s", (id,))
-        db.commit()
-    return RedirectResponse(url="/GerenciarProdutos", status_code=303)
+    with db.cursor(pymysql.cursors.DictCursor) as cursor:
+        # 1. Descobre a qual loja este produto pertence
+        cursor.execute("SELECT fk_Loja_Id_Loja FROM Produto WHERE Id_Produto = %s", (id,))
+        produto = cursor.fetchone()
+        
+        if produto:
+            id_loja = produto["fk_Loja_Id_Loja"]
+            # 2. Desativa o produto
+            cursor.execute("UPDATE Produto SET Status = 0 WHERE Id_Produto = %s", (id,))
+            db.commit()
+            # 3. Redireciona devolvendo a loja certa
+            return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
+            
+    # Se der erro, volta pro perfil
+    return RedirectResponse(url="/perfilLojista", status_code=303)
