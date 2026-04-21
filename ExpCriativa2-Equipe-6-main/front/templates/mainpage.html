@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Main Page</title>
+    <link rel="stylesheet" href="/front/style/mainpage.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="header-container">
+            <div class="logo">Brinquedo<span class="logo-highlight">Shop</span></div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#produtos">Produtos</a></li>
+                    <li><a href="#ofertas">Ofertas</a></li>
+                    <li><a href="#contato">Contato</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="main-layout">
+
+        <aside class="sidebar-filters">
+            <h2 class="filters-title">Filtros</h2>
+
+            <div class="filter-section">
+                <div class="filter-header" onclick="toggleFilter(this)">
+                    <h3>Categorias</h3>
+                    <span class="toggle-icon">-</span>
+                </div>
+                <div class="filter-content">
+                    <label class="filter-option"><input type="checkbox"> XXXX </label>
+                    <label class="filter-option"><input type="checkbox"> YYYY </label>
+                    <label class="filter-option"><input type="checkbox"> ZZZZ </label>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <div class="filter-header" onclick="toggleFilter(this)">
+                    <h3>Marcas</h3>
+                    <span class="toggle-icon">-</span>
+                </div>
+                <div class="filter-content">
+                    <label class="filter-option"><input type="checkbox"> Looney </label>
+                    <label class="filter-option"><input type="checkbox"> Tunes </label>
+                    <label class="filter-option"><input type="checkbox"> Disney </label>
+                    <label class="filter-option"><input type="checkbox"> Marvel </label>
+                    <label class="filter-option"><input type="checkbox"> DC</label>
+                    <button class="see-more-btn"><span class="arrow-down">&#709;</span> Ver mais</button>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <div class="filter-header" onclick="toggleFilter(this)">
+                    <h3>Preço</h3>
+                    <span class="toggle-icon">-</span>
+                </div>
+                <div class="filter-content">
+                    <label class="filter-option"><input type="checkbox"> Até R$ 100,00 </label>
+                    <label class="filter-option"><input type="checkbox"> De R$ 100,00 até R$ 200,00 </label>
+                    <label class="filter-option"><input type="checkbox"> De R$ 200,00 até R$ 300,00 </label>
+                </div>
+            </div>
+        </aside>
+        
+        <main>
+            <div class="carousel-wrapper">
+                <button class="nav-button prev-button" id="prevBtn">&#10094;</button>
+
+                <div class="carousel-container">
+                    <div class="carousel-track" id="carouselTrack">
+                        {% for prod in produtos %}
+                        <div class="product-card">
+                            <div class="product-image-container" style="position: relative; height: 200px; overflow: hidden;">
+                                {% if prod.lista_imagens %}
+                                    <div class="product-slides" id="slides-{{ prod.Id_Produto }}" style="display: flex; transition: transform 0.3s ease;">
+                                        {% for img_base64 in prod.lista_imagens %}
+                                            <img src="data:image/jpeg;base64,{{ img_base64 }}" 
+                                                style="min-width: 100%; height: 200px; object-fit: cover;" 
+                                                alt="{{ prod.Nome }}">
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    {% if prod.lista_imagens|length > 1 %}
+                                        <button class="inner-nav prev" onclick="moveInternalSlide('{{ prod.Id_Produto }}', -1)" 
+                                                style="position: absolute; left: 5px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.7); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">&#10094;</button>
+                                        <button class="inner-nav next" onclick="moveInternalSlide('{{ prod.Id_Produto }}', 1)" 
+                                                style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.7); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">&#10095;</button>
+                                    {% endif %}
+                                {% else %}
+                                    <div style="width:100%; height:100%; background:#eee; display:flex; align-items:center; justify-content:center; color:#999;">Sem Foto</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="product-info">
+                                <h4 class="product-title">{{ prod.Nome }}</h4>
+                                <div class="product-price">
+                                    <span class="current-price">R$ {{ "%.2f"|format(prod.Preco) }}</span>
+                                    <span class="installments">ou 12x de R$ {{ "%.2f"|format(prod.Preco / 12) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <button class="nav-button next-button" id="nextBtn">&#10095;</button>
+            </div>
+        </main>
+
+    </div>
+
+    <footer class="site-footer">
+        <p>&copy; SnapShop. Todos os direitos reservados.</p>
+    </footer>
+
+    <script src="/front/script/mainpage.js"></script>
+</body>
+</html>

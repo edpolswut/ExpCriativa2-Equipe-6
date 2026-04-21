@@ -1,0 +1,188 @@
+DROP DATABASE IF EXISTS SnapShop;
+CREATE DATABASE SnapShop;
+USE SnapShop;
+
+/* Tabela Usuario */
+CREATE TABLE Usuario (
+    Id_Usuario INT AUTO_INCREMENT PRIMARY KEY,
+    Nome VARCHAR(100) NOT NULL,
+    Cpf VARCHAR(14) NOT NULL UNIQUE, -- Unique adicionado
+    Email VARCHAR(100) NOT NULL UNIQUE, -- Unique adicionado
+    Senha_Hash CHAR(255) NOT NULL,
+    Dat_Criacao DATE NOT NULL,
+    Status INT NOT NULL
+);
+
+/* Tabela Perfil */
+CREATE TABLE Perfil (
+    Id_Perfil INT AUTO_INCREMENT PRIMARY KEY,
+    Nom_Perfil VARCHAR(40) NOT NULL
+);
+
+/* Tabela Loja */
+CREATE TABLE Loja (
+    Id_Loja INT AUTO_INCREMENT PRIMARY KEY,
+    Nome VARCHAR(100) NOT NULL,
+    Cnpj VARCHAR(18) NOT NULL UNIQUE, -- Unique adicionado
+    Razao_Social VARCHAR(100) NOT NULL,
+    Email VARCHAR(100) NOT NULL UNIQUE, -- Unique adicionado
+    Telefone VARCHAR(25) NOT NULL,
+    Status INT NOT NULL
+);
+
+/* Tabela Produto */
+CREATE TABLE Produto (
+    Id_Produto INT AUTO_INCREMENT PRIMARY KEY,
+    fk_Loja_Id_Loja INT NOT NULL,
+    Nome VARCHAR(150) NOT NULL,
+    Preco DOUBLE NOT NULL,
+    Qtd_Estoque INT NOT NULL,
+    Status INT NOT NULL
+);
+
+/* Tabela Imagem_Produto */
+CREATE TABLE Imagem_Produto (
+    Id_Imagem INT AUTO_INCREMENT PRIMARY KEY,
+    fk_Produto_Id_Produto INT NOT NULL,
+    Imagem LONGBLOB NOT NULL
+);
+
+/* Tabela Categoria */
+CREATE TABLE Categoria (
+    Id_Categoria INT AUTO_INCREMENT PRIMARY KEY,
+    fk_Loja_Id_Loja INT NOT NULL,
+    Nome VARCHAR(50) NOT NULL,
+    Status INT NOT NULL
+);
+
+/* Tabela Carrinho */
+CREATE TABLE Carrinho (
+    Id_Carrinho INT AUTO_INCREMENT PRIMARY KEY,
+    fk_Usuario_Id_Usuario INT NOT NULL,
+    fk_Loja_Id_Loja INT NOT NULL
+);
+
+/* Tabela Log_Compra */
+CREATE TABLE Log_Compra (
+    Id_Log_Compras INT AUTO_INCREMENT PRIMARY KEY,
+    fk_Usuario_Id_Usuario INT NOT NULL,
+    fk_Loja_Id_Loja INT NOT NULL,
+    Dat_Compra DATE NOT NULL,
+    Status INT NOT NULL
+);
+
+/* Tabela Config_Loja */
+CREATE TABLE Config_Loja (
+    Id_Config_Loja INT AUTO_INCREMENT PRIMARY KEY,
+    fk_Loja_Id_Loja INT NOT NULL UNIQUE, -- Unique para relação 1:1
+    Nom_Tema VARCHAR(50) NOT NULL,
+    Cor_Principal VARCHAR(50) NOT NULL,
+    Cor_Secundaria VARCHAR(50) NOT NULL,
+    Logo BLOB NOT NULL,
+    Banner BLOB NOT NULL,
+    Url VARCHAR(100) NOT NULL UNIQUE -- Unique adicionado
+);
+
+/* Tabela Endereco */
+CREATE TABLE Endereco (
+    Id_Endereco INT AUTO_INCREMENT PRIMARY KEY,
+    fk_Usuario_Id_Usuario INT NOT NULL,
+    fk_Loja_Id_Loja INT NOT NULL,
+    Cep VARCHAR(10) NOT NULL,
+    Rua VARCHAR(100) NOT NULL,
+    Numero INT NOT NULL,
+    Cidade VARCHAR(100) NOT NULL,
+    Bairro VARCHAR(100) NOT NULL,
+    Complemento VARCHAR(100), -- Removido NOT NULL pois nem todo lugar tem comp.
+    Status INT NOT NULL
+);
+
+/* Tabelas Associativas e Relacionamentos */
+
+CREATE TABLE Usuario_Perfil (
+    Id_Usuario_Perfil INTEGER PRIMARY KEY,
+    fk_Perfil_Id_Perfil INTEGER,
+    fk_Usuario_Id_Usuario INTEGER,
+    fk_Loja_Id_Loja INTEGER
+);
+
+CREATE TABLE Produto_Categoria (
+    fk_Categoria_Id_Categoria INT NOT NULL,
+    fk_Produto_Id_Produto INT NOT NULL,
+    Status INT NOT NULL,
+    PRIMARY KEY (fk_Categoria_Id_Categoria, fk_Produto_Id_Produto)
+);
+
+CREATE TABLE Carrinho_Produto (
+    fk_Carrinho_Id_Carrinho INT NOT NULL,
+    fk_Produto_Id_Produto INT NOT NULL,
+    PRIMARY KEY (fk_Carrinho_Id_Carrinho, fk_Produto_Id_Produto)
+);
+
+CREATE TABLE Log_Compra_Produto (
+    fk_Produto_Id_Produto INT NOT NULL,
+    fk_Log_Compra_Id_Log_Compras INT NOT NULL,
+    PRIMARY KEY (fk_Produto_Id_Produto, fk_Log_Compra_Id_Log_Compras)
+);
+
+/* DEFINIÇÃO DAS CONSTRAINTS (ALTER TABLE) */
+
+-- Produto e Loja
+ALTER TABLE Produto ADD CONSTRAINT FK_Produto_Loja
+    FOREIGN KEY (fk_Loja_Id_Loja) REFERENCES Loja (Id_Loja) ON DELETE CASCADE;
+
+-- Imagem e Produto
+ALTER TABLE Imagem_Produto ADD CONSTRAINT FK_Imagem_Produto
+    FOREIGN KEY (fk_Produto_Id_Produto) REFERENCES Produto (Id_Produto) ON DELETE CASCADE;
+
+-- Categoria e Loja
+ALTER TABLE Categoria ADD CONSTRAINT FK_Categoria_Loja
+    FOREIGN KEY (fk_Loja_Id_Loja) REFERENCES Loja (Id_Loja) ON DELETE CASCADE;
+
+-- Carrinho
+ALTER TABLE Carrinho ADD CONSTRAINT FK_Carrinho_Usuario
+    FOREIGN KEY (fk_Usuario_Id_Usuario) REFERENCES Usuario (Id_Usuario) ON DELETE CASCADE;
+ALTER TABLE Carrinho ADD CONSTRAINT FK_Carrinho_Loja
+    FOREIGN KEY (fk_Loja_Id_Loja) REFERENCES Loja (Id_Loja) ON DELETE CASCADE;
+
+-- Log_Compra
+ALTER TABLE Log_Compra ADD CONSTRAINT FK_Log_Compra_Usuario
+    FOREIGN KEY (fk_Usuario_Id_Usuario) REFERENCES Usuario (Id_Usuario) ON DELETE RESTRICT;
+ALTER TABLE Log_Compra ADD CONSTRAINT FK_Log_Compra_Loja
+    FOREIGN KEY (fk_Loja_Id_Loja) REFERENCES Loja (Id_Loja) ON DELETE RESTRICT;
+
+-- Config_Loja
+ALTER TABLE Config_Loja ADD CONSTRAINT FK_Config_Loja
+    FOREIGN KEY (fk_Loja_Id_Loja) REFERENCES Loja (Id_Loja) ON DELETE CASCADE;
+
+-- Endereco
+ALTER TABLE Endereco ADD CONSTRAINT FK_Endereco_Usuario
+    FOREIGN KEY (fk_Usuario_Id_Usuario) REFERENCES Usuario (Id_Usuario) ON DELETE CASCADE;
+ALTER TABLE Endereco ADD CONSTRAINT FK_Endereco_Loja
+    FOREIGN KEY (fk_Loja_Id_Loja) REFERENCES Loja (Id_Loja) ON DELETE CASCADE;
+
+-- Usuario_Perfil (N:M)
+ALTER TABLE Usuario_Perfil ADD CONSTRAINT FK_UP_Perfil
+    FOREIGN KEY (fk_Perfil_Id_Perfil) REFERENCES Perfil (Id_Perfil) ON DELETE CASCADE;
+ALTER TABLE Usuario_Perfil ADD CONSTRAINT FK_UP_Usuario
+    FOREIGN KEY (fk_Usuario_Id_Usuario) REFERENCES Usuario (Id_Usuario) ON DELETE CASCADE;
+ALTER TABLE Usuario_Perfil ADD CONSTRAINT FK_UP_Loja
+    FOREIGN KEY (fk_Loja_Id_Loja) REFERENCES Loja (Id_Loja) ON DELETE CASCADE;
+
+-- Produto_Categoria (N:M)
+ALTER TABLE Produto_Categoria ADD CONSTRAINT FK_PC_Categoria
+    FOREIGN KEY (fk_Categoria_Id_Categoria) REFERENCES Categoria (Id_Categoria) ON DELETE CASCADE;
+ALTER TABLE Produto_Categoria ADD CONSTRAINT FK_PC_Produto
+    FOREIGN KEY (fk_Produto_Id_Produto) REFERENCES Produto (Id_Produto) ON DELETE CASCADE;
+
+-- Carrinho_Produto (N:M)
+ALTER TABLE Carrinho_Produto ADD CONSTRAINT FK_CP_Carrinho
+    FOREIGN KEY (fk_Carrinho_Id_Carrinho) REFERENCES Carrinho (Id_Carrinho) ON DELETE CASCADE;
+ALTER TABLE Carrinho_Produto ADD CONSTRAINT FK_CP_Produto
+    FOREIGN KEY (fk_Produto_Id_Produto) REFERENCES Produto (Id_Produto) ON DELETE CASCADE;
+
+-- Log_Compra_Produto (N:M)
+ALTER TABLE Log_Compra_Produto ADD CONSTRAINT FK_LCP_Produto
+    FOREIGN KEY (fk_Produto_Id_Produto) REFERENCES Produto (Id_Produto) ON DELETE RESTRICT;
+ALTER TABLE Log_Compra_Produto ADD CONSTRAINT FK_LCP_Log
+    FOREIGN KEY (fk_Log_Compra_Id_Log_Compras) REFERENCES Log_Compra (Id_Log_Compras) ON DELETE CASCADE;

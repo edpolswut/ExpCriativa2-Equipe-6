@@ -1,0 +1,9 @@
+
+INSERT INTO Loja (Id_Loja, Nome, Cnpj, Razao_Social, Email, Telefone, Status) 
+VALUES (1, 'SnapShop Teste', '12345678000199', 'SnapShop Teste LTDA', 'contato@snapshop.com', '41999999999', 1);
+
+DELETE FROM Categoria WHERE fk_Loja_Id_Loja = 1;
+INSERT INTO Categoria (fk_Loja_Id_Loja, Nome, Status) VALUES 
+(1, 'Categoria 1', 1),
+(1, 'Categoria 2', 1),
+(1, 'Categoria 3', 1);
