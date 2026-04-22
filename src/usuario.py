@@ -44,7 +44,7 @@ async def cadastroLoja(request: Request):
 
 @router.get("/perfilLojista", response_class=HTMLResponse)
 async def perfil(request: Request, db = Depends(get_db)):
-    
+
     user_id = request.session.get("user_id")
 
     if not user_id:
@@ -142,15 +142,12 @@ async def editar_loja(request: Request, id_loja: int, db = Depends(get_db)):
         return RedirectResponse(url="/login", status_code=303)
 
     with db.cursor(pymysql.cursors.DictCursor) as cursor:
-        # Busca dados da Loja
         cursor.execute("SELECT * FROM Loja WHERE Id_Loja = %s", (id_loja,))
         loja = cursor.fetchone()
 
-        # Busca Endereço
         cursor.execute("SELECT * FROM Endereco WHERE fk_Loja_Id_Loja = %s", (id_loja,))
         endereco = cursor.fetchone()
 
-        # Busca Configurações Visuais
         cursor.execute("SELECT * FROM Config_Loja WHERE fk_Loja_Id_Loja = %s", (id_loja,))
         config = cursor.fetchone()
 
@@ -335,7 +332,6 @@ async def deletar_usuario(request: Request, db = Depends(get_db)):
 
     try:
         with db.cursor() as cursor:
-            # 1. Desativa as lojas vinculadas a este usuário
             sql_lojas = """
                 UPDATE Loja L
                 INNER JOIN Usuario_Perfil UP ON L.Id_Loja = UP.fk_Loja_Id_Loja
@@ -344,7 +340,6 @@ async def deletar_usuario(request: Request, db = Depends(get_db)):
             """
             cursor.execute(sql_lojas, (user_id,))
 
-            # 2. Desativa o próprio usuário
             cursor.execute("UPDATE Usuario SET Status = 0 WHERE Id_Usuario = %s", (user_id,))
             
             db.commit()
@@ -372,7 +367,6 @@ async def deletar_loja(request: Request, id_loja: int, db = Depends(get_db)):
             if not cursor.fetchone():
                 return RedirectResponse(url="/perfilLojista?erro=acesso_negado", status_code=303)
 
-            # Desativa a loja (Status = 0)
             cursor.execute("UPDATE Loja SET Status = 0 WHERE Id_Loja = %s", (id_loja,))
             db.commit()
             
@@ -385,7 +379,6 @@ async def logout(request: Request):
     request.session.clear() 
     return RedirectResponse(url="/login", status_code=303)
 
-#Hash
 def gerar_hash(senha: str) -> str:
     salt = os.urandom(16)
 
