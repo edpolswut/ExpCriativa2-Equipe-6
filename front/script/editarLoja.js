@@ -147,3 +147,20 @@ document.addEventListener("DOMContentLoaded", function () {
         form.submit();
     });
 });
+
+function confirmarExclusaoLoja(idLoja) {
+    Swal.fire({
+        title: 'Você tem certeza?',
+        text: "Sua loja será desativada e você não terá mais acesso a ela!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#494949',
+        confirmButtonText: 'Sim, excluir loja!',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = `/DeletarLoja/${idLoja}`;
+        }
+    });
+}

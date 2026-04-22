@@ -84,7 +84,13 @@
                 {% for loja in lojas %}
                 <div class="card" style="padding-bottom: 20px;">
                     <div class="card-img" style="display: flex; align-items: center; justify-content: center; background: #eee;">
-                        <i class="fas fa-store fa-3x" style="color: #ccc;"></i>
+                        
+                        {% if loja.Logo_B64 %}
+                            <img src="data:image/jpeg;base64,{{ loja.Logo_B64 }}" alt="Logo" style="height: 80px; border-radius: 8px; object-fit: cover;">
+                        {% else %}
+                            <i class="fas fa-store fa-3x" style="color: #ccc;"></i>
+                        {% endif %}
+
                     </div>
                     <div class="card-title">
                         {{ loja.Nome }} <br>

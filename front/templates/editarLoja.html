@@ -170,7 +170,10 @@
                     </div>
                 </div>
 
-                <div class="btn-area">
+                <div class="btn-area" style="display: flex; justify-content: flex-end; gap: 15px;">
+                    <button type="button" class="btn-deletar" onclick="confirmarExclusaoLoja('{{ id_loja }}')">
+                        <i class="fas fa-trash-alt"></i> Excluir Loja
+                    </button>
                     <button type="submit" class="btn-salvar">
                         <i class="fas fa-save"></i> Salvar
                     </button>

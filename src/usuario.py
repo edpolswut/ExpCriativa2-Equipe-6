@@ -58,14 +58,19 @@ async def perfil(request: Request, db = Depends(get_db)):
         # 2. Busca as lojas associadas a este usuário (usando a tabela Usuario_Perfil)
         # Trazemos apenas lojas ativas (Status = 1)
         sql_lojas = """
-            SELECT L.*, UP.fk_Perfil_Id_Perfil, P.Nom_Perfil
+            SELECT L.*, UP.fk_Perfil_Id_Perfil, P.Nom_Perfil, CL.Logo
             FROM Loja L
             INNER JOIN Usuario_Perfil UP ON L.Id_Loja = UP.fk_Loja_Id_Loja
             INNER JOIN Perfil P ON UP.fk_Perfil_Id_Perfil = P.Id_Perfil
+             LEFT JOIN Config_Loja CL ON L.Id_Loja = CL.fk_Loja_Id_Loja
             WHERE UP.fk_Usuario_Id_Usuario = %s AND L.Status = 1
         """
         cursor.execute(sql_lojas, (user_id,))
         lojas = cursor.fetchall()
+
+        for loja in lojas:
+            if loja.get("Logo"):
+                loja["Logo_B64"] = base64.b64encode(loja["Logo"]).decode('utf-8')
 
     # Passamos a lista de lojas para o HTML
     return templates.TemplateResponse(
@@ -371,6 +376,30 @@ async def deletar_usuario(request: Request, db = Depends(get_db)):
     except Exception as e:
         print(f"Erro ao deletar usuário: {e}")
         return RedirectResponse(url="/perfilLojista?erro=exclusao", status_code=303)
+
+@router.get("/DeletarLoja/{id_loja}")
+async def deletar_loja(request: Request, id_loja: int, db = Depends(get_db)):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=303)
+
+    try:
+        with db.cursor() as cursor:
+            cursor.execute("""
+                SELECT 1 FROM Usuario_Perfil 
+                WHERE fk_Usuario_Id_Usuario = %s AND fk_Loja_Id_Loja = %s
+            """, (user_id, id_loja))
+            
+            if not cursor.fetchone():
+                return RedirectResponse(url="/perfilLojista?erro=acesso_negado", status_code=303)
+
+            # Desativa a loja (Status = 0)
+            cursor.execute("UPDATE Loja SET Status = 0 WHERE Id_Loja = %s", (id_loja,))
+            db.commit()
+            
+        return RedirectResponse(url="/perfilLojista?sucesso=loja_excluida", status_code=303)
+    except Exception as e:
+        return RedirectResponse(url=f"/EditarLoja/{id_loja}?erro=exclusao", status_code=303)
 
 @router.get("/logout")
 async def logout(request: Request):
