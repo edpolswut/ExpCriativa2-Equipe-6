@@ -102,7 +102,6 @@ async def vitrine_loja(request: Request, identificador: str, db = Depends(get_db
 @app.get("/produto/{id_produto}")
 async def detalhes_produto(request: Request, id_produto: int, db = Depends(get_db)):
     with db.cursor(pymysql.cursors.DictCursor) as cursor:
-        # 1. Procurar os dados do Produto
         sql_produto = "SELECT * FROM Produto WHERE Id_Produto = %s"
         cursor.execute(sql_produto, (id_produto,))
         produto = cursor.fetchone()
@@ -110,7 +109,6 @@ async def detalhes_produto(request: Request, id_produto: int, db = Depends(get_d
         if not produto:
             raise HTTPException(status_code=404, detail="Produto não encontrado")
 
-        # 2. Procurar as imagens do produto
         sql_imagens = "SELECT Imagem FROM Imagem_Produto WHERE fk_Produto_Id_Produto = %s"
         cursor.execute(sql_imagens, (id_produto,))
         imagens_blob = cursor.fetchall()
@@ -119,7 +117,6 @@ async def detalhes_produto(request: Request, id_produto: int, db = Depends(get_d
             for img in imagens_blob if img["Imagem"]
         ]
 
-        # 3. Procurar a Loja dona deste produto para carregar as cores e logo na página
         sql_loja = """
             SELECT L.*, C.Cor_Principal, C.Cor_Secundaria, C.Logo, C.Banner, C.Url 
             FROM Loja L 

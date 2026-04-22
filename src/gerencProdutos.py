@@ -45,7 +45,6 @@ async def gerenciar_produtos(request: Request, id_loja: int, db = Depends(get_db
     })
 
 @router.get("/FormProduto", response_class=HTMLResponse)
-# 1. ADICIONADO o id_loja aqui nos parâmetros
 async def form_produto(request: Request, id_loja: int, id: int = None, db = Depends(get_db)):
 
     user_id = request.session.get("user_id")
@@ -58,7 +57,6 @@ async def form_produto(request: Request, id_loja: int, id: int = None, db = Depe
     categorias_vinculadas = []
     
     with db.cursor(pymysql.cursors.DictCursor) as cursor:
-        # 2. SUBSTITUÍDO o '1' pelo '%s' e passado o id_loja
         cursor.execute("SELECT * FROM Categoria WHERE fk_Loja_Id_Loja = %s AND Status = 1", (id_loja,))
         categorias_todas = cursor.fetchall()
 
@@ -129,17 +127,13 @@ async def salvar_produto(
 @router.get("/DeletarProduto/{id}")
 async def deletar_produto(id: int, db = Depends(get_db)):
     with db.cursor(pymysql.cursors.DictCursor) as cursor:
-        # 1. Descobre a qual loja este produto pertence
         cursor.execute("SELECT fk_Loja_Id_Loja FROM Produto WHERE Id_Produto = %s", (id,))
         produto = cursor.fetchone()
         
         if produto:
             id_loja = produto["fk_Loja_Id_Loja"]
-            # 2. Desativa o produto
             cursor.execute("UPDATE Produto SET Status = 0 WHERE Id_Produto = %s", (id,))
             db.commit()
-            # 3. Redireciona devolvendo a loja certa
             return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
             
-    # Se der erro, volta pro perfil
     return RedirectResponse(url="/perfilLojista", status_code=303)

@@ -44,19 +44,17 @@ async def cadastroLoja(request: Request):
 
 @router.get("/perfilLojista", response_class=HTMLResponse)
 async def perfil(request: Request, db = Depends(get_db)):
-    # Pega o ID do usuário da sessão
+    
     user_id = request.session.get("user_id")
 
     if not user_id:
         return RedirectResponse(url="/login", status_code=303)
 
     with db.cursor(pymysql.cursors.DictCursor) as cursor:
-        # 1. Busca os dados do usuário
         cursor.execute("SELECT Nome, Email FROM Usuario WHERE Id_Usuario = %s", (user_id,))
         usuario = cursor.fetchone()
 
-        # 2. Busca as lojas associadas a este usuário (usando a tabela Usuario_Perfil)
-        # Trazemos apenas lojas ativas (Status = 1)
+        # apenas lojas ativas (Status = 1)
         sql_lojas = """
             SELECT L.*, UP.fk_Perfil_Id_Perfil, P.Nom_Perfil, CL.Logo
             FROM Loja L
@@ -72,7 +70,6 @@ async def perfil(request: Request, db = Depends(get_db)):
             if loja.get("Logo"):
                 loja["Logo_B64"] = base64.b64encode(loja["Logo"]).decode('utf-8')
 
-    # Passamos a lista de lojas para o HTML
     return templates.TemplateResponse(
         request=request,
         name="perfilLojista.html",
@@ -91,7 +88,7 @@ async def CriarLoja(
     CNPJ: str = Form(...),
     Telefone: str = Form(...),
     CEP: str = Form(...),
-    Logradouro: str = Form(...), # Usaremos como 'Rua'
+    Logradouro: str = Form(...),
     Numero: int = Form(...),
     Cidade: str = Form(...),
     Bairro: str = Form(...),
@@ -104,8 +101,6 @@ async def CriarLoja(
 
     try:
         with db.cursor() as cursor:
-            # 1. Inserir na tabela Loja
-            # Nota: Usei NomeLoja como Razao_Social por padrão, ajuste se necessário.
             sql_loja = """
                 INSERT INTO Loja (Nome, Cnpj, Razao_Social, Email, Telefone, Status) 
                 VALUES (%s, %s, %s, %s, %s, 1)
@@ -113,7 +108,6 @@ async def CriarLoja(
             cursor.execute(sql_loja, (NomeLoja, CNPJ, NomeLoja, EmailLoja, Telefone))
             id_loja = cursor.lastrowid
 
-            # 2. Inserir na tabela Usuario_Perfil 
             # fk_Perfil_Id_Perfil = 2 (Lojista)
             sql_perfil = """
                 INSERT INTO Usuario_Perfil (fk_Perfil_Id_Perfil, fk_Usuario_Id_Usuario, fk_Loja_Id_Loja) 
@@ -121,7 +115,6 @@ async def CriarLoja(
             """
             cursor.execute(sql_perfil, (user_id, id_loja))
 
-            # 3. Inserir na tabela Endereco
             sql_endereco = """
                 INSERT INTO Endereco (fk_Usuario_Id_Usuario, fk_Loja_Id_Loja, Cep, Rua, Numero, Cidade, Bairro, Complemento, Status)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 1)
@@ -142,7 +135,6 @@ async def CriarLoja(
 
 from fastapi import UploadFile, File
 
-# --- ROTA GET: Busca todos os dados (Loja, Endereço e Configurações) ---
 @router.get("/EditarLoja/{id_loja}", response_class=HTMLResponse)
 async def editar_loja(request: Request, id_loja: int, db = Depends(get_db)):
     user_id = request.session.get("user_id")
@@ -180,7 +172,6 @@ async def editar_loja(request: Request, id_loja: int, db = Depends(get_db)):
         }
     )
 
-# --- ROTA POST: Salva todas as alterações ---
 @router.post("/SalvarEdicaoLoja")
 async def salvar_edicao_loja(
     request: Request,
@@ -190,14 +181,12 @@ async def salvar_edicao_loja(
     Cnpj: str = Form(...),
     Email: str = Form(...),
     Telefone: str = Form(...),
-    # Endereço
     Cep: str = Form(...),
     Rua: str = Form(...),
     Numero: int = Form(...),
     Cidade: str = Form(...),
     Bairro: str = Form(...),
     Complemento: str = Form(None),
-    # Configurações
     Nom_Tema: str = Form(...),
     Cor_Principal: str = Form(...),
     Cor_Secundaria: str = Form(...),
@@ -208,19 +197,16 @@ async def salvar_edicao_loja(
 ):
     try:
         with db.cursor() as cursor:
-            # 1. Atualiza Loja
             cursor.execute("""
                 UPDATE Loja SET Nome=%s, Cnpj=%s, Razao_Social=%s, Email=%s, Telefone=%s 
                 WHERE Id_Loja=%s
             """, (Nome, Cnpj, Razao_Social, Email, Telefone, Id_Loja))
 
-            # 2. Atualiza Endereço
             cursor.execute("""
                 UPDATE Endereco SET Cep=%s, Rua=%s, Numero=%s, Cidade=%s, Bairro=%s, Complemento=%s 
                 WHERE fk_Loja_Id_Loja=%s
             """, (Cep, Rua, Numero, Cidade, Bairro, Complemento, Id_Loja))
 
-            # 3. Atualiza ou Insere Config_Loja
             cursor.execute("SELECT Id_Config_Loja FROM Config_Loja WHERE fk_Loja_Id_Loja=%s", (Id_Loja,))
             existe_config = cursor.fetchone()
 
@@ -260,7 +246,6 @@ async def CriarUsuario(
 ):
     try:
         with db.cursor() as cursor:
-            # Verifica se email já existe
             cursor.execute("SELECT Email FROM Usuario WHERE Email = %s", (Email,)) 
             if cursor.fetchone():   
                 return JSONResponse(status_code=400, content={"erro": "email_existe"})
@@ -280,7 +265,6 @@ async def CriarUsuario(
     finally:
         db.close()
 
-# Login
 @router.post("/Login")
 async def Login(
     request: Request,
@@ -293,7 +277,6 @@ async def Login(
             cursor.execute("SELECT * FROM Usuario WHERE Email = %s", (Email,))
             usuario = cursor.fetchone()
 
-            # SE USUÁRIO NÃO EXISTIR OU SENHA ESTIVER ERRADA (Redireciona com erro)
             if not usuario or not verificar_senha(Senha, usuario["Senha_Hash"]):
                 return RedirectResponse(url="/login?erro=credenciais", status_code=303)
 
@@ -306,7 +289,6 @@ async def Login(
         print("ERRO VERIFY:", e)
         return RedirectResponse(url="/login?erro=sistema", status_code=303)
     
-# --- ROTA GET: Carrega o formulário com os dados atuais do utilizador ---
 @router.get("/EditarUsuario", response_class=HTMLResponse)
 async def editar_usuario_form(request: Request, db = Depends(get_db)):
     user_id = request.session.get("user_id")
@@ -319,29 +301,26 @@ async def editar_usuario_form(request: Request, db = Depends(get_db)):
 
     return templates.TemplateResponse("editarUsuario.html", {"request": request, "usuario": usuario})
 
-# --- ROTA POST: Guarda as alterações (Nome, Email e Opcionalmente Senha) ---
 @router.post("/SalvarEdicaoUsuario")
 async def salvar_edicao_usuario(
     request: Request,
     Nome: str = Form(...),
     Email: str = Form(...),
-    Senha: str = Form(None), # Senha é opcional na edição
+    Senha: str = Form(None),
     db = Depends(get_db)
 ):
     user_id = request.session.get("user_id")
     try:
         with db.cursor() as cursor:
-            # Atualiza dados básicos
             sql = "UPDATE Usuario SET Nome=%s, Email=%s WHERE Id_Usuario=%s"
             cursor.execute(sql, (Nome, Email, user_id))
             
-            # Se o utilizador preencheu uma nova senha, gera o hash e atualiza
             if Senha and Senha.strip() != "":
                 novo_hash = gerar_hash(Senha)
                 cursor.execute("UPDATE Usuario SET Senha_Hash=%s WHERE Id_Usuario=%s", (novo_hash, user_id))
             
             db.commit()
-            request.session["user_nome"] = Nome # Atualiza o nome na sessão
+            request.session["user_nome"] = Nome
         return RedirectResponse(url="/perfilLojista?sucesso=1", status_code=303)
     except Exception as e:
         print(f"Erro ao editar utilizador: {e}")
