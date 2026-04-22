@@ -187,6 +187,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("erro-data").textContent = "Você deve ter pelo menos 18 anos.";
                     valido = false;
                 }
+                else if (idade > 120) {
+                    document.getElementById("erro-data").textContent = "Idade inválida.";
+                    valido = false;
+                }
             }
         }
 

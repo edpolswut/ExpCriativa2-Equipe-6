@@ -23,9 +23,9 @@ CREATE TABLE Perfil (
 CREATE TABLE Loja (
     Id_Loja INT AUTO_INCREMENT PRIMARY KEY,
     Nome VARCHAR(100) NOT NULL,
-    Cnpj VARCHAR(18) NOT NULL UNIQUE, -- Unique adicionado
+    Cnpj VARCHAR(18) NOT NULL,
     Razao_Social VARCHAR(100) NOT NULL,
-    Email VARCHAR(100) NOT NULL UNIQUE, -- Unique adicionado
+    Email VARCHAR(100) NOT NULL,
     Telefone VARCHAR(25) NOT NULL,
     Status INT NOT NULL
 );
