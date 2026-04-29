@@ -1,0 +1,1 @@
+# Este arquivo será responsável por lidar com a autorização de usuários.

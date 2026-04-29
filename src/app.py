@@ -1,7 +1,9 @@
 import pymysql
 import base64
+import gerencLoja
 import gerencProdutos
 import usuario
+import auth
 
 from mangum import Mangum
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
@@ -21,8 +23,9 @@ from starlette.middleware.sessions import SessionMiddleware
 app.add_middleware(SessionMiddleware, secret_key="teste123")
 
 app.mount("/front", StaticFiles(directory="front"), name="view")
-app.include_router(gerencProdutos.router)
 app.include_router(usuario.router)
+app.include_router(gerencLoja.router)
+app.include_router(gerencProdutos.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):

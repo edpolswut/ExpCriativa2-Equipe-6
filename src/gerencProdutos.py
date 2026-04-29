@@ -1,7 +1,6 @@
-from urllib import request
-
 import pymysql
 import base64
+import auth
 
 from typing import List
 from fastapi import APIRouter, Request, Form, Depends, UploadFile, File
