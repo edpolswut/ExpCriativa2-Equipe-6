@@ -1,6 +1,5 @@
 import pymysql
 import base64
-import os
 import auth
 
 from fastapi import APIRouter, Request, Form, Depends
@@ -8,16 +7,10 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-# Cassiano vai alterar a autenticação.
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-
 from database import get_db
-
 
 templates = Jinja2Templates(directory="front/templates")
 router = APIRouter()
-
 
 @router.get("/cadastro", response_class=HTMLResponse)
 async def cadastro(request: Request):
@@ -25,19 +18,100 @@ async def cadastro(request: Request):
         "request": request
     })
 
+@router.post("/CriarUsuario", name="CriarUsuario")
+async def CriarUsuario(
+    request: Request,
+    Nome: str = Form(...),
+    CPF: str = Form(...), 
+    Email: str = Form(...), 
+    Senha: str = Form(...), 
+    db = Depends(get_db)
+):
+    # Caso o usuário esteja logado, desloga antes de criar nova conta
+    if request.session.get("user_logged_in"):
+        request.session.clear()
+        return RedirectResponse(url="/", status_code=303)
+
+    try:
+        with db.cursor() as cursor:
+            cursor.execute("SELECT 1 FROM Usuario WHERE Email = %s", (Email,)) 
+            if cursor.fetchone():
+                return JSONResponse(status_code=400, content={"erro": "email_existe"})
+            
+            cursor.execute("SELECT 1 FROM Usuario WHERE Cpf = %s", (CPF,)) 
+            if cursor.fetchone():
+                return JSONResponse(status_code=400, content={"erro": "cpf_existe"})
+
+            sql = "INSERT INTO Usuario (Nome, Cpf, Email, Senha_Hash, Dat_Criacao, Status) VALUES (%s, %s, %s, MD5(%s), current_date(), 1)"
+            cursor.execute(sql, (Nome, CPF, Email, Senha))
+            db.commit()
+
+            return JSONResponse(content={"sucesso": True})
+    except Exception:
+        return JSONResponse(status_code=500, content={"erro": "sistema"})
+    finally:
+        db.close()
+
 @router.get("/login", response_class=HTMLResponse)
 async def login(request: Request):
     return templates.TemplateResponse("login.html", {
         "request": request
     })
 
+@router.post("/Login")
+async def Login(
+    request: Request,
+    Email: str = Form(...),
+    Senha: str = Form(...),
+    db = Depends(get_db)
+):
+    # Caso o usuário esteja logado, desloga antes de poder logar com outra conta
+    if request.session.get("user_logged_in"):
+        request.session.clear()
+        return RedirectResponse(url="/", status_code=303)
+
+    try:
+        with db.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT * FROM Usuario WHERE Email = %s", (Email,))
+            usuario = cursor.fetchone()
+
+            if not usuario:
+                return RedirectResponse(url="/login?erro=credenciais", status_code=303)
+
+            cursor.execute("SELECT 1 FROM Usuario WHERE Id_Usuario = %s AND Senha_Hash = MD5(%s)", (usuario["Id_Usuario"], Senha))
+            if not cursor.fetchone():
+                return RedirectResponse(url="/login?erro=credenciais", status_code=303)
+
+            request.session["user_id"] = usuario["Id_Usuario"]
+            request.session["user_nome"] = usuario["Nome"]
+
+            return RedirectResponse(url="/perfilLojista", status_code=303)
+
+    except Exception as e:
+        print("ERRO VERIFY:", e)
+        return RedirectResponse(url="/login?erro=sistema", status_code=303)
+    
+@router.get("/EditarUsuario", response_class=HTMLResponse)
+async def editar_usuario_form(request: Request, db = Depends(get_db)):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=303)
+
+    with db.cursor(pymysql.cursors.DictCursor) as cursor:
+        cursor.execute("SELECT Nome, Email, Cpf FROM Usuario WHERE Id_Usuario = %s", (user_id,))
+        usuario = cursor.fetchone()
+
+    return templates.TemplateResponse("editarUsuario.html", {"request": request, "usuario": usuario})
+
+
 @router.get("/perfilLojista", response_class=HTMLResponse)
 async def perfil(request: Request, db = Depends(get_db)):
 
-    user_id = request.session.get("user_id")
-
-    if not user_id:
+    if request.session.get("user_logged_in"):
+        request.session.clear()
         return RedirectResponse(url="/login", status_code=303)
+    
+    user_id = request.session.get("user_id")
 
     with db.cursor(pymysql.cursors.DictCursor) as cursor:
         cursor.execute("SELECT Nome, Email FROM Usuario WHERE Id_Usuario = %s", (user_id,))
@@ -69,71 +143,6 @@ async def perfil(request: Request, db = Depends(get_db)):
         }
     )
 
-@router.post("/CriarUsuario", name="CriarUsuario")
-async def CriarUsuario(
-    request: Request,
-    Nome: str = Form(...),
-    CPF: str = Form(...), 
-    Email: str = Form(...), 
-    Senha: str = Form(...), 
-    db = Depends(get_db)
-):
-    try:
-        with db.cursor() as cursor:
-            cursor.execute("SELECT Email FROM Usuario WHERE Email = %s", (Email,)) 
-            if cursor.fetchone():   
-                return JSONResponse(status_code=400, content={"erro": "email_existe"})
-            
-            cursor.execute("SELECT Cpf FROM Usuario WHERE Cpf = %s", (CPF,)) 
-            if cursor.fetchone():   
-                return JSONResponse(status_code=400, content={"erro": "cpf_existe"})
-
-            senha_hash = gerar_hash(Senha)
-            sql = "INSERT INTO Usuario (Nome, Cpf, Email, Senha_Hash, Dat_Criacao, Status) VALUES (%s, %s, %s, %s, current_date(), 1)"
-            cursor.execute(sql, (Nome, CPF, Email, senha_hash))
-            db.commit()
-
-            return JSONResponse(content={"sucesso": True})
-    except Exception:
-        return JSONResponse(status_code=500, content={"erro": "sistema"})
-    finally:
-        db.close()
-
-@router.post("/Login")
-async def Login(
-    request: Request,
-    Email: str = Form(...),
-    Senha: str = Form(...),
-    db = Depends(get_db)
-):
-    try:
-        with db.cursor(pymysql.cursors.DictCursor) as cursor:
-            cursor.execute("SELECT * FROM Usuario WHERE Email = %s", (Email,))
-            usuario = cursor.fetchone()
-
-            if not usuario or not verificar_senha(Senha, usuario["Senha_Hash"]):
-                return RedirectResponse(url="/login?erro=credenciais", status_code=303)
-
-            request.session["user_id"] = usuario["Id_Usuario"]
-            request.session["user_nome"] = usuario["Nome"]
-
-            return RedirectResponse(url="/perfilLojista", status_code=303)
-
-    except Exception as e:
-        print("ERRO VERIFY:", e)
-        return RedirectResponse(url="/login?erro=sistema", status_code=303)
-    
-@router.get("/EditarUsuario", response_class=HTMLResponse)
-async def editar_usuario_form(request: Request, db = Depends(get_db)):
-    user_id = request.session.get("user_id")
-    if not user_id:
-        return RedirectResponse(url="/login", status_code=303)
-
-    with db.cursor(pymysql.cursors.DictCursor) as cursor:
-        cursor.execute("SELECT Nome, Email, Cpf FROM Usuario WHERE Id_Usuario = %s", (user_id,))
-        usuario = cursor.fetchone()
-
-    return templates.TemplateResponse("editarUsuario.html", {"request": request, "usuario": usuario})
 
 @router.post("/SalvarEdicaoUsuario")
 async def salvar_edicao_usuario(
@@ -143,15 +152,18 @@ async def salvar_edicao_usuario(
     Senha: str = Form(None),
     db = Depends(get_db)
 ):
+    if not request.session.get("user_logged_in"):
+        return RedirectResponse(url="/login", status_code=303)
+
     user_id = request.session.get("user_id")
+
     try:
         with db.cursor() as cursor:
             sql = "UPDATE Usuario SET Nome=%s, Email=%s WHERE Id_Usuario=%s"
             cursor.execute(sql, (Nome, Email, user_id))
             
             if Senha and Senha.strip() != "":
-                novo_hash = gerar_hash(Senha)
-                cursor.execute("UPDATE Usuario SET Senha_Hash=%s WHERE Id_Usuario=%s", (novo_hash, user_id))
+                cursor.execute("UPDATE Usuario SET Senha_Hash=MD5(%s) WHERE Id_Usuario=%s", (Senha, user_id))
             
             db.commit()
             request.session["user_nome"] = Nome
@@ -162,10 +174,11 @@ async def salvar_edicao_usuario(
 
 @router.get("/DeletarUsuario")
 async def deletar_usuario(request: Request, db = Depends(get_db)):
-    user_id = request.session.get("user_id")
-    
-    if not user_id:
+
+    if not request.session.get("user_logged_in"):
         return RedirectResponse(url="/login", status_code=303)
+
+    user_id = request.session.get("user_id")
 
     try:
         with db.cursor() as cursor:
@@ -191,39 +204,4 @@ async def deletar_usuario(request: Request, db = Depends(get_db)):
 @router.get("/logout")
 async def logout(request: Request):
     request.session.clear() 
-    return RedirectResponse(url="/login", status_code=303)
-
-def gerar_hash(senha: str) -> str:
-    salt = os.urandom(16)
-
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=64,
-        salt=salt,
-        iterations=100_000,
-    )
-
-    hash_bytes = kdf.derive(senha.encode())
-
-    # junta salt + hash e codifica
-    return base64.b64encode(salt + hash_bytes).decode()
-
-
-def verificar_senha(senha: str, hash_salvo: str) -> bool:
-    decoded = base64.b64decode(hash_salvo.encode())
-
-    salt = decoded[:16]
-    hash_original = decoded[16:]
-
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=64,
-        salt=salt,
-        iterations=100_000,
-    )
-
-    try:
-        kdf.verify(senha.encode(), hash_original)
-        return True
-    except Exception:
-        return False
+    return RedirectResponse(url="/", status_code=303)
