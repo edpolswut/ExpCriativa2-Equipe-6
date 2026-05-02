@@ -51,7 +51,9 @@
             <h1>{{ produto.Nome }}</h1>
             
             <div class="price-box">
-                <span class="current-price">R$ {{ "%.2f"|format(produto.Preco) }}</span>
+                <span class="current-price">
+                    R$ {{ "{:,.2f}".format(produto.Preco).replace(",", "X").replace(".", ",").replace("X", ".") }}
+                </span>
             </div>
 
             {% if produto.Qtd_Estoque > 0 %}
