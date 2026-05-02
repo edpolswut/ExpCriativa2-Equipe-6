@@ -49,6 +49,4 @@ async def login(request: Request):
         "request": request
     })
 
-
-
 handler = Mangum(app)

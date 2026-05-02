@@ -18,11 +18,19 @@ templates = Jinja2Templates(directory="front/templates")
 router = APIRouter()
 
 @router.get("/GerenciarProdutos", response_class=HTMLResponse)
-async def gerenciar_produtos(request: Request, id_loja: int, db = Depends(get_db)):
-
-    user_id = request.session.get("user_id")
-    if not user_id:
+async def gerenciar_produtos(
+    request: Request, 
+    id_loja: int, 
+    db = Depends(get_db)
+):
+    if not request.session.get("user_logged_in"):
         return RedirectResponse(url="/login", status_code=303)
+    
+    user_id = request.session.get("user_id")
+
+    if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
+        return RedirectResponse(url="/perfilLojista", status_code=303)
+
     
     with db.cursor(pymysql.cursors.DictCursor) as cursor:
         sql = """
@@ -44,11 +52,19 @@ async def gerenciar_produtos(request: Request, id_loja: int, db = Depends(get_db
     })
 
 @router.get("/FormProduto", response_class=HTMLResponse)
-async def form_produto(request: Request, id_loja: int, id: int = None, db = Depends(get_db)):
-
-    user_id = request.session.get("user_id")
-    if not user_id:
+async def form_produto(
+    request: Request, 
+    id_loja: int, 
+    id: int = None, 
+    db = Depends(get_db)
+):
+    if not request.session.get("user_logged_in"):
         return RedirectResponse(url="/login", status_code=303)
+    
+    user_id = request.session.get("user_id")
+
+    if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
+        return RedirectResponse(url="/perfilLojista", status_code=303)
 
     produto = None
     imagens_prod = []
@@ -85,6 +101,7 @@ async def form_produto(request: Request, id_loja: int, id: int = None, db = Depe
 
 @router.post("/SalvarProduto")
 async def salvar_produto(
+    request: Request, 
     id_loja: int = Form(...),
     Id_Produto: str = Form(None),
     Nome: str = Form(...),
@@ -95,6 +112,14 @@ async def salvar_produto(
     ImagensParaDeletar: List[int] = Form(default=[]),
     db = Depends(get_db)
 ):
+    if not request.session.get("user_logged_in"):
+        return RedirectResponse(url="/login", status_code=303)
+    
+    user_id = request.session.get("user_id")
+
+    if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
+        return RedirectResponse(url="/perfilLojista", status_code=303)
+
     try:
         with db.cursor() as cursor:
             if Id_Produto:
@@ -124,7 +149,19 @@ async def salvar_produto(
         db.close()
 
 @router.get("/DeletarProduto/{id}")
-async def deletar_produto(id: int, db = Depends(get_db)):
+async def deletar_produto(
+    request: Request,
+    id: int,
+    db = Depends(get_db)
+):
+    if not request.session.get("user_logged_in"):
+        return RedirectResponse(url="/login", status_code=303)
+    
+    user_id = request.session.get("user_id")
+
+    if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
+        return RedirectResponse(url="/perfilLojista", status_code=303)
+
     with db.cursor(pymysql.cursors.DictCursor) as cursor:
         cursor.execute("SELECT fk_Loja_Id_Loja FROM Produto WHERE Id_Produto = %s", (id,))
         produto = cursor.fetchone()

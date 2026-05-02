@@ -14,6 +14,12 @@ router = APIRouter()
 
 @router.get("/cadastro", response_class=HTMLResponse)
 async def cadastro(request: Request):
+
+    # Caso o usuário esteja logado, desloga antes de criar nova conta
+    if request.session.get("user_logged_in"):
+        request.session.clear()
+        return RedirectResponse(url="/", status_code=303)
+    
     return templates.TemplateResponse("cadastro.html", {
         "request": request
     })
@@ -54,6 +60,11 @@ async def CriarUsuario(
 
 @router.get("/login", response_class=HTMLResponse)
 async def login(request: Request):
+    # Caso o usuário esteja logado, desloga antes de poder logar com outra conta
+    if request.session.get("user_logged_in"):
+        request.session.clear()
+        return RedirectResponse(url="/", status_code=303)
+
     return templates.TemplateResponse("login.html", {
         "request": request
     })
@@ -84,6 +95,7 @@ async def Login(
 
             request.session["user_id"] = usuario["Id_Usuario"]
             request.session["user_nome"] = usuario["Nome"]
+            request.session["user_logged_in"] = True
 
             return RedirectResponse(url="/perfilLojista", status_code=303)
 
@@ -107,7 +119,7 @@ async def editar_usuario_form(request: Request, db = Depends(get_db)):
 @router.get("/perfilLojista", response_class=HTMLResponse)
 async def perfil(request: Request, db = Depends(get_db)):
 
-    if request.session.get("user_logged_in"):
+    if not request.session.get("user_logged_in"):
         request.session.clear()
         return RedirectResponse(url="/login", status_code=303)
     

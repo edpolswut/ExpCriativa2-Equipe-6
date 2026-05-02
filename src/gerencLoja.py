@@ -16,7 +16,7 @@ router = APIRouter()
 @router.get("/CadastroLoja", response_class=HTMLResponse)
 async def cadastroLoja(request: Request):
 
-    if not request.session.get("user_id"):
+    if not request.session.get("user_logged_in"):
         return RedirectResponse(url="/login", status_code=303)
 
     return templates.TemplateResponse("cadastroLoja.html", {
@@ -38,9 +38,10 @@ async def CriarLoja(
     Complemento: str = Form(None),
     db = Depends(get_db)
 ):
+    if not request.session.get("user_logged_in"):
+        return RedirectResponse(url="/login", status_code=303)
+    
     user_id = request.session.get("user_id")
-    if not user_id:
-        return JSONResponse(status_code=401, content={"erro": "sessao_expirada"})
 
     try:
         with db.cursor() as cursor:
@@ -77,10 +78,18 @@ async def CriarLoja(
         db.close()
 
 @router.get("/EditarLoja/{id_loja}", response_class=HTMLResponse)
-async def editar_loja(request: Request, id_loja: int, db = Depends(get_db)):
-    user_id = request.session.get("user_id")
-    if not user_id:
+async def editar_loja(
+    request: Request, 
+    id_loja: int, 
+    db = Depends(get_db)
+):
+    if not request.session.get("user_logged_in"):
         return RedirectResponse(url="/login", status_code=303)
+    
+    user_id = request.session.get("user_id")
+
+    if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
+        return RedirectResponse(url="/perfilLojista", status_code=303)
 
     with db.cursor(pymysql.cursors.DictCursor) as cursor:
         cursor.execute("SELECT * FROM Loja WHERE Id_Loja = %s", (id_loja,))
@@ -133,6 +142,14 @@ async def salvar_edicao_loja(
     Banner: UploadFile = File(None),
     db = Depends(get_db)
 ):
+    if not request.session.get("user_logged_in"):
+        return RedirectResponse(url="/login", status_code=303)
+    
+    user_id = request.session.get("user_id")
+
+    if not await auth.verificarUsuarioPerfil(db, user_id, 2, Id_Loja):
+        return RedirectResponse(url="/perfilLojista", status_code=303)
+
     try:
         with db.cursor() as cursor:
             cursor.execute("""
@@ -174,10 +191,18 @@ async def salvar_edicao_loja(
         return RedirectResponse(url=f"/EditarLoja/{Id_Loja}?erro=1", status_code=303)
 
 @router.get("/DeletarLoja/{id_loja}")
-async def deletar_loja(request: Request, id_loja: int, db = Depends(get_db)):
-    user_id = request.session.get("user_id")
-    if not user_id:
+async def deletar_loja(
+    request: Request, 
+    id_loja: int, 
+    db = Depends(get_db)
+):
+    if not request.session.get("user_logged_in"):
         return RedirectResponse(url="/login", status_code=303)
+    
+    user_id = request.session.get("user_id")
+
+    if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
+        return RedirectResponse(url="/perfilLojista", status_code=303)
 
     try:
         with db.cursor() as cursor:
