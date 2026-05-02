@@ -46,10 +46,10 @@ async def CriarLoja(
     try:
         with db.cursor() as cursor:
             sql_loja = """
-                INSERT INTO Loja (Nome, Cnpj, Razao_Social, Email, Telefone, Status) 
-                VALUES (%s, %s, %s, %s, %s, 1)
+                INSERT INTO Loja (Nome, Cnpj, Email, Telefone, Status) 
+                VALUES (%s, %s, %s, %s, 1)
             """
-            cursor.execute(sql_loja, (NomeLoja, CNPJ, NomeLoja, EmailLoja, Telefone))
+            cursor.execute(sql_loja, (NomeLoja, CNPJ, EmailLoja, Telefone))
             id_loja = cursor.lastrowid
 
             # fk_Perfil_Id_Perfil = 2 (Lojista)
@@ -124,7 +124,6 @@ async def salvar_edicao_loja(
     request: Request,
     Id_Loja: int = Form(...),
     Nome: str = Form(...),
-    Razao_Social: str = Form(...),
     Cnpj: str = Form(...),
     Email: str = Form(...),
     Telefone: str = Form(...),
@@ -153,9 +152,9 @@ async def salvar_edicao_loja(
     try:
         with db.cursor() as cursor:
             cursor.execute("""
-                UPDATE Loja SET Nome=%s, Cnpj=%s, Razao_Social=%s, Email=%s, Telefone=%s 
+                UPDATE Loja SET Nome=%s, Cnpj=%s, Email=%s, Telefone=%s 
                 WHERE Id_Loja=%s
-            """, (Nome, Cnpj, Razao_Social, Email, Telefone, Id_Loja))
+            """, (Nome, Cnpj, Email, Telefone, Id_Loja))
 
             cursor.execute("""
                 UPDATE Endereco SET Cep=%s, Rua=%s, Numero=%s, Cidade=%s, Bairro=%s, Complemento=%s 
