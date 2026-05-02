@@ -24,7 +24,8 @@ async def CriarUsuario(
     Nome: str = Form(...),
     CPF: str = Form(...), 
     Email: str = Form(...), 
-    Senha: str = Form(...), 
+    Senha: str = Form(...),
+    DataNascimento: str = Form(...),
     db = Depends(get_db)
 ):
     # Caso o usuário esteja logado, desloga antes de criar nova conta
@@ -42,8 +43,8 @@ async def CriarUsuario(
             if cursor.fetchone():
                 return JSONResponse(status_code=400, content={"erro": "cpf_existe"})
 
-            sql = "INSERT INTO Usuario (Nome, Cpf, Email, Senha_Hash, Dat_Criacao, Status) VALUES (%s, %s, %s, MD5(%s), current_date(), 1)"
-            cursor.execute(sql, (Nome, CPF, Email, Senha))
+            sql = "INSERT INTO Usuario (Nome, Cpf, Email, Senha_Hash, Dat_Criacao, Status) VALUES (%s, %s, %s, MD5(%s), %s, current_date(), 1)"
+            cursor.execute(sql, (Nome, CPF, Email, Senha, DataNascimento))
             db.commit()
 
             return JSONResponse(content={"sucesso": True})
