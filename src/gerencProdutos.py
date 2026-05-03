@@ -5,10 +5,6 @@ import auth
 from typing import List
 from fastapi import APIRouter, Request, Form, Depends, UploadFile, File
 from fastapi.responses import HTMLResponse, RedirectResponse
-
-
-from fastapi import Request, Form, Depends, UploadFile, File
-from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from database import get_db
@@ -19,48 +15,52 @@ router = APIRouter()
 
 @router.get("/GerenciarProdutos", response_class=HTMLResponse)
 async def gerenciar_produtos(
-    request: Request, 
-    id_loja: int, 
+    request: Request,
+    id_loja: int,
     db = Depends(get_db)
 ):
     if not request.session.get("user_logged_in"):
         return RedirectResponse(url="/login", status_code=303)
-    
+
     user_id = request.session.get("user_id")
 
     if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
         return RedirectResponse(url="/perfilLojista", status_code=303)
 
-    
     with db.cursor(pymysql.cursors.DictCursor) as cursor:
         sql = """
-            SELECT P.*, 
+            SELECT P.*,
             (SELECT Imagem FROM Imagem_Produto WHERE fk_Produto_Id_Produto = P.Id_Produto LIMIT 1) as Imagem
             FROM Produto P WHERE fk_Loja_Id_Loja = %s AND Status = 1
         """
         cursor.execute(sql, (id_loja,))
         produtos = cursor.fetchall()
-        
+
+        cursor.execute("SELECT * FROM Categoria WHERE fk_Loja_Id_Loja = %s AND Status = 1", (id_loja,))
+        categorias = cursor.fetchall()
+
         for p in produtos:
             if p["Imagem"]:
                 p["Imagem_base64"] = base64.b64encode(p["Imagem"]).decode('utf-8')
 
     return templates.TemplateResponse("gerencProdutos/gerenciarProdutos.html", {
-        "request": request, 
+        "request": request,
         "produtos": produtos,
+        "categorias": categorias,
         "id_loja": id_loja
     })
 
+
 @router.get("/FormProduto", response_class=HTMLResponse)
 async def form_produto(
-    request: Request, 
-    id_loja: int, 
-    id: int = None, 
+    request: Request,
+    id_loja: int,
+    id: int = None,
     db = Depends(get_db)
 ):
     if not request.session.get("user_logged_in"):
         return RedirectResponse(url="/login", status_code=303)
-    
+
     user_id = request.session.get("user_id")
 
     if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
@@ -70,7 +70,7 @@ async def form_produto(
     imagens_prod = []
     categorias_todas = []
     categorias_vinculadas = []
-    
+
     with db.cursor(pymysql.cursors.DictCursor) as cursor:
         cursor.execute("SELECT * FROM Categoria WHERE fk_Loja_Id_Loja = %s AND Status = 1", (id_loja,))
         categorias_todas = cursor.fetchall()
@@ -78,30 +78,32 @@ async def form_produto(
         if id:
             cursor.execute("SELECT * FROM Produto WHERE Id_Produto = %s AND Status = 1", (id,))
             produto = cursor.fetchone()
-            
+
             cursor.execute("SELECT Id_Imagem, Imagem FROM Imagem_Produto WHERE fk_Produto_Id_Produto = %s", (id,))
             rows = cursor.fetchall()
+
             for r in rows:
                 imagens_prod.append({
-                    "id": r["Id_Imagem"], 
+                    "id": r["Id_Imagem"],
                     "base64": base64.b64encode(r["Imagem"]).decode('utf-8')
                 })
-            
+
             cursor.execute("SELECT fk_Categoria_Id_Categoria FROM Produto_Categoria WHERE fk_Produto_Id_Produto = %s", (id,))
             categorias_vinculadas = [c["fk_Categoria_Id_Categoria"] for c in cursor.fetchall()]
 
     return templates.TemplateResponse("gerencProdutos/formProduto.html", {
-        "request": request, 
-        "produto": produto, 
+        "request": request,
+        "produto": produto,
         "imagens": imagens_prod,
         "categorias": categorias_todas,
         "categorias_vinculadas": categorias_vinculadas,
         "id_loja": id_loja
     })
 
+
 @router.post("/SalvarProduto")
 async def salvar_produto(
-    request: Request, 
+    request: Request,
     id_loja: int = Form(...),
     Id_Produto: str = Form(None),
     Nome: str = Form(...),
@@ -114,7 +116,7 @@ async def salvar_produto(
 ):
     if not request.session.get("user_logged_in"):
         return RedirectResponse(url="/login", status_code=303)
-    
+
     user_id = request.session.get("user_id")
 
     if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
@@ -122,6 +124,7 @@ async def salvar_produto(
 
     try:
         with db.cursor() as cursor:
+
             if Id_Produto:
                 sql = "UPDATE Produto SET Nome=%s, Preco=%s, Qtd_Estoque=%s WHERE Id_Produto=%s"
                 cursor.execute(sql, (Nome, Preco, Qtd_Estoque, Id_Produto))
@@ -142,34 +145,88 @@ async def salvar_produto(
                 if img.filename:
                     content = await img.read()
                     cursor.execute("INSERT INTO Imagem_Produto (fk_Produto_Id_Produto, Imagem) VALUES (%s, %s)", (id_final, content))
-            
+
             db.commit()
         return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
     finally:
         db.close()
 
+
 @router.get("/DeletarProduto/{id}")
 async def deletar_produto(
     request: Request,
     id: int,
+    id_loja: int,
     db = Depends(get_db)
 ):
     if not request.session.get("user_logged_in"):
         return RedirectResponse(url="/login", status_code=303)
-    
+
     user_id = request.session.get("user_id")
 
     if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
         return RedirectResponse(url="/perfilLojista", status_code=303)
 
     with db.cursor(pymysql.cursors.DictCursor) as cursor:
-        cursor.execute("SELECT fk_Loja_Id_Loja FROM Produto WHERE Id_Produto = %s", (id,))
-        produto = cursor.fetchone()
-        
-        if produto:
-            id_loja = produto["fk_Loja_Id_Loja"]
-            cursor.execute("UPDATE Produto SET Status = 0 WHERE Id_Produto = %s", (id,))
+        cursor.execute("UPDATE Produto SET Status = 0 WHERE Id_Produto = %s", (id,))
+        db.commit()
+
+    return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
+
+#CRUD de categoria
+
+@router.post("/SalvarCategoria")
+async def salvar_categoria(
+    request: Request,
+    id_loja: int = Form(...),
+    Id_Categoria: str = Form(None),
+    Nome: str = Form(...),
+    db = Depends(get_db)
+):
+    if not request.session.get("user_logged_in"):
+        return RedirectResponse(url="/login", status_code=303)
+
+    user_id = request.session.get("user_id")
+
+    if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
+        return RedirectResponse(url="/perfilLojista", status_code=303)
+
+    try:
+        with db.cursor() as cursor:
+
+            if Id_Categoria:
+                cursor.execute("UPDATE Categoria SET Nome=%s WHERE Id_Categoria=%s AND fk_Loja_Id_Loja=%s",
+                               (Nome, Id_Categoria, id_loja))
+            else:
+                cursor.execute("INSERT INTO Categoria (fk_Loja_Id_Loja, Nome, Status) VALUES (%s, %s, 1)",
+                               (id_loja, Nome))
+
             db.commit()
-            return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
-            
-    return RedirectResponse(url="/perfilLojista", status_code=303)
+
+        return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
+
+    finally:
+        db.close()
+
+
+@router.get("/DeletarCategoria/{id}")
+async def deletar_categoria(
+    request: Request,
+    id: int,
+    id_loja: int,
+    db = Depends(get_db)
+):
+    if not request.session.get("user_logged_in"):
+        return RedirectResponse(url="/login", status_code=303)
+
+    user_id = request.session.get("user_id")
+
+    if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
+        return RedirectResponse(url="/perfilLojista", status_code=303)
+
+    with db.cursor() as cursor:
+        cursor.execute("DELETE FROM Categoria WHERE Id_Categoria = %s AND fk_Loja_Id_Loja = %s",
+                       (id, id_loja))
+        db.commit()
+
+    return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
