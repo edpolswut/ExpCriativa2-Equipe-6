@@ -49,7 +49,15 @@
         <div class="product-details">
             <span class="produto-condicao">Disponível: {{ produto.Qtd_Estoque }} em estoque</span>
             <h1>{{ produto.Nome }}</h1>
-            
+
+            {% if produto.categorias %}
+            <div>
+                {% for cat in produto.categorias %}
+                    <span>{{ cat }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <div class="price-box">
                 <span class="current-price">
                     R$ {{ "{:,.2f}".format(produto.Preco).replace(",", "X").replace(".", ",").replace("X", ".") }}
