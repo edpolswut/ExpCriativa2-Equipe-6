@@ -52,7 +52,7 @@ async def CriarUsuario(
             if cursor.fetchone():
                 return JSONResponse(status_code=400, content={"erro": "cpf_existe"})
 
-            sql = "INSERT INTO Usuario (Nome, Cpf, Email, Senha_Hash, Dat_Criacao, Status) VALUES (%s, %s, %s, MD5(%s), %s, current_date(), 1)"
+            sql = "INSERT INTO Usuario (Nome, Cpf, Email, Senha_Hash, Dat_Nascimento, Dat_Criacao, Status) VALUES (%s, %s, %s, MD5(%s), %s, current_date(), 1)"
             cursor.execute(sql, (Nome, CPF, Email, Senha, DataNascimento))
             db.commit()
 

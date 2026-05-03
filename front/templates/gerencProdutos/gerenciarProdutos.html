@@ -66,7 +66,9 @@
                                 {% endif %}
                             </td>
                             <td data-label="Nome"><strong>{{ prod['Nome'] }}</strong></td>
-                            <td data-label="Preço">R$ {{ "%.2f"|format(prod['Preco']) }}</td>
+                            <td data-label="Preço">
+                                R$ {{ "{:,.2f}".format(prod.Preco).replace(",", "X").replace(".", ",").replace("X", ".") }}
+                            </td>
                             <td data-label="Estoque">{{ prod['Qtd_Estoque'] }} un.</td>
                             <td data-label="Ações">
                                 <a href="/FormProduto?id_loja={{ id_loja }}&id={{ prod['Id_Produto'] }}" class="btn-edit" title="Editar">
@@ -87,7 +89,7 @@
     <script>
         function confirmarExclusao(id) {
             if(confirm("Deseja mover este produto para o arquivo?")) {
-                window.location.href = "/DeletarProduto/" + id;
+                window.location.href = "/DeletarProduto/" + id + "?id_loja={{ id_loja }}";
             }
         }
     </script>

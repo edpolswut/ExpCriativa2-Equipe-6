@@ -97,8 +97,19 @@ async def detalhes_produto(request: Request, id_produto: int, db = Depends(get_d
         if loja and loja.get("Logo"):
             loja["Logo_B64"] = base64.b64encode(loja["Logo"]).decode('utf-8')
 
+        
+        sql_categorias = """
+            SELECT C.Nome
+            FROM Categoria C
+            INNER JOIN Produto_Categoria PC
+                ON PC.fk_Categoria_Id_Categoria = C.Id_Categoria
+            WHERE PC.fk_Produto_Id_Produto = %s
+        """
+        cursor.execute(sql_categorias, (id_produto,))
+        produto["categorias"] = [c["Nome"] for c in cursor.fetchall()]
+
     return templates.TemplateResponse("visualizacao.html", {
-        "request": request, 
-        "produto": produto,
-        "loja": loja
-    })
+    "request": request, 
+    "produto": produto,
+    "loja": loja
+})
