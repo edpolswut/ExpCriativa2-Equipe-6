@@ -89,7 +89,7 @@
     <script>
         function confirmarExclusao(id) {
             if(confirm("Deseja mover este produto para o arquivo?")) {
-                window.location.href = "/DeletarProduto/" + id;
+                window.location.href = "/DeletarProduto/" + id + "?id_loja={{ id_loja }}";
             }
         }
     </script>
