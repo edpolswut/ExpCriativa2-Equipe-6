@@ -11,7 +11,8 @@ CREATE TABLE Usuario (
     Senha_Hash CHAR(255) NOT NULL,
     Dat_Nascimento DATE NOT NULL,
     Dat_Criacao DATE NOT NULL,
-    Status INT NOT NULL
+    Imagem_Usuario LONGBLOB,
+    Status INT NOT NULL,
 );
 
 /* Tabela Perfil */

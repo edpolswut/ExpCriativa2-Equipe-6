@@ -2,15 +2,18 @@ import pymysql
 import base64
 import auth
 
-from fastapi import APIRouter, Request, Form, Depends
+from fastapi import APIRouter, File, Request, Form, Depends, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from database import get_db
+from templates import templates
 
-templates = Jinja2Templates(directory="front/templates")
 router = APIRouter()
+
+#Cores pro avatar do usuario
+coresAvatarUsuario = ["#FFD166", "#06D6A0", "#118AB2", "#EF476F", "#8338EC", "#FF9F1C"]
 
 @router.get("/cadastro", response_class=HTMLResponse)
 async def cadastro(request: Request):
@@ -84,24 +87,25 @@ async def Login(
 
     try:
         with db.cursor(pymysql.cursors.DictCursor) as cursor:
-            cursor.execute("SELECT * FROM Usuario WHERE Email = %s", (Email,))
+            cursor.execute("SELECT * FROM Usuario WHERE UPPER(Email) = UPPER(%s) AND Senha_Hash = MD5(%s)", (Email, Senha))
             usuario = cursor.fetchone()
 
             if not usuario:
                 return RedirectResponse(url="/login?erro=credenciais", status_code=303)
 
-            cursor.execute("SELECT 1 FROM Usuario WHERE Id_Usuario = %s AND Senha_Hash = MD5(%s)", (usuario["Id_Usuario"], Senha))
-            if not cursor.fetchone():
-                return RedirectResponse(url="/login?erro=credenciais", status_code=303)
-
             request.session["user_id"] = usuario["Id_Usuario"]
             request.session["user_nome"] = usuario["Nome"]
+            request.session["user_perfil"] = "Lojista"
             request.session["user_logged_in"] = True
+
+            request.session["user_Avatar"] = bool(usuario["Imagem_Usuario"])
+            request.session["user_Avatar_Inicial"] = usuario["Nome"][0].upper()
+            request.session["user_Avatar_Cor"] = coresAvatarUsuario[ord(usuario["Nome"][0].upper()) % len(coresAvatarUsuario)]
 
             return RedirectResponse(url="/perfilLojista", status_code=303)
 
     except Exception as e:
-        print("ERRO VERIFY:", e)
+        print("ERRO LOGIN:", e)
         return RedirectResponse(url="/login?erro=sistema", status_code=303)
     
 @router.get("/EditarUsuario", response_class=HTMLResponse)
@@ -156,13 +160,13 @@ async def perfil(request: Request, db = Depends(get_db)):
         }
     )
 
-
 @router.post("/SalvarEdicaoUsuario")
 async def salvar_edicao_usuario(
     request: Request,
     Nome: str = Form(...),
     Email: str = Form(...),
     Senha: str = Form(None),
+    Imagem: UploadFile = File(None),
     db = Depends(get_db)
 ):
     if not request.session.get("user_logged_in"):
@@ -178,12 +182,22 @@ async def salvar_edicao_usuario(
             if Senha and Senha.strip() != "":
                 cursor.execute("UPDATE Usuario SET Senha_Hash=MD5(%s) WHERE Id_Usuario=%s", (Senha, user_id))
             
+            if Imagem and Imagem.filename:
+                conteudo_imagem = await Imagem.read()
+                cursor.execute("UPDATE Usuario SET Imagem_Usuario=%s WHERE Id_Usuario=%s", (conteudo_imagem, user_id))
+                request.session["user_Avatar"] = True
+
             db.commit()
+
             request.session["user_nome"] = Nome
+            request.session["user_Avatar_Inicial"] = Nome[0].upper()
+            request.session["user_Avatar_Cor"] = coresAvatarUsuario[ord(Nome[0].upper()) % len(coresAvatarUsuario)]
+
         return RedirectResponse(url="/perfilLojista?sucesso=1", status_code=303)
     except Exception as e:
-        print(f"Erro ao editar utilizador: {e}")
-        return RedirectResponse(url="/EditarUsuario?erro=1", status_code=303)
+        db.rollback()
+        print(f"Erro ao editar usuario: {e}")
+        return RedirectResponse(url="/perfilLojista?erro=1", status_code=303)
 
 @router.get("/DeletarUsuario")
 async def deletar_usuario(request: Request, db = Depends(get_db)):
@@ -218,3 +232,19 @@ async def deletar_usuario(request: Request, db = Depends(get_db)):
 async def logout(request: Request):
     request.session.clear() 
     return RedirectResponse(url="/", status_code=303)
+
+def obterAvatarUsuario(user_id: int):
+    db = get_db()
+    try:
+        with db.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT Imagem_Usuario FROM Usuario WHERE Id_Usuario = %s", (user_id,))
+            resultado = cursor.fetchone()
+            if resultado and resultado["Imagem_Usuario"]:
+                return base64.b64encode(resultado["Imagem_Usuario"]).decode('utf-8')
+            
+    except Exception as e:
+        print(f"Erro ao buscar avatar: {e}")
+    finally:
+        db.close()
+        
+    return None

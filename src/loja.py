@@ -2,14 +2,14 @@ import pymysql
 import base64
 import auth
 
-from fastapi import APIRouter, Request, Form, Depends
+from fastapi import APIRouter, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from database import get_db
+from templates import templates
 
-templates = Jinja2Templates(directory="front/templates")
 router = APIRouter()
 
 @router.get("/loja/{identificador}", name="vitrine_loja", response_class=HTMLResponse)

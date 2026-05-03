@@ -9,8 +9,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi import UploadFile, File
 
 from database import get_db
+from templates import templates
 
-templates = Jinja2Templates(directory="front/templates")
 router = APIRouter()
 
 @router.get("/CadastroLoja", response_class=HTMLResponse)

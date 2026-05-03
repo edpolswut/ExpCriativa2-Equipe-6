@@ -8,15 +8,12 @@ import auth
 
 from mangum import Mangum
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.responses import RedirectResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
 from database import get_db
-
-templates = Jinja2Templates(directory="front/templates")
+from templates import templates
 
 app = FastAPI()
 
@@ -24,7 +21,7 @@ app.add_middleware(
     SessionMiddleware, 
     secret_key="SnapshopSecretKey1234567890",
     session_cookie="Snapshop_session",
-    max_age = 6000,  # (600 segundos)
+    max_age = 600, # (em segundos)
     same_site="lax",
     https_only=False
 )
@@ -49,4 +46,5 @@ async def login(request: Request):
         "request": request
     })
 
+templates.env.globals["obterAvatarUsuario"] = usuario.obterAvatarUsuario
 handler = Mangum(app)

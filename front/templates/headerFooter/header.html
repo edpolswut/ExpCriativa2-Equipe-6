@@ -11,7 +11,38 @@
     </nav>
 
     <div class="right">
-        <a href="/login" class="nav-btn">Entrar</a>
-        <a href="/cadastro" class="nav-btn">Criar conta</a>
+        {% if request.session.get("user_logged_in") %}
+            <a href="/perfilLojista" style="display: flex; align-items: center; text-decoration: none; color: inherit; gap: 5px;">
+                
+                {% set AvatarUser = obterAvatarUsuario(request.session.get('user_id')) %}
+
+                {% if AvatarUser %}
+                    <img src="data:image/jpeg;base64,{{ AvatarUser }}" 
+                        style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                
+                {% else %}
+                    <div style="width: 40px; height: 40px; border-radius: 50%; 
+                                display: flex; align-items: center; justify-content: center; 
+                                font-weight: bold; color: white;
+                                background-color: {{ request.session.get('user_Avatar_Cor') }};">
+                        {{ request.session.get('user_Avatar_Inicial') }}
+                    </div>
+                {% endif %}
+
+                <div>
+                    <strong style="display: block;">{{ request.session.get('user_nome') }}</strong>
+                    <span style="font-size: 0.8em; color: gray;">{{ request.session.get('user_perfil') }}</span>
+                </div>
+            </a>
+
+            <a href="/logout" class="nav-btn" 
+            
+            >
+                <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i> Sair
+            </a>
+        {% else %}
+            <a href="/login" class="nav-btn">Entrar</a>
+            <a href="/cadastro" class="nav-btn">Criar conta</a>
+        {% endif %}
     </div>
 </header>

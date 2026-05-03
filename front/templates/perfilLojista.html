@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <title>Meu Perfil - SnapShop</title>
     <link rel="stylesheet" href="/front/style/headerStyle.css">
-    <link rel="stylesheet" href="/front/style/perfilStyle.css">
+    <link rel="stylesheet" href="/front/style/perfilLojistaStyle.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-                :root{
+        :root {
             --primaria: #FFD166;
             --hover: #e6b84f;
             --herobtn: #494949;
@@ -18,62 +18,74 @@
 </head>
 <body>
 
-    <header class="site-header">
-        <div class="left">
-            <a href="/" class="logo">Snap<span class="shop">shop</span></a>
-        </div>
-        <div class="center">
-            <a href="/" class="nav-btn">Sobre</a>
-            <a href="/" class="nav-btn">Contato</a>
-        </div>
-        <div class="right">
-            <a href="/logout" class="nav-btn"><i class="fas fa-sign-out-alt"></i> Sair</a>
-        </div>
-    </header>
+    {% include 'headerFooter/header.html' %}
 
     <main>
         <section class="perfil-section">
-            <div class="perfil-box" style="flex-direction: column; align-items: stretch;">
-                <div id="info-perfil-atual" style="display: flex; align-items: center; gap: 20px;">
-                    <div class="perfil-avatar" id="perfilAvatar">{{ usuario.Nome[0] }}</div>
-                    <div class="perfil-info">
-                        <h1 id="nomeUsuario" data-nome="{{ usuario.Nome }}">{{ usuario.Nome }}</h1>
-                        <span>{{ usuario.Email }}</span>
-                        <br>
-                        <button onclick="toggleEdicaoPerfil()" style="background: none; border: none; font-size: 13px; color: #494949; text-decoration: underline; cursor: pointer; padding: 0;">
-                            <i class="fas fa-user-edit"></i> Editar Perfil
-                        </button>
-                    </div>
-                    <a href="/CadastroLoja" class="cta-btn" style="margin-left: auto;"><i class="fas fa-plus"></i> Criar loja</a>
-                </div>
+            <form action="/SalvarEdicaoUsuario" method="POST" enctype="multipart/form-data" id="formEdicao">
+                <div class="perfil-box perfil-box-col">
+                    
+                    <div id="info-perfil-atual">
+                        
+                        <label for="uploadFoto" class="upload-foto-label" title="Clique para alterar a foto">
+                            
+                            <div class="perfil-avatar" id="perfilAvatar">
+                                {% set AvatarUser = obterAvatarUsuario(request.session.get('user_id')) %}
 
-                <div id="form-edicao-perfil" style="display: none; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
-                    <form action="/SalvarEdicaoUsuario" method="POST">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                            <div class="campo-grupo" style="display: flex; flex-direction: column;">
-                                <label style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">Nome:</label>
-                                <input type="text" name="Nome" value="{{ usuario.Nome }}" required style="padding: 8px; border: 1px solid #ccc; border-radius: 8px;">
+                                {% if AvatarUser %}
+                                    <img id="previewAvatar" src="data:image/jpeg;base64,{{ AvatarUser }}">
+                                {% else %}
+                                    <div id="previewAvatarDiv" style="background-color: {{ request.session.get('user_Avatar_Cor') }};">
+                                        {{ request.session.get('user_Avatar_Inicial') }}
+                                    </div>
+                                {% endif %}
                             </div>
-                            <div class="campo-grupo" style="display: flex; flex-direction: column;">
-                                <label style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">Email:</label>
-                                <input type="email" name="Email" value="{{ usuario.Email }}" required style="padding: 8px; border: 1px solid #ccc; border-radius: 8px;">
+                            
+                            <div id="cameraIcon">
+                                <i class="fas fa-camera"></i>
                             </div>
-                            <div class="campo-grupo" style="display: flex; flex-direction: column; grid-column: span 2;">
-                                <label style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">Nova Senha (deixe vazio para manter):</label>
-                                <input type="password" name="Senha" style="padding: 8px; border: 1px solid #ccc; border-radius: 8px;">
+
+                        </label>
+
+                        <input type="file" id="uploadFoto" name="Imagem" accept="image/*" style="display: none;" onchange="previewImagem(event)">
+
+                        <div class="perfil-info">
+                            <h1 id="nomeUsuario" data-nome="{{ usuario.Nome }}">{{ usuario.Nome }}</h1>
+                            <span>{{ usuario.Email }}</span>
+                            <br>
+                            <button type="button" class="btn-editar-perfil" onclick="toggleEdicaoPerfil()">
+                                <i class="fas fa-user-edit"></i> Editar Perfil
+                            </button>
+                        </div>
+                        <a href="/CadastroLoja" class="cta-btn cta-btn-right"><i class="fas fa-plus"></i> Criar loja</a>
+                    </div>
+
+                    <div id="form-edicao-perfil">
+                        <div class="form-grid">
+                            <div class="campo-grupo">
+                                <label>Nome:</label>
+                                <input type="text" name="Nome" value="{{ usuario.Nome }}" required>
+                            </div>
+                            <div class="campo-grupo">
+                                <label>Email:</label>
+                                <input type="email" name="Email" value="{{ usuario.Email }}" required>
+                            </div>
+                            <div class="campo-grupo campo-grupo-span">
+                                <label>Nova Senha (deixe vazio para manter):</label>
+                                <input type="password" name="Senha">
                             </div>
                         </div>
                         
-                        <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <div class="form-actions">
                             <button type="submit" class="cta-btn pequeno">Guardar Alterações</button>
-                            <button type="button" class="cta-btn pequeno" style="background: #666;" onclick="toggleEdicaoPerfil()">Cancelar</button>
-                            <button type="button" onclick="confirmarExclusao()" style="background: none; border: 1px solid #d93025; color: #d93025; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: 0.3s;" onmouseover="this.style.background='#d93025'; this.style.color='white'" onmouseout="this.style.background='none'; this.style.color='#d93025'">
+                            <button type="button" class="cta-btn pequeno btn-cancelar" onclick="toggleEdicaoPerfil()">Cancelar</button>
+                            <button type="button" class="btn-excluir-conta" onclick="confirmarExclusao()">
                                 <i class="fas fa-trash-alt"></i> Eliminar Minha Conta
                             </button>
                         </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
+            </form>
         </section>
 
         <section class="showcase">
@@ -82,19 +94,17 @@
             {% if lojas %}
             <div class="lojas-grid">
                 {% for loja in lojas %}
-                <div class="card" style="padding-bottom: 20px;">
-                    <div class="card-img" style="display: flex; align-items: center; justify-content: center; background: #eee;">
-                        
+                <div class="card">
+                    <div class="card-img">
                         {% if loja.Logo_B64 %}
-                            <img src="data:image/jpeg;base64,{{ loja.Logo_B64 }}" alt="Logo" style="height: 80px; border-radius: 8px; object-fit: cover;">
+                            <img src="data:image/jpeg;base64,{{ loja.Logo_B64 }}" alt="Logo">
                         {% else %}
-                            <i class="fas fa-store fa-3x" style="color: #ccc;"></i>
+                            <i class="fas fa-store fa-3x"></i>
                         {% endif %}
-
                     </div>
                     <div class="card-title">
                         {{ loja.Nome }} <br>
-                        <span style="font-weight: normal; font-size: 13px; color: #666;">CNPJ: {{ loja.Cnpj }}</span>
+                        <span>CNPJ: {{ loja.Cnpj }}</span>
                     </div>
                     <a href="/EditarLoja/{{ loja.Id_Loja }}" class="cta-btn pequeno"><i class="fas fa-cog"></i> Gerenciar</a>
                 </div>

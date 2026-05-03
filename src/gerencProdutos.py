@@ -12,8 +12,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from database import get_db
-
-templates = Jinja2Templates(directory="front/templates")
+from templates import templates
 
 router = APIRouter()
 

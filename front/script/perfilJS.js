@@ -1,41 +1,44 @@
-document.addEventListener("DOMContentLoaded", function () {
+// document.addEventListener("DOMContentLoaded", function () {
 
-    const nomeElemento = document.getElementById("nomeUsuario");
-    const avatar = document.getElementById("perfilAvatar");
+//     const nomeElemento = document.getElementById("nomeUsuario");
+//     const avatar = document.getElementById("perfilAvatar");
 
-    const cores = [
-        "#FFD166", "#06D6A0", "#118AB2",
-        "#EF476F", "#8338EC", "#FF9F1C"
-    ];
+//     const cores = [
+//         "#FFD166", "#06D6A0", "#118AB2",
+//         "#EF476F", "#8338EC", "#FF9F1C"
+//     ];
 
-    if (!nomeElemento || !avatar) return;
+//     if (!nomeElemento || !avatar) return;
 
-    let nome = nomeElemento.dataset.nome;
+//     let nome = nomeElemento.dataset.nome;
 
-    if (!nome || nome.trim() === "") {
-        nome = nomeElemento.textContent.trim();
-    }
+//     if (!nome || nome.trim() === "") {
+//         nome = nomeElemento.textContent.trim();
+//     }
 
-    if (nome && nome.length > 0) {
-        const inicial = nome.charAt(0).toUpperCase();
+//     if (nome && nome.length > 0) {
+//         const inicial = nome.charAt(0).toUpperCase();
 
-        avatar.textContent = inicial;
+//         avatar.textContent = inicial;
 
-        const index = inicial.charCodeAt(0) % cores.length;
-        avatar.style.backgroundColor = cores[index];
-    } else {
-        avatar.textContent = "U";
-    }
+//         const index = inicial.charCodeAt(0) % cores.length;
+//         avatar.style.backgroundColor = cores[index];
+//     } else {
+//         avatar.textContent = "U";
+//     }
 
-});
+// });
 
 function toggleEdicaoPerfil() {
     const form = document.getElementById('form-edicao-perfil');
+    const cameraIcon = document.getElementById('cameraIcon');
     
     if (form.style.display === "none") {
         form.style.display = "block";
+        cameraIcon.style.display = "flex";
     } else {
         form.style.display = "none";
+        cameraIcon.style.display = "none";
     }
 }
 
@@ -54,4 +57,26 @@ function confirmarExclusao() {
             window.location.href = "/DeletarUsuario";
         }
     });
+}
+
+function previewImagem(event) {
+    const input = event.target;
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const avatarContainer = document.getElementById('perfilAvatar');
+            
+            avatarContainer.innerHTML = `
+                <img id="previewAvatar" src="${e.target.result}" 
+                     style="border-radius: 50%; object-fit: cover; width: 100%; height: 100%;">
+            `;
+            
+            document.getElementById('form-edicao-perfil').style.display = 'block';
+            document.getElementById('cameraIcon').style.display = 'flex';
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    }
 }
