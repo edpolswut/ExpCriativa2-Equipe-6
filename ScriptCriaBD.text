@@ -6,13 +6,13 @@ USE SnapShop;
 CREATE TABLE Usuario (
     Id_Usuario INT AUTO_INCREMENT PRIMARY KEY,
     Nome VARCHAR(100) NOT NULL,
-    Cpf VARCHAR(14) NOT NULL UNIQUE, -- Unique adicionado
-    Email VARCHAR(100) NOT NULL UNIQUE, -- Unique adicionado
+    Cpf VARCHAR(14) NOT NULL UNIQUE,
+    Email VARCHAR(100) NOT NULL UNIQUE,
     Senha_Hash CHAR(255) NOT NULL,
     Dat_Nascimento DATE NOT NULL,
     Dat_Criacao DATE NOT NULL,
     Imagem_Usuario LONGBLOB,
-    Status INT NOT NULL,
+    Status INT NOT NULL
 );
 
 /* Tabela Perfil */
