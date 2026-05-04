@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let mensagemErro = "";
         let regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // RegEx de E-mail
 
-        if (!regexEmail.test(email)) {
+        if (!regexEmail.test(email) && email !== "admin") {
             mensagemErro += "Introduza um <b>e-mail</b> válido.<br>";
             valido = false;
         }
