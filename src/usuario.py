@@ -92,10 +92,13 @@ async def Login(
 
             if not usuario:
                 return RedirectResponse(url="/login?erro=credenciais", status_code=303)
+            
+            cursor.execute("SELECT fk_Perfil_Id_Perfil FROM Usuario_Perfil WHERE fk_Usuario_Id_Usuario = %s", (usuario["Id_Usuario"],))
+            perfil = cursor.fetchone()
 
             request.session["user_id"] = usuario["Id_Usuario"]
             request.session["user_nome"] = usuario["Nome"]
-            request.session["user_perfil"] = "Lojista"
+            request.session["user_perfil"] = "Administrador" if perfil != None and perfil["fk_Perfil_Id_Perfil"] == 1 else "Lojista"
             request.session["user_logged_in"] = True
 
             request.session["user_Avatar"] = bool(usuario["Imagem_Usuario"])

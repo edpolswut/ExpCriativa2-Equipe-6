@@ -27,8 +27,7 @@
                     
                     <div id="info-perfil-atual">
                         
-                        <label for="uploadFoto" class="upload-foto-label" title="Clique para alterar a foto">
-                            
+                        <div class="avatar-upload-container">
                             <div class="perfil-avatar" id="perfilAvatar">
                                 {% set AvatarUser = obterAvatarUsuario(request.session.get('user_id')) %}
 
@@ -40,12 +39,15 @@
                                     </div>
                                 {% endif %}
                             </div>
-                            
-                            <div id="cameraIcon">
-                                <i class="fas fa-camera"></i>
-                            </div>
 
-                        </label>
+                            <label for="uploadFoto" class="upload-foto-label" title="Clique para alterar a foto">
+                            
+                                <div id="cameraIcon">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+
+                            </label>
+                        </div>
 
                         <input type="file" id="uploadFoto" name="Imagem" accept="image/*" style="display: none;" onchange="previewImagem(event)">
 
@@ -77,10 +79,10 @@
                         </div>
                         
                         <div class="form-actions">
-                            <button type="submit" class="cta-btn pequeno">Guardar Alterações</button>
+                            <button type="submit" class="cta-btn pequeno">Salvar</button>
                             <button type="button" class="cta-btn pequeno btn-cancelar" onclick="toggleEdicaoPerfil()">Cancelar</button>
                             <button type="button" class="btn-excluir-conta" onclick="confirmarExclusao()">
-                                <i class="fas fa-trash-alt"></i> Eliminar Minha Conta
+                                <i class="fas fa-trash-alt"></i> Excluir Minha Conta
                             </button>
                         </div>
                     </div>

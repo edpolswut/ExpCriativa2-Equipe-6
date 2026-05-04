@@ -45,6 +45,10 @@ main {
     gap: 20px;
 }
 
+.avatar-upload-container{
+    display: flex;
+}
+
 /* AVATAR E UPLOAD */
 .upload-foto-label {
     cursor: pointer;

@@ -1,6 +1,5 @@
-INSERT INTO perfil (Id_Perfil, Nom_Perfil) VALUES (1, 'Administrador');
-INSERT INTO perfil (Id_Perfil, Nom_Perfil) VALUES (2, 'Lojista');
-INSERT INTO perfil (Id_Perfil, Nom_Perfil) VALUES (3, 'Cliente');
+
+INSERT INTO `perfil` VALUES (1,'Administrador'),(2,'Lojista'),(3,'Cliente');
 
 INSERT INTO Usuario (
     Nome, 
@@ -20,12 +19,8 @@ INSERT INTO Usuario (
     1
 );
 
-INSERT INTO Usuario_Perfil (
-    fk_Perfil_Id_Perfil,
-    fk_Usuario_Id_Usuario,
-    fk_Loja_Id_Loja
-)VALUES (
-    1,
-    1,
-    NULL
-);
+INSERT INTO `loja` VALUES (1, 'Loja do Admin','00.000.000/0001-91','LojaAdmin@Admin.com','(41) 0000-0000', 1);
+
+INSERT INTO `endereco` VALUES (1,1,1,'47402-504','Praça São Pedro',0,'Xique-Xique','Paramelos','',1);
+
+INSERT INTO `usuario_perfil` VALUES (1,1,1,NULL),(2,2,1,1);
