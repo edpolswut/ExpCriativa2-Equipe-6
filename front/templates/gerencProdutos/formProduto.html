@@ -77,6 +77,11 @@
             </div>
 
             <div class="campo-grupo">
+                <label for="Descricao">Descrição do Produto:</label>
+                <textarea id="Descricao" name="Descricao" rows="4">{{ produto['Descricao'] if produto else '' }}</textarea>
+            </div>
+
+            <div class="campo-grupo">
                 <label>Adicionar Fotos:</label>
                 <input type="file" name="Imagens" accept="image/*" multiple>
             </div>

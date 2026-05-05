@@ -109,6 +109,7 @@ async def salvar_produto(
     Preco: float = Form(...),
     Qtd_Estoque: int = Form(...),
     Categorias: List[int] = Form(default=[]),
+    Descricao: str = Form(None),
     Imagens: List[UploadFile] = File(None),
     ImagensParaDeletar: List[int] = Form(default=[]),
     db = Depends(get_db)
@@ -125,12 +126,12 @@ async def salvar_produto(
         with db.cursor() as cursor:
 
             if Id_Produto:
-                sql = "UPDATE Produto SET Nome=%s, Preco=%s, Qtd_Estoque=%s WHERE Id_Produto=%s"
-                cursor.execute(sql, (Nome, Preco, Qtd_Estoque, Id_Produto))
+                sql = "UPDATE Produto SET Nome=%s, Preco=%s, Qtd_Estoque=%s, Descricao=%s WHERE Id_Produto=%s"
+                cursor.execute(sql, (Nome, Preco, Qtd_Estoque, Descricao, Id_Produto))
                 id_final = Id_Produto
             else:
-                sql = "INSERT INTO Produto (fk_Loja_Id_Loja, Nome, Preco, Qtd_Estoque, Status) VALUES (%s, %s, %s, %s, 1)"
-                cursor.execute(sql, (id_loja, Nome, Preco, Qtd_Estoque))
+                sql = "INSERT INTO Produto (fk_Loja_Id_Loja, Nome, Preco, Qtd_Estoque, Descricao, Status) VALUES (%s, %s, %s, %s, %s, 1)"
+                cursor.execute(sql, (id_loja, Nome, Preco, Qtd_Estoque, Descricao))
                 id_final = cursor.lastrowid
 
             cursor.execute("DELETE FROM Produto_Categoria WHERE fk_Produto_Id_Produto = %s", (id_final,))
