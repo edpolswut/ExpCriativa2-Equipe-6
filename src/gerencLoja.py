@@ -19,7 +19,7 @@ async def cadastroLoja(request: Request):
     if not request.session.get("user_logged_in"):
         return RedirectResponse(url="/login", status_code=303)
 
-    return templates.TemplateResponse("cadastroLoja.html", {
+    return templates.TemplateResponse("gerencLoja/cadastroLoja.html", {
         "request": request
     })
 

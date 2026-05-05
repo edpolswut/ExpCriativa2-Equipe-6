@@ -23,7 +23,7 @@ async def cadastro(request: Request):
         request.session.clear()
         return RedirectResponse(url="/", status_code=303)
     
-    return templates.TemplateResponse("cadastro.html", {
+    return templates.TemplateResponse("usuario/cadastro.html", {
         "request": request
     })
 
@@ -69,7 +69,7 @@ async def login(request: Request):
         request.session.clear()
         return RedirectResponse(url="/", status_code=303)
 
-    return templates.TemplateResponse("login.html", {
+    return templates.TemplateResponse("usuario/login.html", {
         "request": request
     })
 
@@ -121,7 +121,7 @@ async def editar_usuario_form(request: Request, db = Depends(get_db)):
         cursor.execute("SELECT Nome, Email, Cpf FROM Usuario WHERE Id_Usuario = %s", (user_id,))
         usuario = cursor.fetchone()
 
-    return templates.TemplateResponse("editarUsuario.html", {"request": request, "usuario": usuario})
+    return templates.TemplateResponse("usuario/editarUsuario.html", {"request": request, "usuario": usuario})
 
 
 @router.get("/perfilLojista", response_class=HTMLResponse)
@@ -155,7 +155,7 @@ async def perfil(request: Request, db = Depends(get_db)):
 
     return templates.TemplateResponse(
         request=request,
-        name="perfilLojista.html",
+        name="usuario/perfilLojista.html",
         context={
             "request": request,
             "usuario": usuario,
