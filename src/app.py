@@ -46,5 +46,4 @@ async def login(request: Request):
         "request": request
     })
 
-templates.env.globals["obterAvatarUsuario"] = usuario.obterAvatarUsuario
 handler = Mangum(app)
