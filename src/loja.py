@@ -15,23 +15,13 @@ router = APIRouter()
 @router.get("/loja/{identificador}", name="vitrine_loja", response_class=HTMLResponse)
 async def vitrine_loja(request: Request, identificador: str, db = Depends(get_db)):
     with db.cursor(pymysql.cursors.DictCursor) as cursor:
-        # 1. Verifica se o identificador é um número (ID) ou texto (URL personalizada)
-        if identificador.isdigit():
-            sql_loja = """
-                SELECT L.*, C.Cor_Principal, C.Cor_Secundaria, C.Logo, C.Banner, C.Url 
-                FROM Loja L 
-                LEFT JOIN Config_Loja C ON L.Id_Loja = C.fk_Loja_Id_Loja 
-                WHERE L.Id_Loja = %s AND L.Status = 1
-            """
-            cursor.execute(sql_loja, (int(identificador),))
-        else:
-            sql_loja = """
-                SELECT L.*, C.Cor_Principal, C.Cor_Secundaria, C.Logo, C.Banner, C.Url 
-                FROM Config_Loja C 
-                INNER JOIN Loja L ON C.fk_Loja_Id_Loja = L.Id_Loja 
-                WHERE C.Url = %s AND L.Status = 1
-            """
-            cursor.execute(sql_loja, (identificador,))
+        sql_loja = """
+            SELECT L.*, C.Cor_Principal, C.Cor_Secundaria, C.Logo, C.Banner, C.Url 
+            FROM Config_Loja C 
+            INNER JOIN Loja L ON C.fk_Loja_Id_Loja = L.Id_Loja 
+            WHERE C.Url = %s AND L.Status = 1
+        """
+        cursor.execute(sql_loja, (identificador,))
             
         loja = cursor.fetchone()
         

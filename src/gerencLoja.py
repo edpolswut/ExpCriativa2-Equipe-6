@@ -133,7 +133,6 @@ async def salvar_edicao_loja(
     Cidade: str = Form(...),
     Bairro: str = Form(...),
     Complemento: str = Form(None),
-    Nom_Tema: str = Form(...),
     Cor_Principal: str = Form(...),
     Cor_Secundaria: str = Form(...),
     Url: str = Form(...),
@@ -169,18 +168,18 @@ async def salvar_edicao_loja(
 
             if existe_config:
                 cursor.execute("""
-                    UPDATE Config_Loja SET Nom_Tema=%s, Cor_Principal=%s, Cor_Secundaria=%s, Url=%s 
+                    UPDATE Config_Loja SET Cor_Principal=%s, Cor_Secundaria=%s, Url=%s 
                     WHERE fk_Loja_Id_Loja=%s
-                """, (Nom_Tema, Cor_Principal, Cor_Secundaria, Url, Id_Loja))
+                """, (Cor_Principal, Cor_Secundaria, Url, Id_Loja))
                 if logo_data:
                     cursor.execute("UPDATE Config_Loja SET Logo=%s WHERE fk_Loja_Id_Loja=%s", (logo_data, Id_Loja))
                 if banner_data:
                     cursor.execute("UPDATE Config_Loja SET Banner=%s WHERE fk_Loja_Id_Loja=%s", (banner_data, Id_Loja))
             else:
                 cursor.execute("""
-                    INSERT INTO Config_Loja (fk_Loja_Id_Loja, Nom_Tema, Cor_Principal, Cor_Secundaria, Url, Logo, Banner)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                """, (Id_Loja, Nom_Tema, Cor_Principal, Cor_Secundaria, Url, logo_data or b'', banner_data or b''))
+                    INSERT INTO Config_Loja (fk_Loja_Id_Loja, Cor_Principal, Cor_Secundaria, Url, Logo, Banner)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (Id_Loja, Cor_Principal, Cor_Secundaria, Url, logo_data or b'', banner_data or b''))
 
             db.commit()
             return RedirectResponse(url=f"/EditarLoja/{Id_Loja}?sucesso=1", status_code=303)

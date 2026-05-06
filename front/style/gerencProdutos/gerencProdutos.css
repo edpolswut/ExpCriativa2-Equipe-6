@@ -22,41 +22,6 @@ body {
 .app-body {
     display: flex;
     flex: 1;
-    overflow: hidden;
-}
-
-/* --- Menu Lateral (Identidade do EditarLoja) --- */
-.sidebar {
-    width: 250px;
-    background-color: #292929;
-    color: white;
-    padding: 20px;
-    flex-shrink: 0;
-}
-
-.sidebar h2 {
-    font-size: 1.1em;
-    border-bottom: 1px solid #444;
-    padding-bottom: 15px;
-    margin-bottom: 15px;
-    color: var(--primaria);
-    text-transform: uppercase;
-}
-
-.sidebar a {
-    display: block;
-    color: #ddd;
-    text-decoration: none;
-    padding: 12px 15px;
-    border-radius: 6px;
-    margin-bottom: 5px;
-    transition: 0.3s;
-}
-
-.sidebar a:hover,
-.sidebar a.active {
-    background-color: #494949;
-    color: white;
 }
 
 /* --- Área de Conteúdo --- */

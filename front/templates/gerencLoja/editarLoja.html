@@ -5,7 +5,7 @@
     <title>Configurações da Loja - SnapShop</title>
 
     <link rel="stylesheet" href="/front/style/headerStyle.css">
-    <link rel="stylesheet" href="/front/style/perfilStyle.css">
+    <link rel="stylesheet" href="/front/style/headerFooter/sidebar.css">
     <link rel="stylesheet" href="/front/style/gerencLoja/editarLojaStyle.css">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -21,32 +21,11 @@
 </head>
 
 <body>
-    <header class="site-header">
-        <div class="left">
-            <a href="/" class="logo">Snap<span class="shop">shop</span></a>
-        </div>
-
-        <div class="center"></div>
-
-        <div class="right">
-            <a href="/perfilLojista" class="nav-btn">
-                <i class="fas fa-arrow-left"></i> Voltar
-            </a>
-        </div>
-    </header>
+    {% include 'headerFooter/header.html' %}
 
     <div class="app-body">
-        <nav class="sidebar">
-            <h2><i class="fas fa-store"></i> Painel da Loja</h2>
-
-            <a href="/EditarLoja/{{ id_loja }}" class="active">
-                <i class="fas fa-sliders-h"></i> Configurações
-            </a>
-
-            <a href="/GerenciarProdutos?id_loja={{ id_loja }}">
-                <i class="fas fa-box-open"></i> Produtos
-            </a>
-        </nav>
+        {% set sidebar_active = 'configuracoes' %}
+        {% include 'headerFooter/sidebar.html' %}
 
         <main class="content">
             <form action="/SalvarEdicaoLoja" method="POST" enctype="multipart/form-data">
@@ -131,8 +110,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Nome do Tema</label>
-                            <input type="text" name="Nom_Tema" value="{{ config.Nom_Tema if config else 'Padrão' }}" required>
+                            
                         </div>
 
                         <div class="form-group">
@@ -165,7 +143,7 @@
                     </div>
                 </div>
 
-                <div class="btn-area" style="display: flex; justify-content: flex-end; gap: 15px;">
+                <div class="btn-area" style="display: flex; justify-content: flex-end; gap: 15px; position: fixed; bottom: 20px; right: 20px;">
                     <button type="button" class="btn-deletar" onclick="confirmarExclusaoLoja('{{ id_loja }}')">
                         <i class="fas fa-trash-alt"></i> Excluir Loja
                     </button>

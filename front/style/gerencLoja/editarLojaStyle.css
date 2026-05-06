@@ -9,40 +9,6 @@ body {
 .app-body {
     display: flex;
     flex: 1;
-    overflow: hidden;
-}
-
-.sidebar {
-    width: 250px;
-    background-color: #292929;
-    color: white;
-    padding: 20px;
-    flex-shrink: 0;
-}
-
-.sidebar h2 {
-    font-size: 1.1em;
-    border-bottom: 1px solid #444;
-    padding-bottom: 15px;
-    margin-bottom: 15px;
-    color: var(--primaria);
-    text-transform: uppercase;
-}
-
-.sidebar a {
-    display: block;
-    color: #ddd;
-    text-decoration: none;
-    padding: 12px 15px;
-    border-radius: 6px;
-    margin-bottom: 5px;
-    transition: 0.3s;
-}
-
-.sidebar a:hover,
-.sidebar a.active {
-    background-color: #494949;
-    color: white;
 }
 
 .content {
@@ -58,6 +24,10 @@ body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     margin-bottom: 30px;
     max-width: 900px;
+}
+
+.card-painel:nth-last-child(1 of .card-painel) {
+    margin-bottom: 0px;
 }
 
 .secao-titulo {
@@ -144,7 +114,7 @@ input[type="color"] {
 }
 
 .btn-deletar {
-    background-color: transparent;
+    background-color: #ffa9a3;
     color: #d93025;
     border: 2px solid #d93025;
     padding: 15px 30px;

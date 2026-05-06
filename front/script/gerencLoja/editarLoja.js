@@ -52,7 +52,6 @@ document.addEventListener("DOMContentLoaded", function () {
     aplicarMascara(inputTel, v => v.replace(/\D/g,"").replace(/^(\d{2})(\d{5})(\d{4})/, "($1) $2-$3").substring(0, 15));
     aplicarMascara(inputCep, v => v.replace(/\D/g,"").replace(/^(\d{5})(\d{3})/, "$1-$2").substring(0, 9));
 
-    // --- PREVIEW DE IMAGENS ---
     function setupPreview(inputId, imgId) {
         document.getElementById(inputId).addEventListener("change", function(e) {
             const reader = new FileReader();
@@ -66,7 +65,6 @@ document.addEventListener("DOMContentLoaded", function () {
     setupPreview("input-logo", "preview-logo");
     setupPreview("input-banner", "preview-banner");
 
-    // Função de validação de CNPJ (Reaproveitada do seu código)
     function validarCNPJ(cnpj) {
         cnpj = cnpj.replace(/[^\d]+/g, "");
         if (cnpj.length !== 14) return false;
@@ -103,7 +101,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     form.addEventListener("submit", function (event) {
-        // Impede o envio imediato para podermos validar
         event.preventDefault();
 
         let cnpj = document.querySelector('input[name="Cnpj"]').value.trim();
@@ -113,7 +110,6 @@ document.addEventListener("DOMContentLoaded", function () {
         let valido = true;
         let mensagemErro = "";
 
-        // RegEx para CEP (ex: 12345-678 ou 12345678) e Telefone
         let regexCEP = /^\d{5}-?\d{3}$/;
         let regexTelefone = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
 
@@ -132,7 +128,6 @@ document.addEventListener("DOMContentLoaded", function () {
             valido = false;
         }
 
-        // Se encontrou erro, mostra o SweetAlert
         if (!valido) {
             Swal.fire({
                 icon: 'error',
@@ -143,7 +138,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Se tudo estiver certo, envia o formulário
         form.submit();
     });
 });

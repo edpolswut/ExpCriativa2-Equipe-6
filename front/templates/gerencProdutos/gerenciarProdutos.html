@@ -6,37 +6,17 @@
     <title>Gerenciar Produtos - Snapshop</title>
     <link rel="stylesheet" href="/front/style/headerStyle.css">
     <link rel="stylesheet" href="/front/style/perfilStyle.css">
+    <link rel="stylesheet" href="/front/style/headerFooter/sidebar.css">
     <link rel="stylesheet" href="/front/style/gerencProdutos/gerencProdutos.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-    <header class="site-header">
-        <div class="left">
-            <a href="/" class="logo">Snap<span class="shop">shop</span></a>
-        </div>
-
-        <div class="center"></div>
-
-        <div class="right">
-            <a href="/perfilLojista" class="nav-btn">
-                <i class="fas fa-arrow-left"></i> Voltar
-            </a>
-        </div>
-    </header>
+    {% include 'headerFooter/header.html' %}
 
     <div class="app-body">
-        <nav class="sidebar">
-            <h2><i class="fas fa-store"></i> Painel da Loja</h2>
-
-            <a href="/EditarLoja/{{ id_loja }}">
-                <i class="fas fa-sliders-h"></i> Configurações
-            </a>
-
-            <a href="/GerenciarProdutos?id_loja={{ id_loja }}" class="active">
-                <i class="fas fa-box-open"></i> Produtos
-            </a>
-        </nav>
+        {% set sidebar_active = 'produtos' %}
+        {% include 'headerFooter/sidebar.html' %}
 
         <div class="admin-container">
             <div class="header-actions">
