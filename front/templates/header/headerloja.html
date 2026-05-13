@@ -8,9 +8,26 @@
             <span>{{ loja.Nome if loja else 'Nossa Loja' }}</span>
         </div>
 
+        <div class="search-container">
+            <form action="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}" method="GET" class="search-form">
+                {% for cat in categorias_selecionadas %}
+                    <input type="hidden" name="categorias" value="{{ cat }}">
+                {% endfor %}
+                {% if preco_selecionado %}
+                    <input type="hidden" name="preco" value="{{ preco_selecionado }}">
+                {% endif %}
+                
+                <input type="text" name="busca" id="input-pesquisa-header" class="search-input" placeholder="Buscar produtos..." value="{{ busca_atual if busca_atual else '' }}">
+                
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+
         <nav class="main-nav">
             <ul>
-                <li><a href="/loja/{{ loja.Url}}">Início</a></li>
+                <li><a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}">Início</a></li>
                 <li><a href="#produtos">Produtos</a></li>
                 <li><a href="#ofertas">Ofertas</a></li>
                 <li><a href="#contato">Contato</a></li>
