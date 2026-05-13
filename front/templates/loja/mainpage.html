@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
     <link rel="stylesheet" href="/front/style/loja/mainpage.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root{
             --azul: #0b3d91;
@@ -30,48 +32,58 @@
 
     <div class="main-layout">
 
-        <aside class="sidebar-filters">
-            <h2 class="filters-title">Filtros</h2>
+        <form id="form-filtros" method="GET" action="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}">
+            
+            <input type="hidden" name="busca" id="busca-oculta" value="{{ busca_atual or '' }}">
 
-            <div class="filter-section">
-                <div class="filter-header" onclick="toggleFilter(this)">
-                    <h3>Categorias</h3>
-                    <span class="toggle-icon">-</span>
-                </div>
-                <div class="filter-content">
-                    <label class="filter-option"><input type="checkbox"> XXXX </label>
-                    <label class="filter-option"><input type="checkbox"> YYYY </label>
-                    <label class="filter-option"><input type="checkbox"> ZZZZ </label>
-                </div>
-            </div>
+            <aside class="sidebar-filters">
+                <h2 class="filters-title">Filtros</h2>
 
-            <div class="filter-section">
-                <div class="filter-header" onclick="toggleFilter(this)">
-                    <h3>Marcas</h3>
-                    <span class="toggle-icon">-</span>
+                <div class="filter-section">
+                    <div class="filter-header" onclick="toggleFilter(this)">
+                        <h3>Categorias</h3>
+                        <span class="toggle-icon">-</span>
+                    </div>
+                    <div class="filter-content">
+                        {% for cat in categorias_loja %}
+                        <label class="filter-option">
+                            <input type="checkbox" name="categorias" value="{{ cat.Id_Categoria }}" 
+                                {% if cat.Id_Categoria in categorias_selecionadas %}checked{% endif %}> 
+                            {{ cat.Nome }} 
+                        </label>
+                        {% endfor %}
+                    </div>
                 </div>
-                <div class="filter-content">
-                    <label class="filter-option"><input type="checkbox"> Looney </label>
-                    <label class="filter-option"><input type="checkbox"> Tunes </label>
-                    <label class="filter-option"><input type="checkbox"> Disney </label>
-                    <label class="filter-option"><input type="checkbox"> Marvel </label>
-                    <label class="filter-option"><input type="checkbox"> DC</label>
-                    <button class="see-more-btn"><span class="arrow-down">&#709;</span> Ver mais</button>
-                </div>
-            </div>
 
-            <div class="filter-section">
-                <div class="filter-header" onclick="toggleFilter(this)">
-                    <h3>Preço</h3>
-                    <span class="toggle-icon">-</span>
+                <div class="filter-section">
+                    <div class="filter-header" onclick="toggleFilter(this)">
+                        <h3>Preço</h3>
+                        <span class="toggle-icon">-</span>
+                    </div>
+                    <div class="filter-content">
+                        <label class="filter-option"><input type="radio" name="preco" value="0-100" {% if preco_selecionado == '0-100' %}checked{% endif %}> Até R$ 100,00 </label>
+                        <label class="filter-option"><input type="radio" name="preco" value="100-200" {% if preco_selecionado == '100-200' %}checked{% endif %}> De R$ 100,00 até R$ 200,00 </label>
+                        <label class="filter-option"><input type="radio" name="preco" value="200-300" {% if preco_selecionado == '200-300' %}checked{% endif %}> De R$ 200,00 até R$ 300,00 </label>
+                        <label class="filter-option"><input type="radio" name="preco" value="300-plus" {% if preco_selecionado == '300-plus' %}checked{% endif %}> Acima de R$ 300,00 </label>
+                        
+                        {% if preco_selecionado %}
+                        <a href="#" id="limpar-preco" style="font-size: 0.8rem; color: var(--azul); margin-top: 10px; display: block;">Limpar preço</a>
+                        <script>
+                            document.getElementById('limpar-preco').addEventListener('click', function(e) {
+                                e.preventDefault();
+                                document.querySelectorAll('input[name="preco"]').forEach(el => el.checked = false);
+                                document.getElementById('form-filtros').submit();
+                            });
+                        </script>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="filter-content">
-                    <label class="filter-option"><input type="checkbox"> Até R$ 100,00 </label>
-                    <label class="filter-option"><input type="checkbox"> De R$ 100,00 até R$ 200,00 </label>
-                    <label class="filter-option"><input type="checkbox"> De R$ 200,00 até R$ 300,00 </label>
-                </div>
-            </div>
-        </aside>
+            </aside>
+        </form>
+
+        <script src="/front/script/loja/mainpage.js"></script>
+        <script src="/front/script/loja/filtroLoja.js"></script>
+
         
         <!-- <main>
             <div class="carousel-wrapper">
