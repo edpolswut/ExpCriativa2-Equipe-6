@@ -101,7 +101,7 @@ async def vitrine_loja(
                 for img in imagens_blob if img["Imagem"]
             ]
 
-    return templates.TemplateResponse("mainpage.html", {
+    return templates.TemplateResponse("loja/mainpage.html", {
         "request": request, 
         "loja": loja,
         "produtos": produtos,
@@ -151,7 +151,7 @@ async def detalhes_produto(request: Request, id_produto: int, db = Depends(get_d
         cursor.execute(sql_categorias, (id_produto,))
         produto["categorias"] = [c["Nome"] for c in cursor.fetchall()]
 
-    return templates.TemplateResponse("visualizacao.html", {
+    return templates.TemplateResponse("loja/visualizacao.html", {
         "request": request, 
         "produto": produto,
         "loja": loja
