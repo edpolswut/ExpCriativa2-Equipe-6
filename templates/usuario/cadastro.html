@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro</title>
+    <link rel="stylesheet" href="/front/style/cadastro/cadastroStyle.css">
+    <style>
+                :root{
+            --primaria: #FFD166;
+            --hover: #e6b84f;
+            --herobtn: #494949;
+            --herohover: #292929;
+            --fundo: #FFF8E7;
+        }
+    </style>
+    <link rel="stylesheet" href="/front/style/responsividadeGeral.css">
+</head>
+<body>
+    <main class="container">
+        <img src="/front/icons/logosnap.png" alt="Logo Snapshop" class="logo-login">
+
+        <div class="box">
+
+            <h1>Cadastre-se</h1>
+
+            <form id="formulario" method="POST" action="/CriarUsuario">
+
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome" name="Nome">
+                <p id="erro-nome"></p>
+
+                <label for="cpf">CPF:</label>
+                <input type="text" id="cpf" name="CPF">
+                <p id="erro-cpf"></p>
+
+                <label for="email">Email:</label>
+                <input type="text" id="email" name="Email">
+                <p id="erro-email"></p>
+
+                <label for="senha">Senha:</label>
+                <div class="senha-wrapper">
+                    <input type="password" id="senha" name="Senha">
+                    <button type="button" class="toggle-senha" data-target="senha">
+                        <img src="/front/icons/eye.svg" class="icone-olho" alt="Mostrar senha">
+                    </button>
+                </div>
+                <p id="erro-senha"></p>
+
+                <label for="confirmarSenha">Confirmar Senha:</label>
+                <div class="senha-wrapper">
+                    <input type="password" id="confirmarSenha">
+                    <button type="button" class="toggle-senha" data-target="confirmarSenha">
+                        <img src="/front/icons/eye.svg" class="icone-olho" alt="Mostrar senha">
+                    </button>
+                </div>
+                <p id="erro-confirmar-senha"></p>
+                    
+                <label for="dataNascimento">Data de Nascimento:</label>
+                <input type="date" id="dataNascimento" name="DataNascimento">
+                <p id="erro-data"></p>
+
+                <button type="submit">Cadastrar</button>
+            </form>
+
+            <a href="/">
+                <button id="voltar" type="button">Voltar</button>
+            </a>
+
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/front/script/cadastro/cadastroForm.js"></script>
+</body>
+</html>

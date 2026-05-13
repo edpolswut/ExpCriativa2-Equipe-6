@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Categorias - Snapshop</title>
+
+    <link rel="stylesheet" href="/front/style/headerStyle.css">
+    <link rel="stylesheet" href="/front/style/perfilStyle.css">
+    <link rel="stylesheet" href="/front/style/headerFooter/sidebar.css">
+    <link rel="stylesheet" href="/front/style/gerencProdutos/gerencProdutos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/front/style/responsividadeGeral.css">
+</head>
+<body>
+
+    {% include 'headerFooter/header.html' %}
+
+    <div class="app-body">
+
+        {% set sidebar_active = 'categoria' %}
+        {% include 'headerFooter/sidebar.html' %}
+
+        <div class="admin-container">
+            <div class="header-actions">
+                <h1>Gestão de Categorias</h1>
+
+                <a href="/FormCategoria?id_loja={{ id_loja }}"
+                   class="btn-novo">
+                    + Nova Categoria
+                </a>
+            </div>
+            <div class="table-responsive">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Categoria</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        {% for cat in categorias %}
+                        <tr>
+
+                            <td data-label="ID">
+                                {{ cat['Id_Categoria'] }}
+                            </td>
+
+                            <td data-label="Categoria">
+                                <strong>{{ cat['Nome'] }}</strong>
+                            </td>
+
+                            <td data-label="Ações">
+
+                                <a href="/FormCategoria?id_loja={{ id_loja }}&id={{ cat['Id_Categoria'] }}"
+                                   class="btn-edit"
+                                   title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                                <button class="btn-delete"
+                                        onclick="confirmarExclusao('{{ cat['Id_Categoria'] }}')"
+                                        title="Excluir">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function confirmarExclusao(id) {
+            if(confirm("Deseja excluir esta categoria?")) {
+                window.location.href = "/DeletarCategoria/" + id + "?id_loja={{ id_loja }}";
+            }
+        }
+    </script>
+</body>
+</html>

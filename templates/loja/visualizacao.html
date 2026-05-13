@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Produto - BrinquedoShop</title>
+    <link rel="stylesheet" href="/front/style/loja/mainpage.css">
+    <link rel="stylesheet" href="/front/style/loja/visualizacao.css">
+    <style>
+                :root{
+            --azul: #0b3d91;
+            --azul2: #3483fa;
+            --azul3: #2968c8;
+            --branco: #fff;
+            --amarelo: #ffd700;
+            --preto-rgb: 0, 0, 0;
+            --cinza: #eaeaea;
+            --cinza2: #f8f9fa;
+            --cinza3: #ccc;
+            --cinza4: #333;
+            --cinza5: #888;
+            --cinza6: #555;
+            --cinza7: #666;
+            --cinza8: #f9f9f9;
+            --verde: #1a9e1a;
+        }
+    </style>
+    <link rel="stylesheet" href="/front/style/responsividadeGeral.css"> 
+</head>
+<body style="--azul: {% if loja and loja.Cor_Principal %}{{ loja.Cor_Principal }}{% else %}#0b3d91{% endif %}; --amarelo: {% if loja and loja.Cor_Secundaria %}{{ loja.Cor_Secundaria }}{% else %}#ffd700{% endif %};">
+
+     {% include 'header/headerloja.html'%}
+ 
+    <main class="product-page">
+        <div class="product-gallery">
+            <div class="main-image-container">
+                {% if produto.lista_imagens %}
+                    <img id="imagem-principal" src="data:image/jpeg;base64,{{ produto.lista_imagens[0] }}" alt="{{ produto.Nome }}">
+                {% else %}
+                    <img id="imagem-principal" src="/front/images/sem-imagem.jpg" alt="Sem Imagem">
+                {% endif %}
+            </div>
+            
+            <div class="thumbnails">
+                {% for img_b64 in produto.lista_imagens %}
+                    <img src="data:image/jpeg;base64,{{ img_b64 }}" alt="Foto {{ loop.index }}" class="thumb {% if loop.first %}active{% endif %}" onclick="trocarImagem(this)">
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="product-details">
+            <span class="produto-condicao">Disponível: {{ produto.Qtd_Estoque }} em estoque</span>
+            <h1>{{ produto.Nome }}</h1>
+
+            {% if produto.categorias %}
+            <div>
+                {% for cat in produto.categorias %}
+                    <span>{{ cat }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="price-box">
+                <span class="current-price">
+                    R$ {{ "{:,.2f}".format(produto.Preco).replace(",", "X").replace(".", ",").replace("X", ".") }}
+                </span>
+            </div>
+
+            {% if produto.Qtd_Estoque > 0 %}
+                <button class="btn-comprar">Comprar Agora</button>
+            {% else %}
+                <button class="btn-comprar" style="background-color: gray; cursor: not-allowed;" disabled>Esgotado</button>
+            {% endif %}
+
+            <div class="description-box">
+                <h3>Descrição do Produto</h3>
+                <p>{{ produto.Descricao }}</p>
+            </div>
+        </div>
+    </main>
+    
+    {% include 'footer/footer.html'%}
+
+    <script src="/front/script/loja/mainpage.js"></script>
+    <script src="/front/script/loja/visualizacao.js"></script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categoria - Snapshop</title>
+
+    <link rel="stylesheet" href="/front/style/headerStyle.css">
+    <link rel="stylesheet" href="/front/style/perfilStyle.css">
+    <link rel="stylesheet" href="/front/style/headerFooter/sidebar.css">
+    <link rel="stylesheet" href="/front/style/gerencProdutos/gerencProdutos.css">
+    <link rel="stylesheet" href="/front/style/responsividadeGeral.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    {% include 'headerFooter/header.html' %}
+
+    <div class="app-body">
+
+        {% set sidebar_active = 'categoria' %}
+        {% include 'headerFooter/sidebar.html' %}
+
+        <div class="admin-container form-container">
+
+            <h1>
+                {{ "Editar Categoria" if categoria else "Nova Categoria" }}
+            </h1>
+
+            <form action="/SalvarCategoria"
+                  method="post"
+                  class="categoria-form">
+
+                <input type="hidden"
+                       name="id_loja"
+                       value="{{ id_loja }}">
+
+                <input type="hidden"
+                       name="Id_Categoria"
+                       value="{{ categoria['Id_Categoria'] if categoria else '' }}">
+                <div class="campo-grupo">
+
+                    <label>Nome da Categoria:</label>
+
+                    <input type="text"
+                           name="Nome"
+                           id="NomeCategoria"
+                           value="{{ categoria['Nome'] if categoria else '' }}"
+                           required>
+                </div>
+                <div class="form-actions">
+
+                    <button type="submit" class="btn-save">
+                        Salvar
+                    </button>
+
+                    <a href="/GerenciarCategorias?id_loja={{ id_loja }}"
+                       class="btn-cancel">
+                        Cancelar
+                    </a>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
