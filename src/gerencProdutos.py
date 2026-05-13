@@ -175,6 +175,82 @@ async def deletar_produto(
 
 #CRUD de categoria
 
+
+@router.get("/GerenciarCategorias", response_class=HTMLResponse)
+async def gerenciar_categorias(
+    request: Request,
+    id_loja: int,
+    db = Depends(get_db)
+):
+    if not request.session.get("user_logged_in"):
+        return RedirectResponse(url="/login", status_code=303)
+
+    user_id = request.session.get("user_id")
+
+    if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
+        return RedirectResponse(url="/perfilLojista", status_code=303)
+
+    with db.cursor(pymysql.cursors.DictCursor) as cursor:
+
+        cursor.execute("""
+            SELECT *
+            FROM Categoria
+            WHERE fk_Loja_Id_Loja = %s
+            AND Status = 1
+            ORDER BY Nome
+        """, (id_loja,))
+
+        categorias = cursor.fetchall()
+
+    return templates.TemplateResponse(
+        "gerencCategoria/gerenciarCategoria.html",
+        {
+            "request": request,
+            "categorias": categorias,
+            "id_loja": id_loja,
+            "sidebar_active": "categoria"
+        }
+    )
+
+@router.get("/FormCategoria", response_class=HTMLResponse)
+async def form_categoria(
+    request: Request,
+    id_loja: int,
+    id: int = None,
+    db = Depends(get_db)
+):
+    if not request.session.get("user_logged_in"):
+        return RedirectResponse(url="/login", status_code=303)
+
+    user_id = request.session.get("user_id")
+
+    if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
+        return RedirectResponse(url="/perfilLojista", status_code=303)
+
+    categoria = None
+
+    with db.cursor(pymysql.cursors.DictCursor) as cursor:
+
+        if id:
+            cursor.execute("""
+                SELECT *
+                FROM Categoria
+                WHERE Id_Categoria = %s
+                AND fk_Loja_Id_Loja = %s
+                AND Status = 1
+            """, (id, id_loja))
+
+            categoria = cursor.fetchone()
+
+    return templates.TemplateResponse(
+        "gerencCategoria/formCategoria.html",
+        {
+            "request": request,
+            "categoria": categoria,
+            "id_loja": id_loja
+        }
+    )
+
 @router.post("/SalvarCategoria")
 async def salvar_categoria(
     request: Request,
@@ -203,7 +279,7 @@ async def salvar_categoria(
 
             db.commit()
 
-        return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
+        return RedirectResponse(url=f"/GerenciarCategorias?id_loja={id_loja}", status_code=303)
 
     finally:
         db.close()
@@ -229,4 +305,4 @@ async def deletar_categoria(
                        (id, id_loja))
         db.commit()
 
-    return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
+    return RedirectResponse(url=f"/GerenciarCategorias?id_loja={id_loja}", status_code=303)

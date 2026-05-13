@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
     <link rel="stylesheet" href="/front/style/loja/mainpage.css">
     <style>
@@ -20,7 +21,8 @@
             --cinza8: #f9f9f9;
             --verde: #1a9e1a;
         }
-    </style>    
+    </style>
+    <link rel="stylesheet" href="/front/style/responsividadeGeral.css">    
 </head>
 <body style="--azul: {% if loja and loja.Cor_Principal %}{{ loja.Cor_Principal }}{% else %}#0b3d91{% endif %}; --amarelo: {% if loja and loja.Cor_Secundaria %}{{ loja.Cor_Secundaria }}{% else %}#ffd700{% endif %};">
 

@@ -140,22 +140,3 @@ footer {
     padding: 15px;
     font-size: 14px;
 }
-
-@media (max-width: 768px) {
-    header {
-        padding: 0 20px;
-        height: auto;
-    }
-
-    .left, .center, .right {
-        width: 100%;
-        height: auto;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .logo, .nav-btn {
-        align-self: auto;
-        padding: 10px 16px;
-    }
-}

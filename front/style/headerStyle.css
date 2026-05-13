@@ -23,7 +23,6 @@ body {
 
     position: sticky;
     top: 0;
-    z-index: 15;
 }
 
 .left,
@@ -76,27 +75,4 @@ body {
     padding: 2px 6px;
     border-radius: 6px;
     margin-left: 2px;
-}
-
-@media (max-width: 768px) {
-    .site-header {
-        grid-template-columns: 1fr;
-        height: auto;
-        padding: 10px 20px;
-        gap: 10px;
-    }
-
-    .left,
-    .center,
-    .right {
-        justify-content: center;
-        flex-wrap: wrap;
-        height: auto;
-    }
-
-    .logo,
-    .nav-btn {
-        height: auto;
-        padding: 10px 16px;
-    }
 }

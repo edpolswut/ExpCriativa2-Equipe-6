@@ -202,16 +202,3 @@ input[type="file"] {
     margin-top: 25px;
     justify-content: flex-end;
 }
-
-/* Responsividade original da tabela */
-@media (max-width: 768px) {
-    .app-body { flex-direction: column; }
-    .sidebar { width: 100%; }
-    
-    table, thead, tbody, th, td, tr { display: block; }
-    td:before {
-        content: attr(data-label);
-        float: left;
-        font-weight: bold;
-    }
-}
