@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Snapshop</title>
+    <link rel="stylesheet" href="/front/style/cadastro/cadastroStyle.css">
+    <style>
+                :root{
+            --primaria: #FFD166;
+            --hover: #e6b84f;
+            --herobtn: #494949;
+            --herohover: #292929;
+            --fundo: #FFF8E7;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="container">
+        <div class="box">
+
+            <h1>Login</h1>
+
+            <form id="formulario" method="POST" action="/Login">
+
+                <label>Email:</label>
+                <input type="text" id="email" name="Email">
+                <p id="erro-email"></p>
+
+                <label>Senha:</label>
+                <input type="password" id="senha" name="Senha">
+                <p id="erro-senha"></p>
+
+                <a href="/perfil">
+                    <button type="submit">Entrar</button>
+                </a>
+            </form>
+
+            <a href="/">
+                <button id="voltar">Voltar</button>
+            </a>
+
+        </div>
+    </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/front/script/usuario/login.js"></script>
+</body>
+</html>
