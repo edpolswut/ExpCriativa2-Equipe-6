@@ -173,8 +173,40 @@ async def deletar_produto(
 
     return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
 
-#CRUD de categoria
+@router.post("/AlterarEstoqueProduto")
+async def alterar_estoque_produto(
+    request: Request,
+    id_produto: int = Form(...),
+    qtd_alterar: int = Form(...),
+    id_loja: int = Form(...),
+    db = Depends(get_db)
+):
+    if not request.session.get("user_logged_in"):
+        return RedirectResponse(url="/login", status_code=303)
 
+    user_id = request.session.get("user_id")
+
+    if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
+        return RedirectResponse(url="/perfilLojista", status_code=303)
+
+    with db.cursor(pymysql.cursors.DictCursor) as cursor:
+
+        cursor.execute("SELECT Qtd_Estoque FROM Produto WHERE Id_Produto = %s AND fk_Loja_Id_Loja = %s AND Status = 1", (id_produto, id_loja))
+
+        QtdAtual = cursor.fetchone()
+
+        if QtdAtual['Qtd_Estoque'] < 0:
+            return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
+        elif QtdAtual['Qtd_Estoque'] + qtd_alterar < 0:
+            return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
+
+        cursor.execute("UPDATE Produto SET Qtd_Estoque = %s WHERE Id_Produto = %s", (QtdAtual['Qtd_Estoque'] + qtd_alterar, id_produto))
+
+        db.commit()
+
+    return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
+
+#CRUD de categoria
 
 @router.get("/GerenciarCategorias", response_class=HTMLResponse)
 async def gerenciar_categorias(

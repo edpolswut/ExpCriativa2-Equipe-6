@@ -237,6 +237,7 @@ main {
     color: black;
     transition: 0.2s;
     padding-bottom: 20px;
+    position: relative;
 }
 
 .card:hover {
@@ -250,6 +251,7 @@ main {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .card-img img {
@@ -259,7 +261,7 @@ main {
 }
 
 .card-img i {
-    color: #ccc;
+    color: rgba(255,255,255,0.5);
 }
 
 .card-title {
@@ -271,4 +273,43 @@ main {
     font-weight: normal;
     font-size: 13px;
     color: #666;
+}
+
+.card-actions {
+    padding: 0 15px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-visitar {
+    width: 40px;
+    height: 40px;
+    background-color: var(--herobtn);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 16px;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.8);
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    z-index: 10;
+}
+
+.card:hover .btn-visitar {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+
+.btn-visitar:hover {
+    background-color: var(--herohover);
 }

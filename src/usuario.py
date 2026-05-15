@@ -139,7 +139,7 @@ async def perfil(request: Request, db = Depends(get_db)):
 
         # apenas lojas ativas (Status = 1)
         sql_lojas = """
-            SELECT L.*, UP.fk_Perfil_Id_Perfil, P.Nom_Perfil, CL.Logo
+            SELECT L.*, UP.fk_Perfil_Id_Perfil, P.Nom_Perfil, CL.Logo, CL.Cor_Principal, CL.Url
             FROM Loja L
             INNER JOIN Usuario_Perfil UP ON L.Id_Loja = UP.fk_Loja_Id_Loja
             INNER JOIN Perfil P ON UP.fk_Perfil_Id_Perfil = P.Id_Perfil

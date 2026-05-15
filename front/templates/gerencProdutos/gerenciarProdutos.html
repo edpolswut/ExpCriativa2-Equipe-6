@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciar Produtos - Snapshop</title>
     <link rel="stylesheet" href="/front/style/headerStyle.css">
-    <link rel="stylesheet" href="/front/style/perfilStyle.css">
     <link rel="stylesheet" href="/front/style/headerFooter/sidebar.css">
     <link rel="stylesheet" href="/front/style/gerencProdutos/gerencProdutos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -55,7 +54,10 @@
                                 <a href="/FormProduto?id_loja={{ id_loja }}&id={{ prod['Id_Produto'] }}" class="btn-edit" title="Editar">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <button class="btn-delete" onclick="confirmarExclusao('{{ prod.Id_Produto }}')" title="Excluir">
+                                <button class="btn-adjust" onclick="ajustarEstoque(`{{ prod['Id_Produto'] }}`, `{{ prod['Nome'] }}`, `{{ prod['Qtd_Estoque'] }}`)" title="Ajustar Estoque">
+                                    <i class="fas fa-plus-square"></i>
+                                </button>
+                                <button class="btn-delete" onclick="confirmarExclusao(`{{ prod['Id_Produto'] }}`)" title="Excluir">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </td>
@@ -67,12 +69,8 @@
         </div>
     </div>
 
-    <script>
-        function confirmarExclusao(id) {
-            if(confirm("Deseja mover este produto para o arquivo?")) {
-                window.location.href = "/DeletarProduto/" + id + "?id_loja={{ id_loja }}";
-            }
-        }
-    </script>
+    <input type="hidden" id="id-loja-hidden" value="{{ id_loja }}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/front/script/gerencProdutos/gerenciarProdutos.js"></script>
 </body>
 </html>
