@@ -1,14 +1,42 @@
-{% include 'header/headerloja.html' %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrinho</title>
+    <link rel="stylesheet" href="/front/style/loja/mainpage.css">
+    <link rel="stylesheet" href="/front/style/loja/carrinho.css">
 
-<link rel="stylesheet" href="/front/style/loja/carrinho.css">
-<link rel="stylesheet" href="/front/style/loja/mainpage.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<main class="cart-container">
-    <div class="cart-left">
-        <div class="cart-store-header">
+    <style>
+        :root{
+            --azul: #0b3d91;
+            --branco: #fff;
+            --amarelo: #ffd700;
+            --preto-rgb: 0, 0, 0;
+            --cinza: #eaeaea;
+            --cinza2: #f8f9fa;
+            --cinza3: #ccc;
+            --cinza4: #333;
+            --cinza5: #888;
+            --cinza6: #555;
+            --cinza7: #666;
+            --cinza8: #f9f9f9;
+            --verde: #1a9e1a;
+        }
+    </style>
+    <link rel="stylesheet" href="/front/style/responsividadeGeral.css">    
+</head>
+<body style="--azul: {% if loja and loja.Cor_Principal %}{{ loja.Cor_Principal }}{% else %}#0b3d91{% endif %}; --amarelo: {% if loja and loja.Cor_Secundaria %}{{ loja.Cor_Secundaria }}{% else %}#ffd700{% endif %};">
+    {% include 'header/headerloja.html' %}
+
+    <main class="cart-container">
+        <div class="cart-left">
+            <div class="cart-store-header">
             <input type="checkbox" checked>
             <span>Produtos de {{ loja.Nome }}</span>
-            <i class="fas fa-chevron-right" style="color: #ccc; font-size: 12px;"></i>
+            <i class="fas fa-chevron-right" style="color: var(--azul); font-size: 12px;"></i>
         </div>
 
         {% for item in itens_carrinho %}
@@ -25,17 +53,17 @@
                 <h4 class="item-name">{{ item.Nome }}</h4>
                 <div class="item-actions-row">
                     <div class="quantity-selector">
-                        <a href="/carrinho/diminuir/{{ item.Id_Produto }}"><i class="fas fa-minus"></i></a>
+                        <a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}/carrinho/diminuir/{{ item.Id_Produto }}" style="color: var(--azul);"><i class="fas fa-minus"></i></a>
                         
                         <input type="text" value="{{ item.Qtd_Produto }}" readonly>
                         
-                        <a href="/carrinho/aumentar/{{ item.Id_Produto }}"><i class="fas fa-plus"></i></a>
+                        <a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}/carrinho/aumentar/{{ item.Id_Produto }}" style="color: var(--azul);"><i class="fas fa-plus"></i></a>
                     </div>
                     <span class="stock-info">+{{ item.Qtd_Estoque }} disponíveis</span>
                 </div>
             </div>
 
-            <a href="/carrinho/remover/{{ item.Id_Produto }}" class="item-delete" title="Remover produto">
+            <a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}/carrinho/remover/{{ item.Id_Produto }}" class="item-delete" title="Remover produto">
                 <i class="far fa-trash-alt"></i>
             </a>
 
@@ -57,7 +85,7 @@
             </div>
             <p class="shipping-promo">
                 Aproveite o frete grátis adicionando mais produtos de <strong>{{ loja.Nome }}</strong>. 
-                <a href="/loja/{{ loja.Id_Loja }}">Ver produtos <i class="fas fa-chevron-right" style="font-size: 10px;"></i></a>
+                <a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}" style="color: var(--azul);">Ver produtos <i class="fas fa-chevron-right" style="font-size: 10px;"></i></a>
             </p>
         </div>
         {% endif %}
@@ -76,17 +104,18 @@
             <span><del style="color: #999; font-size: 14px; margin-right: 5px;">R$ 29,20</del> <span class="text-green">Grátis</span></span>
         </div>
         
-        <a href="#" class="coupon-link"><i class="fas fa-ticket-alt"></i> Inserir código do cupom</a>
+        <a href="#" class="coupon-link" style="color: var(--azul);"><i class="fas fa-ticket-alt"></i> Inserir código do cupom</a>
         
         <div class="summary-total">
             <span>Total</span>
             <span>R$ {{ "%.2f"|format(total_compra)|replace('.', ',') }}</span>
         </div>
         
-        <button class="btn-continue" {% if itens_carrinho|length == 0 %}disabled style="background: #ccc; cursor: not-allowed;"{% endif %}>
+        <button class="btn-continue" {% if itens_carrinho|length == 0 %}disabled style="background: #ccc; cursor: not-allowed;"{% else %}style="background-color: var(--azul);"{% endif %}>
             Continuar {% if itens_carrinho|length > 0 %}({{ itens_carrinho|length }}){% endif %}
         </button>
     </div>
 </main>
 
-{% include 'footer/footer.html'%}
+    {% include 'footer/footer.html'%}
+</body>

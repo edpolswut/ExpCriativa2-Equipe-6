@@ -83,5 +83,19 @@
 
     <script src="/front/script/loja/mainpage.js"></script>
     <script src="/front/script/loja/visualizacao.js"></script>
+    <script>
+        // Armazena o identificador da loja no data attribute para o script usar
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlPath = window.location.pathname;
+            const parts = urlPath.split('/');
+            const identificador = parts[2]; // /loja/{identificador}/produto/{id}
+            
+            // Passa para o botão
+            const btnComprar = document.querySelector('.btn-comprar');
+            if (btnComprar) {
+                btnComprar.dataset.identificador = identificador;
+            }
+        });
+    </script>
 </body>
 </html>

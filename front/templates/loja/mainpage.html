@@ -42,7 +42,7 @@
                 <div class="filter-section">
                     <div class="filter-header" onclick="toggleFilter(this)">
                         <h3>Categorias</h3>
-                        <span class="toggle-icon">-</span>
+                        <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
                     </div>
                     <div class="filter-content">
                         {% for cat in categorias_loja %}
@@ -58,7 +58,7 @@
                 <div class="filter-section">
                     <div class="filter-header" onclick="toggleFilter(this)">
                         <h3>Preço</h3>
-                        <span class="toggle-icon">-</span>
+                        <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
                     </div>
                     <div class="filter-content">
                         <label class="filter-option"><input type="radio" name="preco" value="0-100" {% if preco_selecionado == '0-100' %}checked{% endif %}> Até R$ 100,00 </label>
@@ -134,7 +134,7 @@
             <div class="product-grid">
                 {% for prod in produtos %}
                 <div class="product-card">
-                    <a href="/produto/{{ prod.Id_Produto }}" style="text-decoration: none; color: inherit;">
+                    <a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}/produto/{{ prod.Id_Produto }}" style="text-decoration: none; color: inherit;">
                         <div class="product-image-container" style="position: relative; height: 200px; overflow: hidden;">
                             {% if prod.lista_imagens %}
                                 <div class="product-slides" id="slides-{{ prod.Id_Produto }}" style="display: flex; transition: transform 0.3s ease;">

@@ -2,6 +2,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const inputCep = document.getElementById("cep");
     const inputTelefone = document.getElementById("telefone");
+    const form = document.getElementById("formulario");
+
+    // Lógica para exibir mensagens de erro/sucesso da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('erro')) {
+        let erro = urlParams.get('erro');
+        let mensagem = '';
+        if (erro === 'sistema') {
+            mensagem = 'Ocorreu um erro no sistema. Tente novamente mais tarde.';
+        } else if (erro === 'email_existe') {
+            mensagem = 'Este e-mail já está cadastrado para outra loja!';
+        } else if (erro === 'cnpj_existe') {
+            mensagem = 'Este CNPJ já está cadastrado para outra loja!';
+        }
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro ao cadastrar loja',
+            text: mensagem,
+            confirmButtonColor: '#FFD166'
+        });
+        // Limpa o parâmetro de erro da URL para evitar que a mensagem apareça novamente ao recarregar
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
     
     inputCep.addEventListener("blur", function() {
         // Remove tudo o que não for número
@@ -70,8 +93,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         this.value = valor;
     });
-
-    const form = document.getElementById("formulario");
 
     function validarCNPJ(cnpj) {
         cnpj = cnpj.replace(/[^\d]+/g, "");
@@ -182,31 +203,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (valido) {
-            const formData = new FormData(form);
-            try {
-                const response = await fetch("/CriarLoja", {
-                    method: "POST",
-                    body: formData
-                });
-
-                const resultado = await response.json();
-
-                if (response.ok) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Loja Criada!',
-                        text: 'Sua loja foi cadastrada com sucesso.',
-                        confirmButtonColor: '#FFD166'
-                    }).then(() => {
-                        window.location.href = "/perfilLojista";
-                    });
-                } else {
-                    let msg = resultado.erro === 'sistema' ? 'Erro interno no servidor.' : 'Falha ao cadastrar loja.';
-                    Swal.fire({ icon: 'error', title: 'Erro', text: msg });
-                }
-            } catch (error) {
-                Swal.fire({ icon: 'error', title: 'Erro', text: 'Falha na conexão com o servidor.' });
-            }
+            // Se tudo estiver válido, o formulário será submetido normalmente (sem fetch)
+            form.submit();
         }
     });
 });

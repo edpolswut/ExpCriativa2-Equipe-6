@@ -68,12 +68,12 @@ async def CriarLoja(
             ))
 
             db.commit()
-            return JSONResponse(content={"sucesso": True})
+            return RedirectResponse(url="/perfilLojista?sucesso=loja_criada", status_code=303)
 
     except Exception as e:
         print(f"Erro: {e}")
         db.rollback()
-        return JSONResponse(status_code=500, content={"erro": "sistema"})
+        return RedirectResponse(url="/CadastroLoja?erro=sistema", status_code=303)
     finally:
         db.close()
 
@@ -204,13 +204,6 @@ async def deletar_loja(
 
     try:
         with db.cursor() as cursor:
-            cursor.execute("""
-                SELECT 1 FROM Usuario_Perfil 
-                WHERE fk_Usuario_Id_Usuario = %s AND fk_Loja_Id_Loja = %s
-            """, (user_id, id_loja))
-            
-            if not cursor.fetchone():
-                return RedirectResponse(url="/perfilLojista?erro=acesso_negado", status_code=303)
 
             cursor.execute("UPDATE Loja SET Status = 0 WHERE Id_Loja = %s", (id_loja,))
             db.commit()
