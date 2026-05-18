@@ -34,14 +34,12 @@
     <main class="cart-container">
         <div class="cart-left">
             <div class="cart-store-header">
-            <input type="checkbox" checked>
             <span>Produtos de {{ loja.Nome }}</span>
             <i class="fas fa-chevron-right" style="color: var(--azul); font-size: 12px;"></i>
         </div>
 
         {% for item in itens_carrinho %}
         <div class="cart-item">
-            <input type="checkbox" checked>
             
             {% if item.Imagem_B64 %}
                 <img src="data:image/jpeg;base64,{{ item.Imagem_B64 }}" alt="{{ item.Nome }}">
@@ -77,7 +75,7 @@
         </div>
         {% endfor %}
 
-        {% if itens_carrinho|length > 0 %}
+        <!-- {% if itens_carrinho|length > 0 %}
         <div class="cart-shipping-footer">
             <div class="shipping-row">
                 <span>Frete</span>
@@ -88,7 +86,7 @@
                 <a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}" style="color: var(--azul);">Ver produtos <i class="fas fa-chevron-right" style="font-size: 10px;"></i></a>
             </p>
         </div>
-        {% endif %}
+        {% endif %} -->
     </div>
 
     <div class="cart-right">
@@ -99,12 +97,12 @@
             <span>R$ {{ "%.2f"|format(total_produtos)|replace('.', ',') }}</span>
         </div>
         
-        <div class="summary-row">
+        <!-- <div class="summary-row">
             <span>Frete</span>
             <span><del style="color: #999; font-size: 14px; margin-right: 5px;">R$ 29,20</del> <span class="text-green">Grátis</span></span>
-        </div>
+        </div> -->
         
-        <a href="#" class="coupon-link" style="color: var(--azul);"><i class="fas fa-ticket-alt"></i> Inserir código do cupom</a>
+        <!-- <a href="#" class="coupon-link" style="color: var(--azul);"><i class="fas fa-ticket-alt"></i> Inserir código do cupom</a> -->
         
         <div class="summary-total">
             <span>Total</span>
