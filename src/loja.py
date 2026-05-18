@@ -409,10 +409,12 @@ async def exibir_carrinho(request: Request, identificador: str, db = Depends(get
             if carrinho:
                 # Busca os itens do carrinho
                 sql_itens = """
-                    SELECT p.Id_Produto, p.Nome, p.Preco, p.Qtd_Estoque, cp.Qtd_Produto, ip.Imagem
+                    SELECT p.Id_Produto, p.Nome, p.Preco, p.Qtd_Estoque, cp.Qtd_Produto,
+                    (SELECT Imagem 
+                        FROM Imagem_Produto 
+                            WHERE fk_Produto_Id_Produto = p.Id_Produto LIMIT 1) AS Imagem
                     FROM Carrinho_Produto cp
                     INNER JOIN Produto p ON cp.fk_Produto_Id_Produto = p.Id_Produto
-                    LEFT JOIN Imagem_Produto ip ON p.Id_Produto = ip.fk_Produto_Id_Produto
                     WHERE cp.fk_Carrinho_Id_Carrinho = %s
                 """
                 cursor.execute(sql_itens, (carrinho["Id_Carrinho"],))

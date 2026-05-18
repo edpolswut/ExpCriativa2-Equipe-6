@@ -42,10 +42,12 @@ async def exibir_carrinho(request: Request, db = Depends(get_db)):
 
                 # 2. Busca os itens pertencentes a este carrinho mapeando com Produto e Imagem_Produto
                 sql_itens = """
-                    SELECT p.Id_Produto, p.Nome, p.Preco, p.Qtd_Estoque, cp.Qtd_Produto, ip.Imagem
+                    SELECT p.Id_Produto, p.Nome, p.Preco, p.Qtd_Estoque, cp.Qtd_Produto,
+                    (SELECT ip.Imagem 
+                    FROM Imagem_Produto ip  
+                    WHERE p.Id_Produto = ip.fk_Produto_Id_Produto AND ROWNUM = 1)
                     FROM Carrinho_Produto cp
                     INNER JOIN Produto p ON cp.fk_Produto_Id_Produto = p.Id_Produto
-                    LEFT JOIN Imagem_Produto ip ON p.Id_Produto = ip.fk_Produto_Id_Produto
                     WHERE cp.fk_Carrinho_Id_Carrinho = %s
                 """
                 cursor.execute(sql_itens, (carrinho["Id_Carrinho"],))
