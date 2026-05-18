@@ -3,7 +3,7 @@ import pymysql
 DB_CONFIG = {
     "host": "localhost",
     "user": "root",
-    "password": "Familia@1",
+    "password": "abc123",
     "database": "SnapShop"
 }
 
