@@ -1,0 +1,92 @@
+{% include 'header/headerloja.html' %}
+
+<link rel="stylesheet" href="/front/style/loja/carrinho.css">
+<link rel="stylesheet" href="/front/style/loja/mainpage.css">
+
+<main class="cart-container">
+    <div class="cart-left">
+        <div class="cart-store-header">
+            <input type="checkbox" checked>
+            <span>Produtos de {{ loja.Nome }}</span>
+            <i class="fas fa-chevron-right" style="color: #ccc; font-size: 12px;"></i>
+        </div>
+
+        {% for item in itens_carrinho %}
+        <div class="cart-item">
+            <input type="checkbox" checked>
+            
+            {% if item.Imagem_B64 %}
+                <img src="data:image/jpeg;base64,{{ item.Imagem_B64 }}" alt="{{ item.Nome }}">
+            {% else %}
+                <img src="/static/img/placeholder.png" alt="Sem Imagem">
+            {% endif %}
+
+            <div class="item-details">
+                <h4 class="item-name">{{ item.Nome }}</h4>
+                <div class="item-actions-row">
+                    <div class="quantity-selector">
+                        <a href="/carrinho/diminuir/{{ item.Id_Produto }}"><i class="fas fa-minus"></i></a>
+                        
+                        <input type="text" value="{{ item.Qtd_Produto }}" readonly>
+                        
+                        <a href="/carrinho/aumentar/{{ item.Id_Produto }}"><i class="fas fa-plus"></i></a>
+                    </div>
+                    <span class="stock-info">+{{ item.Qtd_Estoque }} disponíveis</span>
+                </div>
+            </div>
+
+            <a href="/carrinho/remover/{{ item.Id_Produto }}" class="item-delete" title="Remover produto">
+                <i class="far fa-trash-alt"></i>
+            </a>
+
+            <div class="item-price">
+                R$ {{ "%.2f"|format(item.Preco * item.Qtd_Produto)|replace('.', ',') }}
+            </div>
+        </div>
+        {% else %}
+        <div class="cart-empty">
+            Seu carrinho está vazio.
+        </div>
+        {% endfor %}
+
+        {% if itens_carrinho|length > 0 %}
+        <div class="cart-shipping-footer">
+            <div class="shipping-row">
+                <span>Frete</span>
+                <span><del style="color: #999; font-size: 14px; margin-right: 5px;"></del> <span class="text-green">Grátis</span></span>
+            </div>
+            <p class="shipping-promo">
+                Aproveite o frete grátis adicionando mais produtos de <strong>{{ loja.Nome }}</strong>. 
+                <a href="/loja/{{ loja.Id_Loja }}">Ver produtos <i class="fas fa-chevron-right" style="font-size: 10px;"></i></a>
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="cart-right">
+        <h3>Resumo da compra</h3>
+        
+        <div class="summary-row">
+            <span>Produto{% if itens_carrinho|length > 1 %}s{% endif %}</span>
+            <span>R$ {{ "%.2f"|format(total_produtos)|replace('.', ',') }}</span>
+        </div>
+        
+        <div class="summary-row">
+            <span>Frete</span>
+            <span><del style="color: #999; font-size: 14px; margin-right: 5px;">R$ 29,20</del> <span class="text-green">Grátis</span></span>
+        </div>
+        
+        <a href="#" class="coupon-link"><i class="fas fa-ticket-alt"></i> Inserir código do cupom</a>
+        
+        <div class="summary-total">
+            <span>Total</span>
+            <span>R$ {{ "%.2f"|format(total_compra)|replace('.', ',') }}</span>
+        </div>
+        
+        <button class="btn-continue" {% if itens_carrinho|length == 0 %}disabled style="background: #ccc; cursor: not-allowed;"{% endif %}>
+            Continuar {% if itens_carrinho|length > 0 %}({{ itens_carrinho|length }}){% endif %}
+        </button>
+    </div>
+</main>
+
+{% include 'footer/footer.html'%}

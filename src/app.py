@@ -5,12 +5,14 @@ import gerencProdutos
 import loja
 import usuario
 import auth
+import carrinho
 
 from mangum import Mangum
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
+
 
 from database import get_db
 from templates import templates
@@ -33,6 +35,7 @@ app.include_router(usuario.router)
 app.include_router(gerencLoja.router)
 app.include_router(gerencProdutos.router)
 app.include_router(loja.router)
+app.include_router(carrinho.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
