@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("formulario");
-    const botoesSenha = document.querySelectorAll(".toggle-senha");
 
     const inputNome = document.getElementById("nome");
     const inputCpf = document.getElementById("cpf");
@@ -36,24 +35,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         window.history.replaceState({}, document.title, window.location.pathname);
     }
-
-    botoesSenha.forEach(function (botao) {
-        botao.addEventListener("click", function () {
-            const targetId = botao.getAttribute("data-target");
-            const input = document.getElementById(targetId);
-            const icon = botao.querySelector("i");
-
-            if (input.type === "password") {
-                input.type = "text";
-                icon.classList.remove("fa-eye");
-                icon.classList.add("fa-eye-slash");
-            } else {
-                input.type = "password";
-                icon.classList.remove("fa-eye-slash");
-                icon.classList.add("fa-eye");
-            }
-        });
-    });
 
     function validarCPF(cpf) {
         cpf = cpf.replace(/[^\d]+/g, '');

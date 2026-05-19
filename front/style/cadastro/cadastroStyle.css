@@ -158,3 +158,13 @@ a{
     color: var(--herohover);
 }
 
+/* Desabilita o ícone de olho nativo do navegador Edge/Chrome */
+input[type="password"]::-ms-reveal {
+    display: none;
+}
+
+input[type="password"]::-webkit-password-toggle {
+    display: none;
+}
+
+
