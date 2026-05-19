@@ -338,3 +338,66 @@ async def deletar_categoria(
         db.commit()
 
     return RedirectResponse(url=f"/GerenciarCategorias?id_loja={id_loja}", status_code=303)
+
+# Históricos de venda/compra
+
+@router.get("/HistoricoVendas", response_class=HTMLResponse)
+async def historico_vendas(
+    request: Request,
+    id_loja: int,
+    db = Depends(get_db)
+):
+    
+    if not request.session.get("user_logged_in"):
+        return RedirectResponse(url="/login", status_code=303)
+
+    user_id = request.session.get("user_id")
+
+    if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
+        return RedirectResponse(url="/perfilLojista", status_code=303)
+
+    with db.cursor(pymysql.cursors.DictCursor) as cursor:
+
+        sql = """
+            SELECT
+                LC.Id_Log_Compras,
+                LC.Dat_Compra,
+                LC.Status,
+
+                U.Nome AS Nome_Cliente,
+
+                P.Nome AS Nome_Produto,
+                P.Preco,
+
+                LCP.Qtd_Produto,
+
+                (P.Preco * LCP.Qtd_Produto) AS Total_Produto
+
+            FROM Log_Compra LC
+
+            INNER JOIN Usuario U
+                ON U.Id_Usuario = LC.fk_Usuario_Id_Usuario
+
+            INNER JOIN Log_Compra_Produto LCP
+                ON LCP.fk_Log_Compra_Id_Log_Compras = LC.Id_Log_Compras
+
+            INNER JOIN Produto P
+                ON P.Id_Produto = LCP.fk_Produto_Id_Produto
+
+            WHERE LC.fk_Loja_Id_Loja = %s
+
+            ORDER BY LC.Dat_Compra DESC
+        """
+
+        cursor.execute(sql, (id_loja,))
+        vendas = cursor.fetchall()
+
+    return templates.TemplateResponse(
+        "historico/historicoVendas.html",
+        {
+            "request": request,
+            "vendas": vendas,
+            "id_loja": id_loja,
+            "sidebar_active": "historico"
+        }
+    )
