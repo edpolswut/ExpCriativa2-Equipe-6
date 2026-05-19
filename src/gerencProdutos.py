@@ -363,14 +363,11 @@ async def historico_vendas(
                 LC.Id_Log_Compras,
                 LC.Dat_Compra,
                 LC.Status,
-
                 U.Nome AS Nome_Cliente,
-
+                P.Id_Produto,
                 P.Nome AS Nome_Produto,
                 P.Preco,
-
                 LCP.Qtd_Produto,
-
                 (P.Preco * LCP.Qtd_Produto) AS Total_Produto
 
             FROM Log_Compra LC
@@ -386,11 +383,41 @@ async def historico_vendas(
 
             WHERE LC.fk_Loja_Id_Loja = %s
 
-            ORDER BY LC.Dat_Compra DESC
+            ORDER BY LC.Dat_Compra DESC, LC.Id_Log_Compras
         """
 
         cursor.execute(sql, (id_loja,))
-        vendas = cursor.fetchall()
+        vendas_raw = cursor.fetchall()
+
+    # Agrupar produtos por pedido
+    vendas_agrupadas = {}
+    for venda in vendas_raw:
+        pedido_id = venda['Id_Log_Compras']
+        
+        if pedido_id not in vendas_agrupadas:
+            # Primeira vez que vemos este pedido
+            vendas_agrupadas[pedido_id] = {
+                'Id_Log_Compras': pedido_id,
+                'Dat_Compra': venda['Dat_Compra'],
+                'Status': venda['Status'],
+                'Nome_Cliente': venda['Nome_Cliente'],
+                'Total_Pedido': 0,
+                'Produtos': []
+            }
+        
+        # Adicionar produto
+        vendas_agrupadas[pedido_id]['Produtos'].append({
+            'Nome_Produto': venda['Nome_Produto'],
+            'Qtd_Produto': venda['Qtd_Produto'],
+            'Preco': venda['Preco'],
+            'Total_Produto': venda['Total_Produto']
+        })
+        
+        # Atualizar total do pedido
+        vendas_agrupadas[pedido_id]['Total_Pedido'] += venda['Total_Produto']
+    
+    # Converter para lista mantendo a ordem
+    vendas = list(vendas_agrupadas.values())
 
     return templates.TemplateResponse(
         "historico/historicoVendas.html",

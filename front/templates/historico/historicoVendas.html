@@ -43,9 +43,7 @@
                     <tr>
                         <th>Pedido</th>
                         <th>Cliente</th>
-                        <th>Produto</th>
-                        <th>Quantidade</th>
-                        <th>Preço</th>
+                        <th>Produtos</th>
                         <th>Total</th>
                         <th>Data</th>
                         <th>Status</th>
@@ -66,20 +64,19 @@
                             {{ venda.Nome_Cliente }}
                         </td>
                     
-                        <td data-label="Produto">
-                            {{ venda.Nome_Produto }}
-                        </td>
-                    
-                        <td data-label="Quantidade">
-                            {{ venda.Qtd_Produto }}
-                        </td>
-                    
-                        <td data-label="Preço">
-                            R$ {{ '%.2f'|format(venda.Preco) }}
+                        <td data-label="Produtos">
+                            <div style="font-size: 0.95rem;">
+                                {% for produto in venda.Produtos %}
+                                    <div style="margin-bottom: 8px; line-height: 1.4;">
+                                        <strong>{{ produto.Nome_Produto }}</strong><br>
+                                        <small>{{ produto.Qtd_Produto }}x R$ {{ '%.2f'|format(produto.Preco) }} = R$ {{ '%.2f'|format(produto.Total_Produto) }}</small>
+                                    </div>
+                                {% endfor %}
+                            </div>
                         </td>
                     
                         <td data-label="Total">
-                            R$ {{ '%.2f'|format(venda.Total_Produto) }}
+                            <strong>R$ {{ '%.2f'|format(venda.Total_Pedido) }}</strong>
                         </td>
                     
                         <td data-label="Data">
