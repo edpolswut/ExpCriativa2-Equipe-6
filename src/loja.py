@@ -18,7 +18,7 @@ async def login_loja(request: Request, identificador: str, db = Depends(get_db))
     """Formulário de login específico da loja"""
     # Se já está logado, vai direto para a loja
     if request.session.get("user_logged_in"):
-        return RedirectResponse(url=f"/loja/{identificador}", status_code=303)
+        return RedirectResponse(url=f"/loja/{identificador}/home", status_code=303)
     
     # Busca dados da loja para exibição
     with db.cursor(pymysql.cursors.DictCursor) as cursor:
@@ -91,7 +91,7 @@ async def processar_login_loja(
             request.session["user_Avatar_Inicial"] = usuario["Nome"][0].upper()
             request.session["user_Avatar_Cor"] = coresAvatarUsuario[ord(usuario["Nome"][0].upper()) % len(coresAvatarUsuario)]
 
-            return RedirectResponse(url=f"/loja/{identificador}", status_code=303)
+            return RedirectResponse(url=f"/loja/{identificador}/home", status_code=303)
 
     except Exception as e:
         print("ERRO LOGIN LOJA:", e)
@@ -102,7 +102,7 @@ async def processar_login_loja(
 async def logout_loja(request: Request, identificador: str):
     """Logout específico da loja"""
     request.session.clear()
-    return RedirectResponse(url=f"/loja/{identificador}", status_code=303)
+    return RedirectResponse(url=f"/loja/{identificador}/home", status_code=303)
 
 
 # ==================== ROTAS DE CADASTRO DE USUÁRIO NA LOJA ====================
@@ -196,7 +196,7 @@ async def processar_cadastro_loja_usuario(
 
 
 
-@router.get("/loja/{identificador}", name="vitrine_loja", response_class=HTMLResponse)
+@router.get("/loja/{identificador}/produtos", name="vitrine_loja", response_class=HTMLResponse)
 async def vitrine_loja(
     request: Request, 
     identificador: str,
@@ -347,6 +347,131 @@ async def detalhes_produto(request: Request, identificador: str, id_produto: int
         "categorias_selecionadas": [],
         "busca_atual": None,
         "preco_selecionado": None,
+        "obterAvatarUsuario": obterAvatarUsuario
+    })
+
+# ==================== ROTA DA HOMEPAGE ====================
+
+@router.get("/loja/{identificador}/home", name="homepage_loja", response_class=HTMLResponse)
+async def homepage_loja(
+    request: Request, 
+    identificador: str,
+    busca: Optional[str] = None,
+    categorias: List[int] = Query(None),
+    preco: Optional[str] = None,
+    db = Depends(get_db)
+):
+    """Exibe a Homepage da loja com Banner, Carrossel de destaques e filtros"""
+    with db.cursor(pymysql.cursors.DictCursor) as cursor:
+        # 1. Verifica se é um ID ou Texto(Url) e busca a Loja (com Banner e Logo)
+        if identificador.isdigit():
+            sql_loja = """
+                SELECT L.*, C.Cor_Principal, C.Cor_Secundaria, C.Logo, C.Banner, C.Url 
+                FROM Loja L 
+                LEFT JOIN Config_Loja C ON L.Id_Loja = C.fk_Loja_Id_Loja 
+                WHERE L.Id_Loja = %s AND L.Status = 1
+            """
+            cursor.execute(sql_loja, (int(identificador),))
+        else:
+            sql_loja = """
+                SELECT L.*, C.Cor_Principal, C.Cor_Secundaria, C.Logo, C.Banner, C.Url 
+                FROM Config_Loja C 
+                INNER JOIN Loja L ON C.fk_Loja_Id_Loja = L.Id_Loja 
+                WHERE C.Url = %s AND L.Status = 1
+            """
+            cursor.execute(sql_loja, (identificador,))
+            
+        loja = cursor.fetchone()
+        
+        if not loja:
+            return RedirectResponse(url="/", status_code=303)
+            
+        # Converte as imagens da loja para Base64
+        if loja.get("Logo"):
+            loja["Logo_B64"] = base64.b64encode(loja["Logo"]).decode('utf-8')
+        if loja.get("Banner"):
+            loja["Banner_B64"] = base64.b64encode(loja["Banner"]).decode('utf-8')
+
+        # 2. Busca Categorias para a barra lateral
+        sql_categorias_loja = "SELECT Id_Categoria, Nome FROM Categoria WHERE fk_Loja_Id_Loja = %s AND Status = 1"
+        cursor.execute(sql_categorias_loja, (loja["Id_Loja"],))
+        categorias_loja = cursor.fetchall()
+
+        # 3. Busca TODOS os Produtos (com aplicação de filtros)
+        sql_produtos_base = """
+            SELECT DISTINCT P.Id_Produto, P.Nome, P.Preco, P.Qtd_Estoque 
+            FROM Produto P
+        """
+        where_clauses = ["P.fk_Loja_Id_Loja = %s", "P.Status = 1"]
+        params = [loja["Id_Loja"]]
+        
+        # Filtro de Categoria
+        if categorias:
+            sql_produtos_base += " INNER JOIN Produto_Categoria PC ON P.Id_Produto = PC.fk_Produto_Id_Produto"
+            placeholders = ', '.join(['%s'] * len(categorias))
+            where_clauses.append(f"PC.fk_Categoria_Id_Categoria IN ({placeholders})")
+            params.extend(categorias)
+            
+        # Filtro de Busca por Nome
+        if busca:
+            where_clauses.append("P.Nome LIKE %s")
+            params.append(f"%{busca}%")
+            
+        # Filtro de Preço
+        if preco:
+            if preco == "0-100":
+                where_clauses.append("P.Preco <= 100")
+            elif preco == "100-200":
+                where_clauses.append("P.Preco > 100 AND P.Preco <= 200")
+            elif preco == "200-300":
+                where_clauses.append("P.Preco > 200 AND P.Preco <= 300")
+            elif preco == "300-plus":
+                where_clauses.append("P.Preco > 300")
+
+        sql_produtos = sql_produtos_base + " WHERE " + " AND ".join(where_clauses) + " ORDER BY P.Nome"
+        cursor.execute(sql_produtos, params)
+        produtos = cursor.fetchall()
+
+        # Busca todas as imagens para a grade de produtos (mantém o slider dos cards funcionando)
+        for prod in produtos:
+            sql_imagens = "SELECT Imagem FROM Imagem_Produto WHERE fk_Produto_Id_Produto = %s"
+            cursor.execute(sql_imagens, (prod["Id_Produto"],))
+            imagens_blob = cursor.fetchall()
+            prod["lista_imagens"] = [
+                base64.b64encode(img["Imagem"]).decode('utf-8') 
+                for img in imagens_blob if img["Imagem"]
+            ]
+
+        # 4. Busca 8 Produtos Aleatórios EXCLUSIVAMENTE para o Carrossel
+        sql_aleatorios = """
+            SELECT Id_Produto, Nome, Preco, Qtd_Estoque 
+            FROM Produto 
+            WHERE fk_Loja_Id_Loja = %s AND Status = 1
+            ORDER BY RAND() LIMIT 8
+        """
+        cursor.execute(sql_aleatorios, (loja["Id_Loja"],))
+        produtos_aleatorios = cursor.fetchall()
+
+        # Busca todas as imagens para os produtos do carrossel
+        for prod_aleatorio in produtos_aleatorios:
+            sql_imagens_aleat = "SELECT Imagem FROM Imagem_Produto WHERE fk_Produto_Id_Produto = %s"
+            cursor.execute(sql_imagens_aleat, (prod_aleatorio["Id_Produto"],))
+            imagens_blob_aleat = cursor.fetchall()
+            prod_aleatorio["lista_imagens"] = [
+                base64.b64encode(img["Imagem"]).decode('utf-8') 
+                for img in imagens_blob_aleat if img["Imagem"]
+            ]
+
+    # Retorna chamando a nova página homepage.html criada anteriormente
+    return templates.TemplateResponse("loja/homepage.html", {
+        "request": request, 
+        "loja": loja,
+        "produtos": produtos,
+        "produtos_aleatorios": produtos_aleatorios,
+        "categorias_loja": categorias_loja,
+        "busca_atual": busca,
+        "categorias_selecionadas": categorias or [],
+        "preco_selecionado": preco,
         "obterAvatarUsuario": obterAvatarUsuario
     })
 

@@ -1,0 +1,189 @@
+/* Estilos exclusivos para o Banner */
+.banner-container {
+    width: 100%;
+    height: 350px; /* Altura fixa recomendada para banners */
+    position: relative; /* CRUCIAL: Permite empilhar elementos aqui dentro */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--cinza2);
+    border-bottom: 2px solid var(--azul);
+    overflow: hidden;
+}
+
+.banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute; /* Joga a imagem para o fundo do container */
+    top: 0;
+    left: 0;
+    z-index: 1; /* Camada 1 (trás) */
+}
+
+.banner-overlay {
+    position: relative;
+    z-index: 2; /* Camada 2 (frente da imagem) */
+    background-color: rgba(0, 0, 0, 0.55); /* Fundo preto semi-transparente para dar leitura */
+    padding: 20px 40px;
+    border-radius: 8px;
+    color: #ffffff;
+    text-align: center;
+    backdrop-filter: blur(2px); /* Efeito de desfoque opcional e moderno */
+}
+
+.banner-overlay h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5); /* Sombreado na letra */
+}
+
+.banner-fallback {
+    width: 100%; 
+    height: 100%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    background: linear-gradient(135deg, var(--azul), var(--cinza4)); 
+    color: white;
+    z-index: 2;
+}
+
+.carousel-section {
+    max-width: 1300px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.carousel-section h2 {
+    text-align: center;
+    color: var(--cinza4);
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+}
+
+.carousel-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.carousel-container {
+    overflow: hidden;
+    width: 100%;
+    padding: 10px 0;
+}
+
+.carousel-track {
+    display: flex;
+    gap: 20px;
+    transition: transform 0.4s ease-in-out;
+}
+
+.carousel-track .product-card {
+    flex: 0 0 calc(25% - 15px);
+    min-width: 250px;
+    border: 1px solid var(--cinza);
+    border-radius: 8px;
+    background: var(--branco);
+    transition: box-shadow 0.3s;
+}
+
+.carousel-track .product-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.product-image-container {
+    position: relative; 
+    height: 200px; 
+    overflow: hidden;
+}
+
+.product-slides {
+    display: flex; 
+    transition: transform 0.3s ease;
+}
+
+.product-slides img {
+    min-width: 100%; 
+    height: 200px; 
+    object-fit: cover;
+}
+
+.product-no-image {
+    width: 100%; 
+    height: 100%; 
+    background: #eee; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    color: #999;
+}
+
+.product-no-image i {
+    font-size: 3rem; 
+    color: #ccc;
+}
+
+.product-info-carousel {
+    padding: 15px;
+}
+
+.product-title-carousel {
+    margin: 0 0 10px 0; 
+    font-size: 1rem; 
+    color: var(--cinza4); 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
+}
+
+.current-price-carousel {
+    font-size: 1.25rem; 
+    font-weight: bold; 
+    color: var(--azul); 
+    display: block;
+}
+
+.installments-carousel {
+    font-size: 0.85rem; 
+    color: var(--cinza7);
+}
+
+.nav-button {
+    position: absolute;
+    z-index: 10;
+    background: var(--branco);
+    border: 1px solid var(--cinza3);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--azul);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.nav-button:hover {
+    background: var(--azul);
+    color: var(--branco);
+    transform: scale(1.1);
+}
+
+.prev-button { left: -20px; }
+.next-button { right: -20px; }
+
+/* Responsividade do carrossel */
+@media (max-width: 768px) {
+    .carousel-track .product-card { flex: 0 0 calc(50% - 10px); }
+    .prev-button { left: 5px; }
+    .next-button { right: 5px; }
+}
+@media (max-width: 480px) {
+    .carousel-track .product-card { flex: 0 0 100%; }
+}

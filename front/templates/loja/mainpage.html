@@ -32,7 +32,7 @@
 
     <div class="main-layout">
 
-        <form id="form-filtros" method="GET" action="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}">
+        <form id="form-filtros" method="GET" action="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}/produtos">
             
             <input type="hidden" name="busca" id="busca-oculta" value="{{ busca_atual or '' }}">
 

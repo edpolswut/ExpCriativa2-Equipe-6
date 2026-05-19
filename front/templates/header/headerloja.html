@@ -25,7 +25,7 @@
         </div>
 
         <div class="search-container">
-            <form action="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}" method="GET" class="search-form">
+            <form action="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}/produtos" method="GET" class="search-form">
                 {% for cat in categorias_selecionadas %}
                     <input type="hidden" name="categorias" value="{{ cat }}">
                 {% endfor %}
@@ -43,8 +43,8 @@
 
         <nav class="main-nav">
             <ul>
-                <li><a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}">Início</a></li>
-                <li><a href="#produtos">Produtos</a></li>
+                <li><a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}/home">Início</a></li>
+                <li><a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}/produtos">Produtos</a></li>
             </ul>
         </nav>
 
