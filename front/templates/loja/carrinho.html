@@ -6,7 +6,6 @@
     <title>Carrinho</title>
     <link rel="stylesheet" href="/front/style/loja/mainpage.css">
     <link rel="stylesheet" href="/front/style/loja/carrinho.css">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -29,91 +28,150 @@
     <link rel="stylesheet" href="/front/style/responsividadeGeral.css">    
 </head>
 <body style="--azul: {% if loja and loja.Cor_Principal %}{{ loja.Cor_Principal }}{% else %}#0b3d91{% endif %}; --amarelo: {% if loja and loja.Cor_Secundaria %}{{ loja.Cor_Secundaria }}{% else %}#ffd700{% endif %};">
+    
     {% include 'header/headerloja.html' %}
 
-    <main class="cart-container">
-        <div class="cart-left">
-            <div class="cart-store-header">
-            <span>Produtos de {{ loja.Nome }}</span>
-            <i class="fas fa-chevron-right" style="color: var(--azul); font-size: 12px;"></i>
-        </div>
-
-        {% for item in itens_carrinho %}
-        <div class="cart-item">
+    <form action="/loja/{{ identificador }}/finalizar_compra" method="POST">
+        <main class="cart-container">
             
-            {% if item.Imagem_B64 %}
-                <img src="data:image/jpeg;base64,{{ item.Imagem_B64 }}" alt="{{ item.Nome }}">
-            {% else %}
-                <img src="/static/img/placeholder.png" alt="Sem Imagem">
-            {% endif %}
-
-            <div class="item-details">
-                <h4 class="item-name">{{ item.Nome }}</h4>
-                <div class="item-actions-row">
-                    <div class="quantity-selector">
-                        <a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}/carrinho/diminuir/{{ item.Id_Produto }}" style="color: var(--azul);"><i class="fas fa-minus"></i></a>
-                        
-                        <input type="text" value="{{ item.Qtd_Produto }}" readonly>
-                        
-                        <a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}/carrinho/aumentar/{{ item.Id_Produto }}" style="color: var(--azul);"><i class="fas fa-plus"></i></a>
-                    </div>
-                    <span class="stock-info">+{{ item.Qtd_Estoque }} disponíveis</span>
+            <div class="cart-left">
+                <div class="cart-store-header">
+                    <span>Produtos de {{ loja.Nome }}</span>
+                    <i class="fas fa-chevron-right" style="color: var(--azul); font-size: 12px;"></i>
                 </div>
+
+                {% for item in itens_carrinho %}
+                <div class="cart-item">
+                    {% if item.Imagem_B64 %}
+                        <img src="data:image/jpeg;base64,{{ item.Imagem_B64 }}" alt="{{ item.Nome }}">
+                    {% else %}
+                        <img src="/static/img/placeholder.png" alt="Sem Imagem">
+                    {% endif %}
+
+                    <div class="item-details">
+                        <h4 class="item-name">{{ item.Nome }}</h4>
+                        <div class="item-actions-row">
+                            <div class="quantity-selector">
+                                <a href="/loja/{{ identificador }}/carrinho/diminuir/{{ item.Id_Produto }}"><i class="fas fa-minus"></i></a>
+                                <input type="text" value="{{ item.Qtd_Produto }}" readonly>
+                                <a href="/loja/{{ identificador }}/carrinho/aumentar/{{ item.Id_Produto }}"><i class="fas fa-plus"></i></a>
+                            </div>
+                            <span class="stock-info">+{{ item.Qtd_Estoque }} disponíveis</span>
+                        </div>
+                    </div>
+
+                    <a href="/loja/{{ identificador }}/carrinho/remover/{{ item.Id_Produto }}" class="item-delete" title="Remover produto">
+                        <i class="far fa-trash-alt"></i>
+                    </a>
+
+                    <div class="item-price">
+                        R$ {{ "%.2f"|format(item.Preco * item.Qtd_Produto)|replace('.', ',') }}
+                    </div>
+                </div>
+                {% else %}
+                <div class="cart-empty">
+                    Seu carrinho está vazio.
+                </div>
+                {% endfor %}
+
+                {% if itens_carrinho|length > 0 %}
+                
+                <div class="checkout-section">
+                    <h3>Endereço de Entrega</h3>
+                    
+                    {% if enderecos %}
+                        {% for end in enderecos %}
+                        <label class="option-card">
+                            <input type="radio" name="endereco_selecionado" value="{{ end.Id_Endereco }}" {% if loop.first %}checked{% endif %} onchange="fecharNovoEndereco()">
+                            <div class="option-details">
+                                <strong>{{ end.Rua }}, {{ end.Numero }}</strong>
+                                <span>{{ end.Bairro }}, {{ end.Cidade }} {% if end.Complemento %}- {{ end.Complemento }}{% endif %}</span>
+                                <span>CEP: {{ end.Cep }}</span>
+                            </div>
+                        </label>
+                        {% endfor %}
+                    {% else %}
+                        <p style="color: var(--cinza6); margin-bottom: 15px;">Você não possui endereços cadastrados para esta loja.</p>
+                    {% endif %}
+
+                    <button type="button" class="btn-outline" onclick="toggleNovoEndereco()">+ Adicionar novo endereço</button>
+
+                    <div id="novo-endereco-form" style="display: none; margin-top: 20px; padding: 20px; border: 1px dashed var(--cinza3); border-radius: 8px; background: var(--cinza8);">
+                        <h4 style="margin-top: 0; color: var(--cinza4);">Novo Endereço</h4>
+                        
+                        <input type="radio" name="endereco_selecionado" value="novo" id="radio-novo-end" style="display: none;">
+                        
+                        <div class="row-inputs">
+                            <input type="text" name="novo_cep" id="novo_cep" placeholder="CEP" class="form-control" style="flex: 1;">
+                            <input type="text" name="nova_cidade" id="nova_cidade" placeholder="Cidade" class="form-control" style="flex: 2;">
+                        </div>
+                        <div class="row-inputs">
+                            <input type="text" name="nova_rua" id="nova_rua" placeholder="Rua / Avenida" class="form-control" style="flex: 3;">
+                            <input type="number" name="novo_numero" id="novo_numero" placeholder="Número" class="form-control" style="flex: 1;">
+                        </div>
+                        <div class="row-inputs">
+                            <input type="text" name="novo_bairro" id="novo_bairro" placeholder="Bairro" class="form-control" style="flex: 1;">
+                            <input type="text" name="novo_complemento" id="novo_complemento" placeholder="Complemento (Apt, Bloco...)" class="form-control" style="flex: 1;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="checkout-section">
+                    <h3>Método de Pagamento</h3>
+                    
+                    <label class="option-card">
+                        <input type="radio" name="metodo_pagamento" value="pix" id="pagamento-pix" checked onchange="togglePagamento()">
+                        <div class="option-details">
+                            <strong><i class="fab fa-pix" style="color: #32BCAD; margin-right: 5px;"></i> PIX</strong>
+                            <span>Aprovação imediata</span>
+                        </div>
+                    </label>
+                    
+                    <label class="option-card">
+                        <input type="radio" name="metodo_pagamento" value="cartao" id="pagamento-cartao" onchange="togglePagamento()">
+                        <div class="option-details">
+                            <strong><i class="fas fa-credit-card" style="color: var(--azul); margin-right: 5px;"></i> Cartão de Crédito</strong>
+                            <span>Até 12x sem juros</span>
+                        </div>
+                    </label>
+
+                    <div id="campos-cartao" style="display: none; margin-top: 20px; padding: 20px; border: 1px solid var(--cinza); border-radius: 8px;">
+                        <input type="text" name="cc_numero" id="cc_numero" placeholder="Número do Cartão" class="form-control" maxlength="19">
+                        <input type="text" name="cc_nome" id="cc_nome" placeholder="Nome impresso no cartão" class="form-control" style="text-transform: uppercase;">
+                        <div class="row-inputs">
+                            <input type="text" name="cc_validade" id="cc_validade" placeholder="Validade (MM/AA)" class="form-control" maxlength="5" style="flex: 1;">
+                            <input type="text" name="cc_cvv" id="cc_cvv" placeholder="CVV" class="form-control" maxlength="4" style="flex: 1;">
+                        </div>
+                    </div>
+                </div>
+
+                {% endif %}
             </div>
 
-            <a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}/carrinho/remover/{{ item.Id_Produto }}" class="item-delete" title="Remover produto">
-                <i class="far fa-trash-alt"></i>
-            </a>
-
-            <div class="item-price">
-                R$ {{ "%.2f"|format(item.Preco * item.Qtd_Produto)|replace('.', ',') }}
+            <div class="cart-right">
+                <h3>Resumo da compra</h3>
+                
+                <div class="summary-row">
+                    <span>Produto{% if itens_carrinho|length > 1 %}s{% endif %}</span>
+                    <span>R$ {{ "%.2f"|format(total_produtos)|replace('.', ',') }}</span>
+                </div>
+                
+                <div class="summary-total">
+                    <span>Total</span>
+                    <span>R$ {{ "%.2f"|format(total_compra)|replace('.', ',') }}</span>
+                </div>
+                
+                <button type="submit" class="btn-continue" {% if itens_carrinho|length == 0 %}disabled style="background: #ccc; cursor: not-allowed;"{% endif %}>
+                    Finalizar Compra {% if itens_carrinho|length > 0 %}({{ itens_carrinho|length }}){% endif %}
+                </button>
             </div>
-        </div>
-        {% else %}
-        <div class="cart-empty">
-            Seu carrinho está vazio.
-        </div>
-        {% endfor %}
+        </main>
+    </form>
 
-        <!-- {% if itens_carrinho|length > 0 %}
-        <div class="cart-shipping-footer">
-            <div class="shipping-row">
-                <span>Frete</span>
-                <span><del style="color: #999; font-size: 14px; margin-right: 5px;"></del> <span class="text-green">Grátis</span></span>
-            </div>
-            <p class="shipping-promo">
-                Aproveite o frete grátis adicionando mais produtos de <strong>{{ loja.Nome }}</strong>. 
-                <a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}" style="color: var(--azul);">Ver produtos <i class="fas fa-chevron-right" style="font-size: 10px;"></i></a>
-            </p>
-        </div>
-        {% endif %} -->
-    </div>
+   {% include 'footer/footer.html'%}
 
-    <div class="cart-right">
-        <h3>Resumo da compra</h3>
-        
-        <div class="summary-row">
-            <span>Produto{% if itens_carrinho|length > 1 %}s{% endif %}</span>
-            <span>R$ {{ "%.2f"|format(total_produtos)|replace('.', ',') }}</span>
-        </div>
-        
-        <!-- <div class="summary-row">
-            <span>Frete</span>
-            <span><del style="color: #999; font-size: 14px; margin-right: 5px;">R$ 29,20</del> <span class="text-green">Grátis</span></span>
-        </div> -->
-        
-        <!-- <a href="#" class="coupon-link" style="color: var(--azul);"><i class="fas fa-ticket-alt"></i> Inserir código do cupom</a> -->
-        
-        <div class="summary-total">
-            <span>Total</span>
-            <span>R$ {{ "%.2f"|format(total_compra)|replace('.', ',') }}</span>
-        </div>
-        
-        <button class="btn-continue" {% if itens_carrinho|length == 0 %}disabled style="background: #ccc; cursor: not-allowed;"{% else %}style="background-color: var(--azul);"{% endif %}>
-            Continuar {% if itens_carrinho|length > 0 %}({{ itens_carrinho|length }}){% endif %}
-        </button>
-    </div>
-</main>
-
-    {% include 'footer/footer.html'%}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script src="/front/script/loja/carrinho.js"></script>
 </body>
+</html>

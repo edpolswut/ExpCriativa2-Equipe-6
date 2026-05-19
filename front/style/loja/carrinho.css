@@ -225,6 +225,91 @@ input[type="checkbox"] {
     cursor: pointer;
 }
 
+/* =========================================
+   SESSÕES DE CHECKOUT (Endereço e Pagamento)
+   ========================================= */
+
+.checkout-section {
+    padding: 24px;
+    border-top: 1px solid #ededed;
+    background-color: #fff;
+}
+
+.checkout-section h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 18px;
+}
+
+.option-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px;
+    border: 1px solid #ededed;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.option-card:hover {
+    border-color: var(--azul);
+}
+
+.option-card input[type="radio"] {
+    margin-top: 4px;
+    cursor: pointer;
+}
+
+.option-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: #666;
+    font-size: 14px;
+}
+
+.option-details strong {
+    color: #333;
+    font-size: 16px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--azul);
+    border: 1px solid var(--azul);
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+    margin-top: 10px;
+}
+
+.btn-outline:hover {
+    background: var(--azul);
+    color: #fff;
+}
+
+.row-inputs {
+    display: flex;
+    gap: 12px;
+}
+
+
 @media (max-width: 900px) {
     .cart-container {
         flex-direction: column;
@@ -244,5 +329,12 @@ input[type="checkbox"] {
         position: absolute;
         top: 24px;
         right: 24px;
+    }
+}
+
+@media (max-width: 600px) {
+    .row-inputs {
+        flex-direction: column;
+        gap: 0;
     }
 }

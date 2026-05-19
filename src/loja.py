@@ -561,6 +561,12 @@ async def exibir_carrinho(request: Request, identificador: str, db = Depends(get
                         "Qtd_Produto": item["Qtd_Produto"],
                         "Imagem_B64": imagem_b64
                     })
+            # BUSCAR ENDEREÇOS DO USUÁRIO
+            enderecos = []
+            if loja:
+                sql_enderecos = "SELECT * FROM Endereco WHERE fk_Usuario_Id_Usuario = %s AND fk_Loja_Id_Loja = %s AND Status = 1"
+                cursor.execute(sql_enderecos, (user_id, loja["Id_Loja"]))
+                enderecos = cursor.fetchall()
 
     except Exception as e:
         print(f"ERRO AO CARREGAR CARRINHO: {e}")
@@ -577,7 +583,8 @@ async def exibir_carrinho(request: Request, identificador: str, db = Depends(get
         "categorias_selecionadas": [],
         "busca_atual": None,
         "preco_selecionado": None,
-        "obterAvatarUsuario": obterAvatarUsuario
+        "obterAvatarUsuario": obterAvatarUsuario,
+        "enderecos": enderecos
     })
 
 
@@ -804,3 +811,103 @@ async def remover_produto(request: Request, identificador: str, id_produto: int,
         db.close()
 
     return RedirectResponse(url=f"/loja/{identificador}/carrinho", status_code=303)
+
+@router.post("/loja/{identificador}/finalizar_compra", response_class=HTMLResponse)
+async def finalizar_compra(
+    request: Request,
+    identificador: str,
+    endereco_selecionado: str = Form(...),
+    metodo_pagamento: str = Form(...),
+    # Campos do novo endereço
+    novo_cep: Optional[str] = Form(None),
+    nova_cidade: Optional[str] = Form(None),
+    nova_rua: Optional[str] = Form(None),
+    novo_numero: Optional[int] = Form(None),
+    novo_bairro: Optional[str] = Form(None),
+    novo_complemento: Optional[str] = Form(None),
+    # Campos do cartão
+    cc_numero: Optional[str] = Form(None),
+    cc_nome: Optional[str] = Form(None),
+    cc_validade: Optional[str] = Form(None),
+    cc_cvv: Optional[str] = Form(None),
+    db = Depends(get_db)
+):
+    """Processa o checkout e salva a compra no banco"""
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return RedirectResponse(url=f"/loja/{identificador}/login", status_code=303)
+
+    try:
+        with db.cursor(pymysql.cursors.DictCursor) as cursor:
+            # 1. Identificar a Loja
+            if identificador.isdigit():
+                cursor.execute("SELECT Id_Loja FROM Loja WHERE Id_Loja = %s AND Status = 1", (int(identificador),))
+            else:
+                cursor.execute("SELECT L.Id_Loja FROM Config_Loja C INNER JOIN Loja L ON C.fk_Loja_Id_Loja = L.Id_Loja WHERE C.Url = %s", (identificador,))
+            
+            loja_result = cursor.fetchone()
+            if not loja_result:
+                return RedirectResponse(url="/", status_code=303)
+            
+            loja_id = loja_result["Id_Loja"]
+
+            # 2. Lidar com o Endereço
+            id_endereco_final = None
+
+            if endereco_selecionado == "novo":
+                # Inserir novo endereço no banco
+                sql_novo_end = """
+                    INSERT INTO Endereco (fk_Usuario_Id_Usuario, fk_Loja_Id_Loja, Cep, Rua, Numero, Cidade, Bairro, Complemento, Status) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 1)
+                """
+                cursor.execute(sql_novo_end, (user_id, loja_id, novo_cep, nova_rua, novo_numero, nova_cidade, novo_bairro, novo_complemento))
+                db.commit()
+                id_endereco_final = cursor.lastrowid
+            else:
+                # Usa o ID do endereço existente selecionado
+                id_endereco_final = int(endereco_selecionado)
+
+            # 3. Registrar a Compra no Log_Compra
+            sql_log_compra = """
+                INSERT INTO Log_Compra (fk_Usuario_Id_Usuario, fk_Loja_Id_Loja, Dat_Compra, fk_Endereco_Id_Endereco, Status)
+                VALUES (%s, %s, current_date(), %s, 1)
+            """
+            cursor.execute(sql_log_compra, (user_id, loja_id, id_endereco_final))
+            db.commit()
+            id_compra = cursor.lastrowid
+
+            # 4. Pegar os itens do carrinho atual e transferir para Log_Compra_Produto
+            sql_carrinho = "SELECT Id_Carrinho FROM Carrinho WHERE fk_Usuario_Id_Usuario = %s AND fk_Loja_Id_Loja = %s ORDER BY Id_Carrinho DESC LIMIT 1"
+            cursor.execute(sql_carrinho, (user_id, loja_id))
+            carrinho = cursor.fetchone()
+
+            if carrinho:
+                carrinho_id = carrinho["Id_Carrinho"]
+                
+                # Buscar produtos
+                cursor.execute("SELECT fk_Produto_Id_Produto, Qtd_Produto FROM Carrinho_Produto WHERE fk_Carrinho_Id_Carrinho = %s", (carrinho_id,))
+                itens = cursor.fetchall()
+
+                # Inserir no log de compras
+                for item in itens:
+                    cursor.execute("""
+                        INSERT INTO Log_Compra_Produto (fk_Produto_Id_Produto, fk_Log_Compra_Id_Log_Compras, Qtd_Produto) 
+                        VALUES (%s, %s, %s)
+                    """, (item["fk_Produto_Id_Produto"], id_compra, item["Qtd_Produto"]))
+                    
+                    # Abater estoque do Produto
+                    cursor.execute("UPDATE Produto SET Qtd_Estoque = Qtd_Estoque - %s WHERE Id_Produto = %s", (item["Qtd_Produto"], item["fk_Produto_Id_Produto"]))
+
+                # 5. Limpar o carrinho (apaga os registros da tabela associativa)
+                cursor.execute("DELETE FROM Carrinho_Produto WHERE fk_Carrinho_Id_Carrinho = %s", (carrinho_id,))
+                db.commit()
+
+    except Exception as e:
+        print(f"ERRO AO FINALIZAR COMPRA: {e}")
+        db.rollback()
+        return RedirectResponse(url=f"/loja/{identificador}/carrinho?erro=finalizar", status_code=303)
+    finally:
+        db.close()
+
+    # Redireciona para a home da loja (ou para uma página de sucesso, se você criar uma)
+    return RedirectResponse(url=f"/loja/{identificador}/home?sucesso=compra", status_code=303)
