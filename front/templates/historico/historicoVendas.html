@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Histórico de Vendas - Snapshop</title>
+
+    <link rel="stylesheet" href="/front/style/headerStyle.css">
+    <link rel="stylesheet" href="/front/style/perfilStyle.css">
+    <link rel="stylesheet" href="/front/style/headerFooter/sidebar.css">
+    <link rel="stylesheet" href="/front/style/gerencProdutos/gerencProdutos.css">
+    <link rel="stylesheet" href="/front/style/responsividadeGeral.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+
+<body>
+
+{% include 'headerFooter/header.html' %}
+
+<div class="app-body">
+
+    {% include 'headerFooter/sidebar.html' %}
+
+    <div class="admin-container form-container">
+
+        <h1>
+            <i class="fas fa-receipt"></i>
+            Histórico de Vendas
+        </h1>
+
+        {% if vendas %}
+
+        <div class="tabela-vendas">
+
+            <table class="table-produtos">
+
+                <thead>
+                    <tr>
+                        <th>Pedido</th>
+                        <th>Cliente</th>
+                        <th>Produto</th>
+                        <th>Quantidade</th>
+                        <th>Preço</th>
+                        <th>Total</th>
+                        <th>Data</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                                
+                    {% for venda in vendas %}
+                                
+                    <tr>
+                    
+                        <td data-label="Pedido">
+                            #{{ venda.Id_Log_Compras }}
+                        </td>
+                    
+                        <td data-label="Cliente">
+                            {{ venda.Nome_Cliente }}
+                        </td>
+                    
+                        <td data-label="Produto">
+                            {{ venda.Nome_Produto }}
+                        </td>
+                    
+                        <td data-label="Quantidade">
+                            {{ venda.Qtd_Produto }}
+                        </td>
+                    
+                        <td data-label="Preço">
+                            R$ {{ '%.2f'|format(venda.Preco) }}
+                        </td>
+                    
+                        <td data-label="Total">
+                            R$ {{ '%.2f'|format(venda.Total_Produto) }}
+                        </td>
+                    
+                        <td data-label="Data">
+                            {{ venda.Dat_Compra.strftime('%d/%m/%Y') }}
+                        </td>
+                    
+                        <td data-label="Status">
+                        
+                            {% if venda.Status == 1 %}
+                                <span class="status status-pendente">
+                                    Pedido Realizado
+                                </span>
+                            
+                            {% elif venda.Status == 2 %}
+                                <span class="status status-pago">
+                                    Pago
+                                </span>
+                            
+                            {% elif venda.Status == 3 %}
+                                <span class="status status-enviado">
+                                    Enviado
+                                </span>
+                            
+                            {% elif venda.Status == 4 %}
+                                <span class="status status-transporte">
+                                    Saiu para entrega
+                                </span>
+                            
+                            {% elif venda.Status == 5 %}
+                                <span class="status status-finalizado">
+                                    Finalizado
+                                </span>
+                            
+                            {% elif venda.Status == 6 %}
+                                <span class="status status-cancelado">
+                                    Cancelado
+                                </span>
+                            
+                            {% else %}
+                                <span class="status">
+                                    Desconhecido
+                                </span>
+                            {% endif %}
+                            
+                        </td>
+                    
+                    </tr>
+                
+                    {% endfor %}
+                
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+            <div class="sem-produtos">
+                <i class="fas fa-box-open"></i>
+                <p>Nenhuma venda encontrada.</p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+</html>
