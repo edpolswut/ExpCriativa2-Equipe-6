@@ -822,7 +822,7 @@ async def finalizar_compra(
     novo_cep: Optional[str] = Form(None),
     nova_cidade: Optional[str] = Form(None),
     nova_rua: Optional[str] = Form(None),
-    novo_numero: Optional[int] = Form(None),
+    novo_numero: Optional[str] = Form(None),
     novo_bairro: Optional[str] = Form(None),
     novo_complemento: Optional[str] = Form(None),
     # Campos do cartão
@@ -855,12 +855,16 @@ async def finalizar_compra(
             id_endereco_final = None
 
             if endereco_selecionado == "novo":
+                # Converte o número de string para int de forma segura
+                numero_formatado = int(novo_numero) if novo_numero and novo_numero.isdigit() else 0
+
                 # Inserir novo endereço no banco
                 sql_novo_end = """
                     INSERT INTO Endereco (fk_Usuario_Id_Usuario, fk_Loja_Id_Loja, Cep, Rua, Numero, Cidade, Bairro, Complemento, Status) 
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 1)
                 """
-                cursor.execute(sql_novo_end, (user_id, loja_id, novo_cep, nova_rua, novo_numero, nova_cidade, novo_bairro, novo_complemento))
+                # Repare que agora enviamos a variável 'numero_formatado' no execute
+                cursor.execute(sql_novo_end, (user_id, loja_id, novo_cep, nova_rua, numero_formatado, nova_cidade, novo_bairro, novo_complemento))
                 db.commit()
                 id_endereco_final = cursor.lastrowid
             else:
@@ -896,7 +900,7 @@ async def finalizar_compra(
                     """, (item["fk_Produto_Id_Produto"], id_compra, item["Qtd_Produto"]))
                     
                     # Abater estoque do Produto
-                    cursor.execute("UPDATE Produto SET Qtd_Estoque = Qtd_Estoque - %s WHERE Id_Produto = %s", (item["Qtd_Produto"], item["fk_Produto_Id_Produto"]))
+                    cursor.execute("UPDATE Produto SET Qtd_Estoque = COALESCE(Qtd_Estoque, 0) - %s, Qtd_Vendida = COALESCE(Qtd_Vendida, 0) + %s WHERE Id_Produto = %s", (item["Qtd_Produto"], item["Qtd_Produto"], item["fk_Produto_Id_Produto"]))
 
                 # 5. Limpar o carrinho (apaga os registros da tabela associativa)
                 cursor.execute("DELETE FROM Carrinho_Produto WHERE fk_Carrinho_Id_Carrinho = %s", (carrinho_id,))
