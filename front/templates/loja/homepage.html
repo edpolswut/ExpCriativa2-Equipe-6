@@ -36,9 +36,9 @@
         {% if loja and loja.Banner_B64 %}
             <img src="data:image/jpeg;base64,{{ loja.Banner_B64 }}" alt="Banner {{ loja.Nome }}" class="banner-img">
             
-            <div class="banner-overlay">
+            <!-- <div class="banner-overlay">
                 <h1>Bem-vindo à {{ loja.Nome }}</h1>
-            </div>
+            </div> -->
         {% else %}
             <div class="banner-fallback">
                 <h1>Bem-vindo à {{ loja.Nome }}</h1>
