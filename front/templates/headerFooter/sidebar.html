@@ -9,6 +9,14 @@
         <i class="fas fa-box-open"></i> Produtos
     </a>
 
+    <a href="/GerenciarCategorias?id_loja={{ id_loja }}" class="{% if sidebar_active == 'categoria' %}active{% endif %}">
+        <i class="fas fa-tags"></i> Categorias
+    </a>
+
+    <a href="/HistoricoVendas?id_loja={{ id_loja }}" class="{% if sidebar_active == 'historico' %}active{% endif %}">
+        <i class="fas fa-receipt"></i> Histórico de Vendas
+    </a>
+
     <a href="/perfilLojista" class="sidebar-voltar">
         <i class="fas fa-arrow-left"></i> Voltar
     </a>

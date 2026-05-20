@@ -15,3 +15,30 @@ function trocarImagem(miniaturaClicada) {
     // 4. Adiciona a borda azul apenas na miniatura que acabou de ser clicada
     miniaturaClicada.classList.add('active');
 }
+
+// Função para adicionar ao carrinho
+document.addEventListener('DOMContentLoaded', function() {
+    const btnComprar = document.querySelector('.btn-comprar');
+    
+    if (btnComprar && !btnComprar.disabled) {
+        btnComprar.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Pega o identificador da loja do data attribute
+            const identificador = this.dataset.identificador;
+            
+            // Pega o ID do produto da URL
+            const pathparts = window.location.pathname.split('/');
+            const idProduto = pathparts[pathparts.length - 1];
+            
+            // Cria um formulário dinamicamente para enviar uma requisição POST
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/loja/${identificador}/carrinho/adicionar/${idProduto}`;
+            
+            // Adiciona o formulário ao corpo do documento e o submete
+            document.body.appendChild(form);
+            form.submit();
+        });
+    }
+});

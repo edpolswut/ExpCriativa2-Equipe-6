@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - {{ loja.Nome }}</title>
+    <link rel="stylesheet" href="/front/style/cadastro/cadastroStyle.css">
+    <style>
+        :root{
+            --primaria: {% if loja.Cor_Principal %}{{ loja.Cor_Principal }}{% else %}#FFD166{% endif %};
+            --hover: #e6b84f;
+            --herobtn: #494949;
+            --herohover: #292929;
+            --fundo: #FFF8E7;
+        }
+    </style>
+    <link rel="stylesheet" href="/front/style/responsividadeGeral.css">
+</head>
+<body>
+
+    <main class="container">
+        {% if loja.Logo_B64 %}
+            <img src="data:image/jpeg;base64,{{ loja.Logo_B64 }}" alt="Logo {{ loja.Nome }}" class="logo-login" style="max-height: 100px; object-fit: contain;">
+        {% else %}
+            <img src="/front/icons/logosnap.png" alt="Logo Snapshop" class="logo-login">
+        {% endif %}
+
+        <div class="box">
+            <h1>Faça seu login</h1>
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">{{ loja.Nome }}</p>
+
+            {% if error %}
+            <div style="background-color: #ffebee; color: #c62828; padding: 10px; border-radius: 4px; margin-bottom: 15px; text-align: center;">
+                {% if error == 'credenciais' %}
+                    Email ou senha incorretos
+                {% elif error == 'sistema' %}
+                    Erro no sistema. Tente novamente mais tarde.
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <form id="formulario" method="POST" action="/loja/{{ identificador }}/login">
+
+                <label>Email:</label>
+                <input type="text" id="email" name="Email" required>
+                <p id="erro-email"></p>
+
+                <label>Senha:</label>
+                <input type="password" id="senha" name="Senha" required>
+                <p id="erro-senha"></p>
+
+                <button type="submit">Entrar</button>
+            </form>
+
+            <a href="/loja/{{ identificador }}/home">
+                <button id="voltar" type="button">Voltar para a loja</button>
+            </a>
+
+        </div>
+    </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Detecta parâmetros de erro na URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('erro')) {
+            const erro = urlParams.get('erro');
+            if (erro === 'credenciais') {
+                document.getElementById('erro-email').textContent = 'Email ou senha incorretos';
+            } else if (erro === 'sistema') {
+                Swal.fire('Erro', 'Erro no sistema. Tente novamente mais tarde.', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

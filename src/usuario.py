@@ -12,7 +12,7 @@ from templates import templates
 
 router = APIRouter()
 
-#Cores pro avatar do usuario
+# Cores pro avatar do usuario
 coresAvatarUsuario = ["#FFD166", "#06D6A0", "#118AB2", "#EF476F", "#8338EC", "#FF9F1C"]
 
 @router.get("/cadastro", response_class=HTMLResponse)
@@ -46,19 +46,20 @@ async def CriarUsuario(
         with db.cursor() as cursor:
             cursor.execute("SELECT 1 FROM Usuario WHERE Email = %s", (Email,)) 
             if cursor.fetchone():
-                return JSONResponse(status_code=400, content={"erro": "email_existe"})
+                return RedirectResponse(url="/cadastro?erro=email_existe", status_code=303)
             
             cursor.execute("SELECT 1 FROM Usuario WHERE Cpf = %s", (CPF,)) 
             if cursor.fetchone():
-                return JSONResponse(status_code=400, content={"erro": "cpf_existe"})
+                return RedirectResponse(url="/cadastro?erro=cpf_existe", status_code=303)
 
             sql = "INSERT INTO Usuario (Nome, Cpf, Email, Senha_Hash, Dat_Nascimento, Dat_Criacao, Status) VALUES (%s, %s, %s, MD5(%s), %s, current_date(), 1)"
             cursor.execute(sql, (Nome, CPF, Email, Senha, DataNascimento))
             db.commit()
 
-            return JSONResponse(content={"sucesso": True})
-    except Exception:
-        return JSONResponse(status_code=500, content={"erro": "sistema"})
+            return RedirectResponse(url="/login?sucesso=cadastro", status_code=303)
+    except Exception as e:
+        print(f"ERRO CRIAR USUARIO: {e}")
+        return RedirectResponse(url="/cadastro?erro=sistema", status_code=303)
     finally:
         db.close()
 
@@ -93,14 +94,13 @@ async def Login(
             if not usuario:
                 return RedirectResponse(url="/login?erro=credenciais", status_code=303)
             
-            cursor.execute("SELECT fk_Perfil_Id_Perfil FROM Usuario_Perfil WHERE fk_Usuario_Id_Usuario = %s", (usuario["Id_Usuario"],))
-            perfil = cursor.fetchone()
+            cursor.execute("SELECT 1 FROM Usuario_Perfil WHERE fk_Usuario_Id_Usuario = %s AND fk_Perfil_Id_Perfil = 1", (usuario["Id_Usuario"],))
+            es_admin = cursor.fetchone()
 
             request.session["user_id"] = usuario["Id_Usuario"]
             request.session["user_nome"] = usuario["Nome"]
-            request.session["user_perfil"] = "Administrador" if perfil != None and perfil["fk_Perfil_Id_Perfil"] == 1 else "Lojista"
+            request.session["user_perfil"] = "Administrador" if es_admin else "Lojista"
             request.session["user_logged_in"] = True
-
             request.session["user_Avatar"] = bool(usuario["Imagem_Usuario"])
             request.session["user_Avatar_Inicial"] = usuario["Nome"][0].upper()
             request.session["user_Avatar_Cor"] = coresAvatarUsuario[ord(usuario["Nome"][0].upper()) % len(coresAvatarUsuario)]
@@ -137,16 +137,26 @@ async def perfil(request: Request, db = Depends(get_db)):
         cursor.execute("SELECT Nome, Email FROM Usuario WHERE Id_Usuario = %s", (user_id,))
         usuario = cursor.fetchone()
 
-        # apenas lojas ativas (Status = 1)
-        sql_lojas = """
-            SELECT L.*, UP.fk_Perfil_Id_Perfil, P.Nom_Perfil, CL.Logo
-            FROM Loja L
-            INNER JOIN Usuario_Perfil UP ON L.Id_Loja = UP.fk_Loja_Id_Loja
-            INNER JOIN Perfil P ON UP.fk_Perfil_Id_Perfil = P.Id_Perfil
-             LEFT JOIN Config_Loja CL ON L.Id_Loja = CL.fk_Loja_Id_Loja
-            WHERE UP.fk_Usuario_Id_Usuario = %s AND L.Status = 1
-        """
-        cursor.execute(sql_lojas, (user_id,))
+        # Se for administrador, vê todas as lojas. Se for lojista, vê apenas as suas.
+        if request.session.get("user_perfil") == "Administrador":
+            sql_lojas = """
+                SELECT L.*, 1 as fk_Perfil_Id_Perfil, 'Administrador' as Nom_Perfil, CL.Logo, CL.Cor_Principal, CL.Url
+                FROM Loja L
+                LEFT JOIN Config_Loja CL ON L.Id_Loja = CL.fk_Loja_Id_Loja
+                WHERE L.Status = 1
+            """
+            cursor.execute(sql_lojas)
+        else:
+            sql_lojas = """
+                SELECT L.*, UP.fk_Perfil_Id_Perfil, P.Nom_Perfil, CL.Logo, CL.Cor_Principal, CL.Url
+                FROM Loja L
+                INNER JOIN Usuario_Perfil UP ON L.Id_Loja = UP.fk_Loja_Id_Loja
+                INNER JOIN Perfil P ON UP.fk_Perfil_Id_Perfil = P.Id_Perfil
+                 LEFT JOIN Config_Loja CL ON L.Id_Loja = CL.fk_Loja_Id_Loja
+                WHERE UP.fk_Usuario_Id_Usuario = %s AND L.Status = 1
+            """
+            cursor.execute(sql_lojas, (user_id,))
+        
         lojas = cursor.fetchall()
 
         for loja in lojas:

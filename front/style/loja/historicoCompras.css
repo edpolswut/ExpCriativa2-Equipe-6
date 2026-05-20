@@ -1,0 +1,224 @@
+.historico-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.historico-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.historico-header h1 {
+    color: var(--cinza4);
+    font-size: 2rem;
+    margin-bottom: 6px;
+}
+
+.historico-header p {
+    color: var(--cinza7);
+}
+
+.btn-voltar {
+    background-color: var(--azul);
+    color: var(--branco);
+    text-decoration: none;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-voltar:hover {
+    background-color: var(--amarelo);
+    color: var(--cinza4);
+}
+
+.lista-compras {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.compra-card {
+    background-color: var(--branco);
+    border: 1px solid var(--cinza);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(var(--preto-rgb), 0.08);
+}
+
+.compra-topo {
+    background-color: var(--cinza2);
+    border-bottom: 1px solid var(--cinza);
+    padding: 18px 22px;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.compra-topo h2 {
+    color: var(--azul);
+    font-size: 1.2rem;
+    margin-bottom: 6px;
+}
+
+.data-compra {
+    color: var(--cinza7);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status {
+    padding: 7px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.status.ativo {
+    background-color: rgba(26, 158, 26, 0.12);
+    color: var(--verde);
+}
+
+.status.inativo {
+    background-color: rgba(180, 0, 0, 0.12);
+    color: #b00000;
+}
+
+.produtos-compra {
+    padding: 10px 22px;
+}
+
+.produto-historico {
+    display: grid;
+    grid-template-columns: 90px 1fr auto;
+    gap: 18px;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--cinza);
+}
+
+.produto-historico:last-child {
+    border-bottom: none;
+}
+
+.produto-img {
+    width: 90px;
+    height: 90px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: var(--cinza2);
+}
+
+.produto-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sem-img {
+    width: 100%;
+    height: 100%;
+    color: var(--cinza5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+}
+
+.produto-info h3 {
+    color: var(--cinza4);
+    font-size: 1.05rem;
+    margin-bottom: 8px;
+}
+
+.produto-info p {
+    color: var(--cinza7);
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+
+.produto-total {
+    text-align: right;
+    min-width: 130px;
+}
+
+.produto-total span {
+    display: block;
+    color: var(--cinza7);
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+
+.produto-total strong {
+    color: var(--azul);
+    font-size: 1.1rem;
+}
+
+.compra-rodape {
+    background-color: var(--cinza8);
+    border-top: 1px solid var(--cinza);
+    padding: 18px 22px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 14px;
+}
+
+.compra-rodape span {
+    color: var(--cinza6);
+    font-weight: bold;
+}
+
+.compra-rodape strong {
+    color: var(--azul);
+    font-size: 1.4rem;
+}
+
+.historico-vazio {
+    background-color: var(--branco);
+    border: 1px solid var(--cinza);
+    border-radius: 12px;
+    padding: 60px 20px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(var(--preto-rgb), 0.08);
+}
+
+.historico-vazio i {
+    font-size: 4rem;
+    color: var(--azul);
+    margin-bottom: 18px;
+}
+
+.historico-vazio h2 {
+    color: var(--cinza4);
+    margin-bottom: 8px;
+}
+
+.historico-vazio p {
+    color: var(--cinza7);
+    margin-bottom: 22px;
+}
+
+.historico-vazio a {
+    display: inline-block;
+    background-color: var(--azul);
+    color: var(--branco);
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.historico-vazio a:hover {
+    background-color: var(--amarelo);
+    color: var(--cinza4);
+}

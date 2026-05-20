@@ -6,9 +6,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const inputData = document.getElementById("dataNascimento");
 
     const urlParams = new URLSearchParams(window.location.search);
-    
+    const identificadorLoja = window.location.pathname.split('/')[2]; // Pega o identificador da URL
 
-    // Lógica para exibir mensagens de erro da URL (Retorno do Servidor)
     if (urlParams.has('erro')) {
         let erro = urlParams.get('erro');
         if (erro === 'email_existe') {
@@ -26,16 +25,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 text: 'Este CPF já está cadastrado em nosso sistema!',
                 confirmButtonColor: '#FFD166'
             });
-        }
-        else if (erro === 'sistema') {
+        } else if (erro === 'sistema') {
             Swal.fire({
                 icon: 'error',
                 title: 'Erro',
-                text: 'Ocorreu um erro interno. Tente novamente mais tarde.',
+                text: 'Ocorreu um erro no sistema. Tente novamente mais tarde.',
                 confirmButtonColor: '#FFD166'
             });
         }
-        // Limpa a URL
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 
@@ -168,30 +165,23 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("erro-data").textContent = "Data de nascimento é obrigatória.";
             valido = false;
         } else {
-            let partes = dataNascimento.split("-");
+            let hoje = new Date();
+            let nascimento = new Date(dataNascimento);
 
-            if (partes[0] && partes[0].length > 4) {
-                document.getElementById("erro-data").textContent = "O ano da data deve ter no máximo 4 dígitos.";
+            let idade = hoje.getFullYear() - nascimento.getFullYear();
+            let mes = hoje.getMonth() - nascimento.getMonth();
+
+            if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
+                idade--;
+            }
+
+            if (idade < 18) {
+                document.getElementById("erro-data").textContent = "Você deve ter pelo menos 18 anos.";
                 valido = false;
-            } else {
-                let hoje = new Date();
-                let nascimento = new Date(dataNascimento);
-
-                let idade = hoje.getFullYear() - nascimento.getFullYear();
-                let mes = hoje.getMonth() - nascimento.getMonth();
-
-                if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
-                    idade--;
-                }
-
-                if (idade < 18) {
-                    document.getElementById("erro-data").textContent = "Você deve ter pelo menos 18 anos.";
-                    valido = false;
-                }
-                else if (idade > 120) {
-                    document.getElementById("erro-data").textContent = "Idade inválida.";
-                    valido = false;
-                }
+            }
+            else if (idade > 120) {
+                document.getElementById("erro-data").textContent = "Idade inválida.";
+                valido = false;
             }
         }
 

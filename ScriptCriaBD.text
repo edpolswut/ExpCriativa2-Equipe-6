@@ -39,6 +39,7 @@ CREATE TABLE Produto (
     Descricao VARCHAR(400),
     Preco DOUBLE NOT NULL,
     Qtd_Estoque INT NOT NULL,
+    Qtd_Vendida INT,
     Status INT NOT NULL
 );
 
@@ -70,6 +71,7 @@ CREATE TABLE Log_Compra (
     fk_Usuario_Id_Usuario INT NOT NULL,
     fk_Loja_Id_Loja INT NOT NULL,
     Dat_Compra DATE NOT NULL,
+    fk_Endereco_Id_Endereco INT NOT NULL,
     Status INT NOT NULL
 );
 
@@ -117,12 +119,14 @@ CREATE TABLE Produto_Categoria (
 CREATE TABLE Carrinho_Produto (
     fk_Carrinho_Id_Carrinho INT NOT NULL,
     fk_Produto_Id_Produto INT NOT NULL,
+    Qtd_Produto INT NOT NULL,
     PRIMARY KEY (fk_Carrinho_Id_Carrinho, fk_Produto_Id_Produto)
 );
 
 CREATE TABLE Log_Compra_Produto (
     fk_Produto_Id_Produto INT NOT NULL,
     fk_Log_Compra_Id_Log_Compras INT NOT NULL,
+    Qtd_Produto INT NOT NULL,
     PRIMARY KEY (fk_Produto_Id_Produto, fk_Log_Compra_Id_Log_Compras)
 );
 
@@ -151,6 +155,8 @@ ALTER TABLE Log_Compra ADD CONSTRAINT FK_Log_Compra_Usuario
     FOREIGN KEY (fk_Usuario_Id_Usuario) REFERENCES Usuario (Id_Usuario) ON DELETE RESTRICT;
 ALTER TABLE Log_Compra ADD CONSTRAINT FK_Log_Compra_Loja
     FOREIGN KEY (fk_Loja_Id_Loja) REFERENCES Loja (Id_Loja) ON DELETE RESTRICT;
+ALTER TABLE Log_Compra ADD CONSTRAINT FK_Log_Compra_Endereco
+    FOREIGN KEY (fk_Endereco_Id_Endereco) REFERENCES Endereco (Id_Endereco) ON DELETE RESTRICT;
 
 -- Config_Loja
 ALTER TABLE Config_Loja ADD CONSTRAINT FK_Config_Loja

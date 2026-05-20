@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Início - {{ loja.Nome }}</title>
+    <link rel="stylesheet" href="/front/style/loja/mainpage.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="/front/style/loja/homepage.css">
+    
+    <style>
+        :root{
+            --azul: #0b3d91;
+            --branco: #fff;
+            --amarelo: #ffd700;
+            --preto-rgb: 0, 0, 0;
+            --cinza: #eaeaea;
+            --cinza2: #f8f9fa;
+            --cinza3: #ccc;
+            --cinza4: #333;
+            --cinza5: #888;
+            --cinza6: #555;
+            --cinza7: #666;
+            --cinza8: #f9f9f9;
+            --verde: #1a9e1a;
+        }
+    </style>
+    <link rel="stylesheet" href="/front/style/responsividadeGeral.css">    
+</head>
+<body style="--azul: {% if loja and loja.Cor_Principal %}{{ loja.Cor_Principal }}{% else %}#0b3d91{% endif %}; --amarelo: {% if loja and loja.Cor_Secundaria %}{{ loja.Cor_Secundaria }}{% else %}#ffd700{% endif %};">
+
+    {% include 'header/headerloja.html' %}
+
+    <div class="banner-container">
+        {% if loja and loja.Banner_B64 %}
+            <img src="data:image/jpeg;base64,{{ loja.Banner_B64 }}" alt="Banner {{ loja.Nome }}" class="banner-img">
+            
+            <div class="banner-overlay">
+                <h1>Bem-vindo à {{ loja.Nome }}</h1>
+            </div>
+        {% else %}
+            <div class="banner-fallback">
+                <h1>Bem-vindo à {{ loja.Nome }}</h1>
+            </div>
+        {% endif %}
+    </div>
+
+    <section class="carousel-section">
+        <div class="carousel-wrapper">
+            <button class="nav-button prev-button" id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+
+            <div class="carousel-container" id="carouselContainer">
+                <div class="carousel-track" id="carouselTrack">
+                    {% for prod in produtos_aleatorios %}
+                    <div class="product-card">
+                        <a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}/produto/{{ prod.Id_Produto }}" style="text-decoration: none; color: inherit;">
+                            <div class="product-image-container">
+                                {% if prod.lista_imagens %}
+                                    <div class="product-slides" id="slides-{{ prod.Id_Produto }}">
+                                        {% for img_base64 in prod.lista_imagens %}
+                                            <img src="data:image/jpeg;base64,{{ img_base64 }}" alt="{{ prod.Nome }}">
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="product-no-image">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="product-info-carousel">
+                                <h4 class="product-title-carousel">{{ prod.Nome }}</h4>
+                                <div class="product-price">
+                                    <span class="current-price-carousel">
+                                        R$ {{ "{:,.2f}".format(prod.Preco).replace(",", "X").replace(".", ",").replace("X", ".") }}
+                                    </span>
+                                    <span class="installments-carousel">ou 12x de R$ {{ "%.2f"|format(prod.Preco / 12)|replace('.', ',') }}</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button class="nav-button next-button" id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </section>
+
+    {% include 'footer/footer.html'%}
+
+    <script src="/front/script/loja/mainpage.js"></script>
+    <script src="/front/script/loja/homepage.js"></script>
+</body>
+</html>

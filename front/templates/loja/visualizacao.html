@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalhes do Produto - BrinquedoShop</title>
     <link rel="stylesheet" href="/front/style/loja/mainpage.css">
     <link rel="stylesheet" href="/front/style/loja/visualizacao.css">
@@ -23,7 +24,8 @@
             --cinza8: #f9f9f9;
             --verde: #1a9e1a;
         }
-    </style> 
+    </style>
+    <link rel="stylesheet" href="/front/style/responsividadeGeral.css"> 
 </head>
 <body style="--azul: {% if loja and loja.Cor_Principal %}{{ loja.Cor_Principal }}{% else %}#0b3d91{% endif %}; --amarelo: {% if loja and loja.Cor_Secundaria %}{{ loja.Cor_Secundaria }}{% else %}#ffd700{% endif %};">
 
@@ -81,5 +83,19 @@
 
     <script src="/front/script/loja/mainpage.js"></script>
     <script src="/front/script/loja/visualizacao.js"></script>
+    <script>
+        // Armazena o identificador da loja no data attribute para o script usar
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlPath = window.location.pathname;
+            const parts = urlPath.split('/');
+            const identificador = parts[2]; // /loja/{identificador}/produto/{id}
+            
+            // Passa para o botão
+            const btnComprar = document.querySelector('.btn-comprar');
+            if (btnComprar) {
+                btnComprar.dataset.identificador = identificador;
+            }
+        });
+    </script>
 </body>
 </html>

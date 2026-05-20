@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Perfil - SnapShop</title>
     <link rel="stylesheet" href="/front/style/headerStyle.css">
     <link rel="stylesheet" href="/front/style/usuario/perfilLojistaStyle.css">
@@ -15,6 +16,7 @@
             --fundo: #FFF8E7;
         }
     </style>
+    <link rel="stylesheet" href="/front/style/responsividadeGeral.css">
 </head>
 <body>
 
@@ -97,18 +99,23 @@
             <div class="lojas-grid">
                 {% for loja in lojas %}
                 <div class="card">
-                    <div class="card-img">
+                    <div class="card-img" style="background: {{ loja.Cor_Principal or '#FFD166' }};">
                         {% if loja.Logo_B64 %}
                             <img src="data:image/jpeg;base64,{{ loja.Logo_B64 }}" alt="Logo">
                         {% else %}
-                            <i class="fas fa-store fa-3x"></i>
+                            <i class="fas fa-store fa-3x" style="color: rgba(255,255,255,0.5);"></i>
+                        {% endif %}
+                        {% if loja.Url %}
+                            <a href="loja/{{ loja.Url }}/home" target="_blank" class="btn-visitar" title="Visitar loja"><i class="fas fa-external-link-alt"></i></a>
                         {% endif %}
                     </div>
                     <div class="card-title">
                         {{ loja.Nome }} <br>
                         <span>CNPJ: {{ loja.Cnpj }}</span>
                     </div>
-                    <a href="/EditarLoja/{{ loja.Id_Loja }}" class="cta-btn pequeno"><i class="fas fa-cog"></i> Gerenciar</a>
+                    <div class="card-actions">
+                        <a href="/EditarLoja/{{ loja.Id_Loja }}" class="cta-btn pequeno"><i class="fas fa-cog"></i> Gerenciar</a>
+                    </div>
                 </div>
                 {% endfor %}
             </div>

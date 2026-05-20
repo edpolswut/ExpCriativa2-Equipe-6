@@ -1,56 +1,50 @@
 document.addEventListener("DOMContentLoaded", function () {
-    
-    // 1. VERIFICA MENSAGENS VINDAS DO BACKEND PELA URL
     const urlParams = new URLSearchParams(window.location.search);
-    
-    if (urlParams.has('erro')) {
-        let erro = urlParams.get('erro');
-        if (erro === 'credenciais') {
-            Swal.fire({ icon: 'error', title: 'Acesso Negado', text: 'E-mail ou palavra-passe incorretos.', confirmButtonColor: '#FFD166' });
-        } else if (erro === 'sistema') {
-            Swal.fire({ icon: 'error', title: 'Ops!', text: 'Ocorreu um erro no servidor. Tente novamente.', confirmButtonColor: '#FFD166' });
-        }
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
-    if (urlParams.has('sucesso') && urlParams.get('sucesso') === 'cadastro') {
-        Swal.fire({ icon: 'success', title: 'Conta criada!', text: 'Inicie sessão para continuar.', confirmButtonColor: '#FFD166' });
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
-    // 2. VALIDAÇÃO DO FORMULÁRIO (FRONT-END)
     const form = document.getElementById("formulario");
 
-    form.addEventListener("submit", function (event) {
-        event.preventDefault();
+    // Validação de campos vazios antes de enviar (Client-side)
+    if (form) {
+        form.addEventListener("submit", function (event) {
+            const email = document.getElementById("email").value.trim();
+            const senha = document.getElementById("senha").value.trim();
+            let valido = true;
 
-        let email = document.getElementById("email").value.trim();
-        let senha = document.getElementById("senha").value.trim();
+            // Limpa mensagens de erro anteriores
+            const erroEmail = document.getElementById("erro-email");
+            const erroSenha = document.getElementById("erro-senha");
+            
+            if (erroEmail) erroEmail.textContent = "";
+            if (erroSenha) erroSenha.textContent = "";
 
-        let valido = true;
-        let mensagemErro = "";
-        let regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // RegEx de E-mail
+            if (email === "") {
+                if (erroEmail) erroEmail.textContent = "Por favor, insira o seu e-mail.";
+                valido = false;
+            }
+            if (senha === "") {
+                if (erroSenha) erroSenha.textContent = "Por favor, insira a sua senha.";
+                valido = false;
+            }
 
-        if (!regexEmail.test(email) && email !== "admin") {
-            mensagemErro += "Introduza um <b>e-mail</b> válido.<br>";
-            valido = false;
-        }
+            if (!valido) {
+                event.preventDefault(); // Impede o envio do formulário
+            }
+        });
+    }
 
-        if (senha === "") {
-            mensagemErro += "A <b>palavra-passe</b> é obrigatória.<br>";
-            valido = false;
-        }
-
-        if (!valido) {
+    // Erros vindos do Servidor (SSR)
+    if (urlParams.has('erro')) {
+        const erro = urlParams.get('erro');
+        if (erro === 'credenciais') {
             Swal.fire({
-                icon: 'warning',
-                title: 'Campos Inválidos',
-                html: mensagemErro,
+                icon: 'error',
+                title: 'Falha no Login',
+                text: 'E-mail ou senha incorretos.',
                 confirmButtonColor: '#FFD166'
             });
-            return;
+        } else if (erro === 'sistema') {
+            Swal.fire('Erro', 'Ocorreu um erro interno. Tente novamente mais tarde.', 'error');
         }
-
-        form.submit();
-    });
+        // Limpa parâmetros da URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
 });

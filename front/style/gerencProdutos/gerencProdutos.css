@@ -106,8 +106,18 @@ th {
 .btn-edit {
     color: #0b3d91;
     text-decoration: none;
+    cursor: pointer;
     margin-right: 15px;
     font-size: 18px;
+}
+
+.btn-adjust {
+    color: #ecdd09;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    margin-right: 15px;
 }
 
 .btn-delete {
@@ -203,15 +213,127 @@ input[type="file"] {
     justify-content: flex-end;
 }
 
-/* Responsividade original da tabela */
+/* Estilos específicos para tabela de vendas */
+.tabela-vendas table {
+    table-layout: auto;
+}
+
+.tabela-vendas td[data-label="Produtos"] {
+    min-width: 300px;
+    max-width: 350px;
+}
+
+.tabela-vendas td[data-label="Imagem"] {
+    width: 80px;
+    text-align: center;
+}
+
+.tabela-vendas td[data-label="Pedido"],
+.tabela-vendas td[data-label="Total"],
+.tabela-vendas td[data-label="Data"] {
+    width: 120px;
+}
+
+.tabela-vendas td[data-label="Cliente"] {
+    min-width: 150px;
+}
+
+.status {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.status-pendente {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-pago {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-enviado {
+    background-color: #cfe2ff;
+    color: #084298;
+}
+
+.status-transporte {
+    background-color: #e7d4f5;
+    color: #664da7;
+}
+
+.status-finalizado {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-cancelado {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+/* Media queries para responsividade */
+@media (max-width: 1024px) {
+    .tabela-vendas td[data-label="Produtos"] {
+        min-width: 250px;
+    }
+}
+
 @media (max-width: 768px) {
-    .app-body { flex-direction: column; }
-    .sidebar { width: 100%; }
-    
-    table, thead, tbody, th, td, tr { display: block; }
-    td:before {
-        content: attr(data-label);
-        float: left;
-        font-weight: bold;
+    .tabela-vendas table {
+        font-size: 0.9rem;
+    }
+
+    .tabela-vendas td[data-label="Imagem"] {
+        width: 60px;
+    }
+
+    .tabela-vendas td[data-label="Produtos"] {
+        min-width: 200px;
+        font-size: 0.85rem;
+    }
+
+    .tabela-vendas td[data-label="Pedido"],
+    .tabela-vendas td[data-label="Total"],
+    .tabela-vendas td[data-label="Data"] {
+        width: 100px;
+    }
+
+    th, td {
+        padding: 10px;
+    }
+
+    .status {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tabela-vendas td[data-label="Imagem"] {
+        display: none;
+    }
+
+    .tabela-vendas th:first-child {
+        display: none;
+    }
+
+    .tabela-vendas td[data-label="Produtos"] {
+        min-width: 150px;
+    }
+
+    th, td {
+        padding: 8px 5px;
+        font-size: 0.8rem;
+    }
+
+    h1 {
+        font-size: 20px;
+        margin-bottom: 15px;
     }
 }

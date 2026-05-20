@@ -31,13 +31,11 @@
 
                 <div>
                     <strong style="display: block;">{{ request.session.get('user_nome') }}</strong>
-                    <span style="font-size: 0.8em; color: gray;">{{ request.session.get('user_perfil') }}</span>
+                    <span style="font-size: 0.8em; color: #444;">{{ request.session.get('user_perfil') }}</span>
                 </div>
             </a>
 
-            <a href="/logout" class="nav-btn" 
-            
-            >
+            <a href="/logout" class="nav-btn" >
                 <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i> Sair
             </a>
         {% else %}

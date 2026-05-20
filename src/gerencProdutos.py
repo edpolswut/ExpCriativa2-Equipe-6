@@ -173,7 +173,115 @@ async def deletar_produto(
 
     return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
 
+@router.post("/AlterarEstoqueProduto")
+async def alterar_estoque_produto(
+    request: Request,
+    id_produto: int = Form(...),
+    qtd_alterar: int = Form(...),
+    id_loja: int = Form(...),
+    db = Depends(get_db)
+):
+    if not request.session.get("user_logged_in"):
+        return RedirectResponse(url="/login", status_code=303)
+
+    user_id = request.session.get("user_id")
+
+    if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
+        return RedirectResponse(url="/perfilLojista", status_code=303)
+
+    with db.cursor(pymysql.cursors.DictCursor) as cursor:
+
+        cursor.execute("SELECT Qtd_Estoque FROM Produto WHERE Id_Produto = %s AND fk_Loja_Id_Loja = %s AND Status = 1", (id_produto, id_loja))
+
+        QtdAtual = cursor.fetchone()
+
+        if QtdAtual['Qtd_Estoque'] < 0:
+            return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
+        elif QtdAtual['Qtd_Estoque'] + qtd_alterar < 0:
+            return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
+
+        cursor.execute("UPDATE Produto SET Qtd_Estoque = %s WHERE Id_Produto = %s", (QtdAtual['Qtd_Estoque'] + qtd_alterar, id_produto))
+
+        db.commit()
+
+    return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
+
 #CRUD de categoria
+
+@router.get("/GerenciarCategorias", response_class=HTMLResponse)
+async def gerenciar_categorias(
+    request: Request,
+    id_loja: int,
+    db = Depends(get_db)
+):
+    if not request.session.get("user_logged_in"):
+        return RedirectResponse(url="/login", status_code=303)
+
+    user_id = request.session.get("user_id")
+
+    if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
+        return RedirectResponse(url="/perfilLojista", status_code=303)
+
+    with db.cursor(pymysql.cursors.DictCursor) as cursor:
+
+        cursor.execute("""
+            SELECT *
+            FROM Categoria
+            WHERE fk_Loja_Id_Loja = %s
+            AND Status = 1
+            ORDER BY Nome
+        """, (id_loja,))
+
+        categorias = cursor.fetchall()
+
+    return templates.TemplateResponse(
+        "gerencCategoria/gerenciarCategoria.html",
+        {
+            "request": request,
+            "categorias": categorias,
+            "id_loja": id_loja,
+            "sidebar_active": "categoria"
+        }
+    )
+
+@router.get("/FormCategoria", response_class=HTMLResponse)
+async def form_categoria(
+    request: Request,
+    id_loja: int,
+    id: int = None,
+    db = Depends(get_db)
+):
+    if not request.session.get("user_logged_in"):
+        return RedirectResponse(url="/login", status_code=303)
+
+    user_id = request.session.get("user_id")
+
+    if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
+        return RedirectResponse(url="/perfilLojista", status_code=303)
+
+    categoria = None
+
+    with db.cursor(pymysql.cursors.DictCursor) as cursor:
+
+        if id:
+            cursor.execute("""
+                SELECT *
+                FROM Categoria
+                WHERE Id_Categoria = %s
+                AND fk_Loja_Id_Loja = %s
+                AND Status = 1
+            """, (id, id_loja))
+
+            categoria = cursor.fetchone()
+
+    return templates.TemplateResponse(
+        "gerencCategoria/formCategoria.html",
+        {
+            "request": request,
+            "categoria": categoria,
+            "id_loja": id_loja
+        }
+    )
 
 @router.post("/SalvarCategoria")
 async def salvar_categoria(
@@ -203,7 +311,7 @@ async def salvar_categoria(
 
             db.commit()
 
-        return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
+        return RedirectResponse(url=f"/GerenciarCategorias?id_loja={id_loja}", status_code=303)
 
     finally:
         db.close()
@@ -229,4 +337,94 @@ async def deletar_categoria(
                        (id, id_loja))
         db.commit()
 
-    return RedirectResponse(url=f"/GerenciarProdutos?id_loja={id_loja}", status_code=303)
+    return RedirectResponse(url=f"/GerenciarCategorias?id_loja={id_loja}", status_code=303)
+
+# Históricos de venda/compra
+
+@router.get("/HistoricoVendas", response_class=HTMLResponse)
+async def historico_vendas(
+    request: Request,
+    id_loja: int,
+    db = Depends(get_db)
+):
+    
+    if not request.session.get("user_logged_in"):
+        return RedirectResponse(url="/login", status_code=303)
+
+    user_id = request.session.get("user_id")
+
+    if not await auth.verificarUsuarioPerfil(db, user_id, 2, id_loja):
+        return RedirectResponse(url="/perfilLojista", status_code=303)
+
+    with db.cursor(pymysql.cursors.DictCursor) as cursor:
+
+        sql = """
+            SELECT
+                LC.Id_Log_Compras,
+                LC.Dat_Compra,
+                LC.Status,
+                U.Nome AS Nome_Cliente,
+                P.Id_Produto,
+                P.Nome AS Nome_Produto,
+                P.Preco,
+                LCP.Qtd_Produto,
+                (P.Preco * LCP.Qtd_Produto) AS Total_Produto
+
+            FROM Log_Compra LC
+
+            INNER JOIN Usuario U
+                ON U.Id_Usuario = LC.fk_Usuario_Id_Usuario
+
+            INNER JOIN Log_Compra_Produto LCP
+                ON LCP.fk_Log_Compra_Id_Log_Compras = LC.Id_Log_Compras
+
+            INNER JOIN Produto P
+                ON P.Id_Produto = LCP.fk_Produto_Id_Produto
+
+            WHERE LC.fk_Loja_Id_Loja = %s
+
+            ORDER BY LC.Dat_Compra DESC, LC.Id_Log_Compras
+        """
+
+        cursor.execute(sql, (id_loja,))
+        vendas_raw = cursor.fetchall()
+
+    # Agrupar produtos por pedido
+    vendas_agrupadas = {}
+    for venda in vendas_raw:
+        pedido_id = venda['Id_Log_Compras']
+        
+        if pedido_id not in vendas_agrupadas:
+            # Primeira vez que vemos este pedido
+            vendas_agrupadas[pedido_id] = {
+                'Id_Log_Compras': pedido_id,
+                'Dat_Compra': venda['Dat_Compra'],
+                'Status': venda['Status'],
+                'Nome_Cliente': venda['Nome_Cliente'],
+                'Total_Pedido': 0,
+                'Produtos': []
+            }
+        
+        # Adicionar produto
+        vendas_agrupadas[pedido_id]['Produtos'].append({
+            'Nome_Produto': venda['Nome_Produto'],
+            'Qtd_Produto': venda['Qtd_Produto'],
+            'Preco': venda['Preco'],
+            'Total_Produto': venda['Total_Produto']
+        })
+        
+        # Atualizar total do pedido
+        vendas_agrupadas[pedido_id]['Total_Pedido'] += venda['Total_Produto']
+    
+    # Converter para lista mantendo a ordem
+    vendas = list(vendas_agrupadas.values())
+
+    return templates.TemplateResponse(
+        "historico/historicoVendas.html",
+        {
+            "request": request,
+            "vendas": vendas,
+            "id_loja": id_loja,
+            "sidebar_active": "historico"
+        }
+    )
