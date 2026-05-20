@@ -28,15 +28,15 @@
             <form id="formulario" method="POST" action="/CriarUsuario">
 
                 <label for="nome">Nome:</label>
-                <input type="text" id="nome" name="Nome">
+                <input type="text" id="nome" name="Nome" value="{{ Nome or '' }}">
                 <p id="erro-nome"></p>
 
                 <label for="cpf">CPF:</label>
-                <input type="text" id="cpf" name="CPF">
+                <input type="text" id="cpf" name="CPF" value="{{ CPF or '' }}">
                 <p id="erro-cpf"></p>
 
                 <label for="email">Email:</label>
-                <input type="text" id="email" name="Email">
+                <input type="text" id="email" name="Email" value="{{ Email or '' }}">
                 <p id="erro-email"></p>
 
                 <label for="senha">Senha:</label>
@@ -58,7 +58,7 @@
                 <p id="erro-confirmar-senha"></p>
                     
                 <label for="dataNascimento">Data de Nascimento:</label>
-                <input type="date" id="dataNascimento" name="DataNascimento">
+                <input type="date" id="dataNascimento" name="DataNascimento" value="{{ DataNascimento or '' }}">
                 <p id="erro-data"></p>
 
                 <button type="submit">Cadastrar</button>
@@ -74,5 +74,14 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/front/script/togglePassword.js"></script>
     <script src="/front/script/cadastro/cadastroForm.js"></script>
+    <script>
+        // Aciona o SweetAlert se o servidor retornou erro via contexto (Jinja2)
+        {% if erro %}
+            const erroServidor = "{{ erro }}";
+            if (erroServidor === 'email_existe') Swal.fire('Atenção', 'Este e-mail já está cadastrado!', 'error');
+            else if (erroServidor === 'cpf_existe') Swal.fire('Atenção', 'Este CPF já está cadastrado!', 'error');
+            else if (erroServidor === 'sistema') Swal.fire('Erro', 'Ocorreu um erro no sistema.', 'error');
+        {% endif %}
+    </script>
 </body>
 </html>

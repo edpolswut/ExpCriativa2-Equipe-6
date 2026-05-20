@@ -54,7 +54,8 @@ async def login_loja(request: Request, identificador: str, db = Depends(get_db))
         "categorias_selecionadas": [],
         "busca_atual": None,
         "preco_selecionado": None,
-        "obterAvatarUsuario": obterAvatarUsuario
+        "obterAvatarUsuario": obterAvatarUsuario,
+        "db": db
     })
 
 
@@ -146,7 +147,8 @@ async def cadastro_loja_usuario(request: Request, identificador: str, db = Depen
         "categorias_selecionadas": [],
         "busca_atual": None,
         "preco_selecionado": None,
-        "obterAvatarUsuario": obterAvatarUsuario
+        "obterAvatarUsuario": obterAvatarUsuario,
+        "db": db
     })
 
 @router.post("/loja/{identificador}/cadastro", response_class=HTMLResponse)
@@ -164,21 +166,53 @@ async def processar_cadastro_loja_usuario(
     if request.session.get("user_logged_in"):
         request.session.clear()
     
+    cpf_limpo = "".join(filter(str.isdigit, CPF))
+    email_limpo = Email.strip().upper()
+
+    # Função auxiliar para buscar dados da loja e renderizar erro sem perder campos
+    def render_erro(erro_msg):
+        with db.cursor(pymysql.cursors.DictCursor) as cursor_loja:
+            if identificador.isdigit():
+                sql_loja = "SELECT L.*, C.Cor_Principal, C.Cor_Secundaria, C.Logo, C.Banner, C.Url FROM Loja L LEFT JOIN Config_Loja C ON L.Id_Loja = C.fk_Loja_Id_Loja WHERE L.Id_Loja = %s AND L.Status = 1"
+                cursor_loja.execute(sql_loja, (int(identificador),))
+            else:
+                sql_loja = "SELECT L.*, C.Cor_Principal, C.Cor_Secundaria, C.Logo, C.Banner, C.Url FROM Config_Loja C INNER JOIN Loja L ON C.fk_Loja_Id_Loja = L.Id_Loja WHERE C.Url = %s AND L.Status = 1"
+                cursor_loja.execute(sql_loja, (identificador,))
+            loja_info = cursor_loja.fetchone()
+            if loja_info and loja_info.get("Logo"):
+                loja_info["Logo_B64"] = base64.b64encode(loja_info["Logo"]).decode('utf-8')
+        
+        return templates.TemplateResponse("loja/cadastro.html", {
+            "request": request,
+            "loja": loja_info,
+            "identificador": identificador,
+            "erro": erro_msg,
+            "Nome": Nome,
+            "CPF": CPF,
+            "Email": Email,
+            "DataNascimento": DataNascimento,
+            "categorias_selecionadas": [],
+            "busca_atual": None,
+            "preco_selecionado": None,
+            "obterAvatarUsuario": obterAvatarUsuario,
+            "db": db
+        })
+
     try:
         with db.cursor() as cursor:
             # Verifica se o email já existe
-            cursor.execute("SELECT 1 FROM Usuario WHERE UPPER(Email) = UPPER(%s)", (Email,)) 
+            cursor.execute("SELECT 1 FROM Usuario WHERE UPPER(Email) = %s", (email_limpo,)) 
             if cursor.fetchone():
-                return RedirectResponse(url=f"/loja/{identificador}/cadastro?erro=email_existe", status_code=303)
+                return render_erro("email_existe")
             
             # Verifica se o CPF já existe
-            cursor.execute("SELECT 1 FROM Usuario WHERE Cpf = %s", (CPF,)) 
+            cursor.execute("SELECT 1 FROM Usuario WHERE Cpf = %s", (cpf_limpo,)) 
             if cursor.fetchone():
-                return RedirectResponse(url=f"/loja/{identificador}/cadastro?erro=cpf_existe", status_code=303)
+                return render_erro("cpf_existe")
 
             # Insere o novo usuário
             sql = "INSERT INTO Usuario (Nome, Cpf, Email, Senha_Hash, Dat_Nascimento, Dat_Criacao, Status) VALUES (%s, %s, %s, MD5(%s), %s, current_date(), 1)"
-            cursor.execute(sql, (Nome, CPF, Email, Senha, DataNascimento))
+            cursor.execute(sql, (Nome, cpf_limpo, email_limpo, Senha, DataNascimento))
             db.commit()
 
             # Redireciona para a página de login da loja com mensagem de sucesso
@@ -187,9 +221,7 @@ async def processar_cadastro_loja_usuario(
     except Exception as e:
         print(f"ERRO CADASTRO LOJA USUARIO: {e}")
         db.rollback()
-        return RedirectResponse(url=f"/loja/{identificador}/cadastro?erro=sistema", status_code=303)
-    finally:
-        db.close()
+        return render_erro("sistema")
 
 
 # ==================== FIM ROTAS DE CADASTRO DE USUÁRIO NA LOJA ====================
@@ -293,7 +325,8 @@ async def vitrine_loja(
         "busca_atual": busca,
         "categorias_selecionadas": categorias or [],
         "preco_selecionado": preco,
-        "obterAvatarUsuario": obterAvatarUsuario
+        "obterAvatarUsuario": obterAvatarUsuario,
+        "db": db
     })
 
 @router.get("/loja/{identificador}/produto/{id_produto}", response_class=HTMLResponse)
@@ -343,11 +376,12 @@ async def detalhes_produto(request: Request, identificador: str, id_produto: int
         "request": request, 
         "produto": produto,
         "loja": loja,
-            "identificador": identificador,
+        "identificador": identificador,
         "categorias_selecionadas": [],
         "busca_atual": None,
         "preco_selecionado": None,
-        "obterAvatarUsuario": obterAvatarUsuario
+        "obterAvatarUsuario": obterAvatarUsuario,
+        "db": db
     })
 
 # ==================== ROTA DA HOMEPAGE ====================
@@ -472,7 +506,8 @@ async def homepage_loja(
         "busca_atual": busca,
         "categorias_selecionadas": categorias or [],
         "preco_selecionado": preco,
-        "obterAvatarUsuario": obterAvatarUsuario
+        "obterAvatarUsuario": obterAvatarUsuario,
+        "db": db
     })
 
 
@@ -570,8 +605,6 @@ async def exibir_carrinho(request: Request, identificador: str, db = Depends(get
 
     except Exception as e:
         print(f"ERRO AO CARREGAR CARRINHO: {e}")
-    finally:
-        db.close()
 
     return templates.TemplateResponse("loja/carrinho.html", {
         "request": request,
@@ -584,6 +617,7 @@ async def exibir_carrinho(request: Request, identificador: str, db = Depends(get
         "busca_atual": None,
         "preco_selecionado": None,
         "obterAvatarUsuario": obterAvatarUsuario,
+        "db": db,
         "enderecos": enderecos
     })
 
@@ -667,8 +701,6 @@ async def adicionar_carrinho(
     except Exception as e:
         print(f"ERRO AO ADICIONAR AO CARRINHO: {e}")
         db.rollback()
-    finally:
-        db.close()
 
     return RedirectResponse(url=f"/loja/{identificador}/carrinho", status_code=303)
 
@@ -715,8 +747,6 @@ async def aumentar_quantidade(request: Request, identificador: str, id_produto: 
     except Exception as e:
         print(f"ERRO AO AUMENTAR QUANTIDADE: {e}")
         db.rollback()
-    finally:
-        db.close()
 
     return RedirectResponse(url=f"/loja/{identificador}/carrinho", status_code=303)
 
@@ -762,8 +792,6 @@ async def diminuir_quantidade(request: Request, identificador: str, id_produto: 
     except Exception as e:
         print(f"ERRO AO DIMINUIR QUANTIDADE: {e}")
         db.rollback()
-    finally:
-        db.close()
 
     return RedirectResponse(url=f"/loja/{identificador}/carrinho", status_code=303)
 
@@ -807,8 +835,6 @@ async def remover_produto(request: Request, identificador: str, id_produto: int,
     except Exception as e:
         print(f"ERRO AO REMOVER PRODUTO: {e}")
         db.rollback()
-    finally:
-        db.close()
 
     return RedirectResponse(url=f"/loja/{identificador}/carrinho", status_code=303)
 
@@ -910,8 +936,131 @@ async def finalizar_compra(
         print(f"ERRO AO FINALIZAR COMPRA: {e}")
         db.rollback()
         return RedirectResponse(url=f"/loja/{identificador}/carrinho?erro=finalizar", status_code=303)
-    finally:
-        db.close()
 
     # Redireciona para a home da loja (ou para uma página de sucesso, se você criar uma)
     return RedirectResponse(url=f"/loja/{identificador}/home?sucesso=compra", status_code=303)
+
+@router.get("/loja/{identificador}/historico", response_class=HTMLResponse)
+async def historico_compras_loja(
+    request: Request,
+    identificador: str,
+    db = Depends(get_db)
+):
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        return RedirectResponse(url=f"/loja/{identificador}/login", status_code=303)
+
+    try:
+        with db.cursor(pymysql.cursors.DictCursor) as cursor:
+
+            if identificador.isdigit():
+                sql_loja = """
+                    SELECT L.*, C.Cor_Principal, C.Cor_Secundaria, C.Logo, C.Banner, C.Url
+                    FROM Loja L
+                    LEFT JOIN Config_Loja C 
+                        ON C.fk_Loja_Id_Loja = L.Id_Loja
+                    WHERE L.Id_Loja = %s
+                    AND L.Status = 1
+                """
+                cursor.execute(sql_loja, (int(identificador),))
+            else:
+                sql_loja = """
+                    SELECT L.*, C.Cor_Principal, C.Cor_Secundaria, C.Logo, C.Banner, C.Url
+                    FROM Config_Loja C
+                    INNER JOIN Loja L 
+                        ON C.fk_Loja_Id_Loja = L.Id_Loja
+                    WHERE C.Url = %s
+                    AND L.Status = 1
+                """
+                cursor.execute(sql_loja, (identificador,))
+
+            loja = cursor.fetchone()
+
+            if not loja:
+                return RedirectResponse(url="/", status_code=303)
+
+            if loja.get("Logo"):
+                loja["Logo_B64"] = base64.b64encode(loja["Logo"]).decode("utf-8")
+
+            sql = """
+                SELECT
+                    LC.Id_Log_Compras,
+                    LC.Dat_Compra,
+                    LC.Status,
+                    P.Id_Produto,
+                    P.Nome AS Nome_Produto,
+                    P.Preco,
+                    LCP.Qtd_Produto,
+                    (P.Preco * LCP.Qtd_Produto) AS Total_Produto,
+                    (
+                        SELECT Imagem
+                        FROM Imagem_Produto
+                        WHERE fk_Produto_Id_Produto = P.Id_Produto
+                        LIMIT 1
+                    ) AS Imagem
+
+                FROM Log_Compra LC
+
+                INNER JOIN Log_Compra_Produto LCP
+                    ON LCP.fk_Log_Compra_Id_Log_Compras = LC.Id_Log_Compras
+
+                INNER JOIN Produto P
+                    ON P.Id_Produto = LCP.fk_Produto_Id_Produto
+
+                WHERE LC.fk_Usuario_Id_Usuario = %s
+                AND LC.fk_Loja_Id_Loja = %s
+
+                ORDER BY LC.Dat_Compra DESC, LC.Id_Log_Compras DESC
+            """
+
+            cursor.execute(sql, (user_id, loja["Id_Loja"]))
+            compras_raw = cursor.fetchall()
+
+            compras_agrupadas = {}
+
+            for compra in compras_raw:
+                id_compra = compra["Id_Log_Compras"]
+
+                if id_compra not in compras_agrupadas:
+                    compras_agrupadas[id_compra] = {
+                        "Id_Log_Compras": id_compra,
+                        "Dat_Compra": compra["Dat_Compra"],
+                        "Status": compra["Status"],
+                        "Total_Pedido": 0,
+                        "Produtos": []
+                    }
+
+                imagem_b64 = None
+                if compra.get("Imagem"):
+                    imagem_b64 = base64.b64encode(compra["Imagem"]).decode("utf-8")
+
+                compras_agrupadas[id_compra]["Produtos"].append({
+                    "Id_Produto": compra["Id_Produto"],
+                    "Nome_Produto": compra["Nome_Produto"],
+                    "Preco": compra["Preco"],
+                    "Qtd_Produto": compra["Qtd_Produto"],
+                    "Total_Produto": compra["Total_Produto"],
+                    "Imagem_B64": imagem_b64
+                })
+
+                compras_agrupadas[id_compra]["Total_Pedido"] += compra["Total_Produto"]
+
+            compras = list(compras_agrupadas.values())
+
+    except Exception as e:
+        print(f"ERRO AO CARREGAR HISTÓRICO DE COMPRAS: {e}")
+        compras = []
+        loja = None
+
+    return templates.TemplateResponse("loja/historicoCompras.html", {
+        "request": request,
+        "loja": loja,
+        "compras": compras,
+        "identificador": identificador,
+        "categorias_selecionadas": [],
+        "busca_atual": None,
+        "preco_selecionado": None,
+        "obterAvatarUsuario": obterAvatarUsuario,
+        "db": db
+    })

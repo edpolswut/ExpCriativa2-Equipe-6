@@ -27,24 +27,90 @@ document.addEventListener("DOMContentLoaded", function() {
                         } else {
                             // Se o CEP não existir
                             limparCamposEndereco();
-                            
-                            // Validação caso o SweetAlert (Swal) esteja incluído na página
-                            if (typeof Swal !== 'undefined') {
-                                Swal.fire({
-                                    icon: 'warning',
-                                    title: 'CEP não encontrado',
-                                    text: 'Verifique se digitou corretamente.',
-                                    confirmButtonColor: '#FFD166'
-                                });
-                            } else {
-                                alert("CEP não encontrado. Verifique se digitou corretamente.");
-                            }
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'CEP não encontrado',
+                                text: 'Verifique se digitou corretamente.',
+                                confirmButtonColor: '#FFD166'
+                            });
                         }
                     })
                     .catch(erro => {
                         console.error("Erro na API ViaCEP:", erro);
                         limparCamposEndereco();
                     });
+            }
+        });
+    }
+});
+
+// Intercepta a finalização de compra para mostrar as modais fakes
+document.addEventListener("DOMContentLoaded", function() {
+    const formCheckout = document.getElementById("form-checkout");
+    
+    if (formCheckout) {
+        formCheckout.addEventListener("submit", function(e) {
+            console.log("Form submission attempted. Default prevented.");
+            e.preventDefault();
+            
+            const metodo = document.querySelector('input[name="metodo_pagamento"]:checked').value;
+
+            if (metodo === 'pix') {
+                let timerInterval;
+                console.log("Initiating PIX SweetAlert.");
+                Swal.fire({
+                    title: 'Pagamento via PIX',
+                    html: `
+                        <div style="text-align: center;">
+                            <p>Escaneie o QR Code abaixo para pagar:</p>
+                            <img src="/front/icons/qrcode.png" style="width: 200px; margin: 15px auto; display: block;" onerror="this.src='https://via.placeholder.com/200?text=QR+CODE'">
+                            <p>O código expira em: <strong>5:00</strong></p>
+                        </div>
+                    `,
+                    timer: 300000,
+                    timerProgressBar: true,
+                    showConfirmButton: true,
+                    confirmButtonText: 'Confirmar Pagamento',
+                    confirmButtonColor: '#1a9e1a',
+                    didOpen: () => {
+                        const timerElement = Swal.getHtmlContainer().querySelector('strong');
+                        timerInterval = setInterval(() => {
+                            const ms = Swal.getTimerLeft();
+                            const min = Math.floor(ms / 60000);
+                            const sec = Math.floor((ms % 60000) / 1000);
+                            timerElement.textContent = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+                        }, 1000);
+                    },
+                    willClose: () => {
+                        clearInterval(timerInterval);
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
+                        console.log("PIX SweetAlert dismissed. Submitting form.");
+                        formCheckout.submit();
+                    }
+                });
+            } else if (metodo === 'cartao') {
+                console.log("Initiating Cartão SweetAlert.");
+                Swal.fire({
+                    title: 'Processando Pagamento',
+                    text: 'Aguarde enquanto validamos os dados do cartão...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                        setTimeout(() => {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Pagamento Aprovado!',
+                                text: 'Sua compra foi concluída com sucesso.',
+                                confirmButtonColor: '#1a9e1a'
+                            }).then(() => { // This then block is for the "Pagamento Aprovado!" Swal
+                            }).then(() => {
+                                formCheckout.submit();
+                            });
+                        }, 2500);
+                    }
+                });
             }
         });
     }

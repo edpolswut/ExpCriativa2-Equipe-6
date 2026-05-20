@@ -31,7 +31,7 @@
     
     {% include 'header/headerloja.html' %}
 
-    <form action="/loja/{{ identificador }}/finalizar_compra" method="POST">
+    <form id="form-checkout" action="/loja/{{ identificador }}/finalizar_compra" method="POST">
         <main class="cart-container">
             
             <div class="cart-left">
@@ -45,7 +45,7 @@
                     {% if item.Imagem_B64 %}
                         <img src="data:image/jpeg;base64,{{ item.Imagem_B64 }}" alt="{{ item.Nome }}">
                     {% else %}
-                        <img src="/static/img/placeholder.png" alt="Sem Imagem">
+                        <img src="https://via.placeholder.com/150?text=Sem+Imagem" alt="Sem Imagem">
                     {% endif %}
 
                     <div class="item-details">
@@ -60,7 +60,7 @@
                         </div>
                     </div>
 
-                    <a href="/loja/{{ identificador }}/carrinho/remover/{{ item.Id_Produto }}" class="item-delete" title="Remover produto">
+                    <a href="#" onclick="removerDoCarrinho(event, '{{ identificador }}', '{{ item.Id_Produto }}')" class="item-delete" title="Remover produto">
                         <i class="far fa-trash-alt"></i>
                     </a>
 
@@ -173,5 +173,24 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script src="/front/script/loja/carrinho.js"></script>
+    <script>
+        function removerDoCarrinho(event, identificador, idProduto) {
+            event.preventDefault();
+            Swal.fire({
+                title: 'Remover produto?',
+                text: "Você deseja remover este item do seu carrinho?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, remover',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/loja/${identificador}/carrinho/remover/${idProduto}`;
+                }
+            });
+        }
+    </script>
 </body>
 </html>

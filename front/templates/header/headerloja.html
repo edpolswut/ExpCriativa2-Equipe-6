@@ -12,6 +12,11 @@
     .user-action-icon:hover {
         color: var(--cor-secundaria-loja); /* Hover color */
     }
+    @media (max-width: 520px){
+        .user-section{
+            margin-left: 0px !important;
+        }
+    }
 </style>
 
 <header class="site-header">
@@ -53,8 +58,8 @@
             {% if request.session.get('user_logged_in') %}
                 <!-- Avatar e Nome do Usuário -->
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    {% if request.session.get('user_Avatar') %}
-                        <img src="data:image/jpeg;base64,{{ obterAvatarUsuario(request.session.get('user_id')) }}" alt="Avatar" class="user-avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                    {% if request.session.get('user_Avatar') and db and obterAvatarUsuario %}
+                        <img src="data:image/jpeg;base64,{{ obterAvatarUsuario(request.session.get('user_id'), db) }}" alt="Avatar" class="user-avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
                     {% else %}
                         <div class="user-avatar-inicial" style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; background-color: {{ request.session.get('user_Avatar_Cor', '#0b3d91') }};">
                             {{ request.session.get('user_Avatar_Inicial', '?') }}
@@ -71,8 +76,8 @@
                     <i class="fas fa-shopping-cart user-action-icon"></i>
                 </a>
 
-                <!-- Histórico de Compras (placeholder) -->
-                <a href="#" title="Histórico de compras" onclick="alert('Histórico de compras em breve'); return false;">
+                <!-- Histórico de Compras -->
+                <a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}/historico" title="Histórico de compras">
                     <i class="fas fa-history user-action-icon"></i>
                 </a>
 

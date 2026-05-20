@@ -312,9 +312,9 @@ async def salvar_categoria(
             db.commit()
 
         return RedirectResponse(url=f"/GerenciarCategorias?id_loja={id_loja}", status_code=303)
-
     finally:
         db.close()
+
 
 
 @router.get("/DeletarCategoria/{id}")

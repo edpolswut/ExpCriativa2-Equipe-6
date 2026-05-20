@@ -42,26 +42,49 @@ async def CriarUsuario(
         request.session.clear()
         return RedirectResponse(url="/", status_code=303)
 
+    # Sanatização dos dados
+    email_limpo = Email.strip().upper()
+    cpf_limpo = "".join(filter(str.isdigit, CPF))
+
     try:
         with db.cursor() as cursor:
-            cursor.execute("SELECT 1 FROM Usuario WHERE Email = %s", (Email,)) 
+            cursor.execute("SELECT 1 FROM Usuario WHERE UPPER(Email) = %s", (email_limpo,)) 
             if cursor.fetchone():
-                return RedirectResponse(url="/cadastro?erro=email_existe", status_code=303)
+                return templates.TemplateResponse("usuario/cadastro.html", {
+                    "request": request, 
+                    "erro": "email_existe",
+                    "Nome": Nome,
+                    "CPF": CPF,
+                    "Email": Email,
+                    "DataNascimento": DataNascimento
+                })
             
-            cursor.execute("SELECT 1 FROM Usuario WHERE Cpf = %s", (CPF,)) 
+            cursor.execute("SELECT 1 FROM Usuario WHERE Cpf = %s", (cpf_limpo,)) 
             if cursor.fetchone():
-                return RedirectResponse(url="/cadastro?erro=cpf_existe", status_code=303)
+                return templates.TemplateResponse("usuario/cadastro.html", {
+                    "request": request, 
+                    "erro": "cpf_existe",
+                    "Nome": Nome,
+                    "CPF": CPF,
+                    "Email": Email,
+                    "DataNascimento": DataNascimento
+                })
 
             sql = "INSERT INTO Usuario (Nome, Cpf, Email, Senha_Hash, Dat_Nascimento, Dat_Criacao, Status) VALUES (%s, %s, %s, MD5(%s), %s, current_date(), 1)"
-            cursor.execute(sql, (Nome, CPF, Email, Senha, DataNascimento))
+            cursor.execute(sql, (Nome, cpf_limpo, email_limpo, Senha, DataNascimento))
             db.commit()
 
             return RedirectResponse(url="/login?sucesso=cadastro", status_code=303)
     except Exception as e:
         print(f"ERRO CRIAR USUARIO: {e}")
-        return RedirectResponse(url="/cadastro?erro=sistema", status_code=303)
-    finally:
-        db.close()
+        return templates.TemplateResponse("usuario/cadastro.html", {
+            "request": request, 
+            "erro": "sistema",
+            "Nome": Nome,
+            "CPF": CPF,
+            "Email": Email,
+            "DataNascimento": DataNascimento
+        })
 
 @router.get("/login", response_class=HTMLResponse)
 async def login(request: Request):
@@ -186,11 +209,17 @@ async def salvar_edicao_usuario(
         return RedirectResponse(url="/login", status_code=303)
 
     user_id = request.session.get("user_id")
+    email_limpo = Email.strip().upper()
 
     try:
         with db.cursor() as cursor:
+            # Verifica se o novo e-mail já está em uso por OUTRO usuário
+            cursor.execute("SELECT 1 FROM Usuario WHERE UPPER(Email) = %s AND Id_Usuario != %s", (email_limpo, user_id))
+            if cursor.fetchone():
+                return RedirectResponse(url="/perfilLojista?erro=email_existe", status_code=303)
+
             sql = "UPDATE Usuario SET Nome=%s, Email=%s WHERE Id_Usuario=%s"
-            cursor.execute(sql, (Nome, Email, user_id))
+            cursor.execute(sql, (Nome, email_limpo, user_id))
             
             if Senha and Senha.strip() != "":
                 cursor.execute("UPDATE Usuario SET Senha_Hash=MD5(%s) WHERE Id_Usuario=%s", (Senha, user_id))
@@ -246,18 +275,14 @@ async def logout(request: Request):
     request.session.clear() 
     return RedirectResponse(url="/", status_code=303)
 
-def obterAvatarUsuario(user_id: int):
-    db = get_db()
+def obterAvatarUsuario(user_id: int, db): # Aceita 'db' como parâmetro
     try:
         with db.cursor(pymysql.cursors.DictCursor) as cursor:
             cursor.execute("SELECT Imagem_Usuario FROM Usuario WHERE Id_Usuario = %s", (user_id,))
             resultado = cursor.fetchone()
             if resultado and resultado["Imagem_Usuario"]:
                 return base64.b64encode(resultado["Imagem_Usuario"]).decode('utf-8')
-            
     except Exception as e:
         print(f"Erro ao buscar avatar: {e}")
-    finally:
-        db.close()
         
     return None

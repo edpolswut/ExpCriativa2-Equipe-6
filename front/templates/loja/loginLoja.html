@@ -7,11 +7,52 @@
     <link rel="stylesheet" href="/front/style/cadastro/cadastroStyle.css">
     <style>
         :root{
-            --primaria: {% if loja.Cor_Principal %}{{ loja.Cor_Principal }}{% else %}#FFD166{% endif %};
+            --primaria: {% if loja.Cor_Principal %}{{ loja.Cor_Principal }}{% else %}#0b3d91{% endif %};
+            --secundaria: {% if loja.Cor_Secundaria %}{{ loja.Cor_Secundaria }}{% else %}#FFD166{% endif %};
             --hover: #e6b84f;
             --herobtn: #494949;
             --herohover: #292929;
-            --fundo: #FFF8E7;
+        }
+        
+        /* Calcular versão mais clara da cor primária para o fundo */
+        body {
+            background: linear-gradient(135deg, var(--primaria)15 0%, var(--primaria)08 100%);
+        }
+        
+        .box {
+            background: white;
+            border-top: 4px solid var(--primaria);
+        }
+        
+        .box h1 {
+            color: var(--primaria);
+        }
+        
+        form input:focus {
+            border-color: var(--primaria);
+            box-shadow: 0 0 0 3px rgba(11, 61, 145, 0.1);
+        }
+        
+        button[type="submit"] {
+            background: var(--primaria);
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        button[type="submit"]:hover {
+            background: var(--secundaria);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        form label {
+            color: var(--primaria);
+        }
+        
+        .error-div {
+            background-color: #ffebee;
+            border-left: 4px solid var(--primaria);
         }
     </style>
     <link rel="stylesheet" href="/front/style/responsividadeGeral.css">
@@ -28,9 +69,10 @@
         <div class="box">
             <h1>Faça seu login</h1>
             <p style="text-align: center; color: #666; margin-bottom: 20px;">{{ loja.Nome }}</p>
+            <p style="text-align: center; font-size: 0.85rem; color: #777; margin-top: -15px; margin-bottom: 20px;">Você também pode utilizar sua conta <strong>Snapshop</strong>.</p>
 
             {% if error %}
-            <div style="background-color: #ffebee; color: #c62828; padding: 10px; border-radius: 4px; margin-bottom: 15px; text-align: center;">
+            <div class="error-div" style="color: #c62828; padding: 10px; border-radius: 4px; margin-bottom: 15px; text-align: center;">
                 {% if error == 'credenciais' %}
                     Email ou senha incorretos
                 {% elif error == 'sistema' %}

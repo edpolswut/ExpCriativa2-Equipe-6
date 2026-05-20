@@ -1,7 +1,7 @@
 /* Estilos exclusivos para o Banner */
 .banner-container {
     width: 100%;
-    height: auto;
+    height: 400px;
     position: relative; /* CRUCIAL: Permite empilhar elementos aqui dentro */
     display: flex;
     align-items: center;
@@ -13,7 +13,7 @@
 
 .banner-img {
     width: 100%;
-    height:auto;
+    height:100%;
     object-fit: cover;
     position: absolute; /* Joga a imagem para o fundo do container */
     top: 0;

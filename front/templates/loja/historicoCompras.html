@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico de Compras - {{ loja.Nome }}</title>
+
+    <link rel="stylesheet" href="/front/style/loja/mainpage.css">
+    <link rel="stylesheet" href="/front/style/loja/historicoCompras.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root{
+            --azul: #0b3d91;
+            --branco: #fff;
+            --amarelo: #ffd700;
+            --preto-rgb: 0, 0, 0;
+            --cinza: #eaeaea;
+            --cinza2: #f8f9fa;
+            --cinza3: #ccc;
+            --cinza4: #333;
+            --cinza5: #888;
+            --cinza6: #555;
+            --cinza7: #666;
+            --cinza8: #f9f9f9;
+            --verde: #1a9e1a;
+        }
+    </style>
+
+    <link rel="stylesheet" href="/front/style/responsividadeGeral.css">
+</head>
+
+<body style="--azul: {% if loja and loja.Cor_Principal %}{{ loja.Cor_Principal }}{% else %}#0b3d91{% endif %}; --amarelo: {% if loja and loja.Cor_Secundaria %}{{ loja.Cor_Secundaria }}{% else %}#ffd700{% endif %};">
+
+    {% include 'header/headerloja.html' %}
+
+    <main class="historico-container">
+        <section class="historico-header">
+            <div>
+                <h1>Histórico de Compras</h1>
+                <p>Veja os pedidos feitos nesta loja.</p>
+            </div>
+
+            <a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}/produtos" class="btn-voltar">
+                <i class="fas fa-store"></i>
+                Continuar comprando
+            </a>
+        </section>
+
+        {% if compras %}
+            <section class="lista-compras">
+                {% for compra in compras %}
+                    <article class="compra-card">
+                        <div class="compra-topo">
+                            <div>
+                                <h2>Pedido #{{ compra.Id_Log_Compras }}</h2>
+                                <span class="data-compra">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    {{ compra.Dat_Compra.strftime('%d/%m/%Y') if compra.Dat_Compra else '' }}
+                                </span>
+                            </div>
+
+                            <div class="status-compra">
+                                {% if compra.Status == 1 %}
+                                    <span class="status ativo">Concluído</span>
+                                {% else %}
+                                    <span class="status inativo">Cancelado</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="produtos-compra">
+                            {% for produto in compra.Produtos %}
+                                <div class="produto-historico">
+                                    <div class="produto-img">
+                                        {% if produto.Imagem_B64 %}
+                                            <img src="data:image/jpeg;base64,{{ produto.Imagem_B64 }}" alt="{{ produto.Nome_Produto }}">
+                                        {% else %}
+                                            <div class="sem-img">
+                                                <i class="fas fa-image"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="produto-info">
+                                        <h3>{{ produto.Nome_Produto }}</h3>
+                                        <p>Quantidade: {{ produto.Qtd_Produto }}</p>
+                                        <p>Preço unitário: R$ {{ "{:,.2f}".format(produto.Preco).replace(",", "X").replace(".", ",").replace("X", ".") }}</p>
+                                    </div>
+
+                                    <div class="produto-total">
+                                        <span>Total</span>
+                                        <strong>
+                                            R$ {{ "{:,.2f}".format(produto.Total_Produto).replace(",", "X").replace(".", ",").replace("X", ".") }}
+                                        </strong>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="compra-rodape">
+                            <span>Total do pedido</span>
+                            <strong>
+                                R$ {{ "{:,.2f}".format(compra.Total_Pedido).replace(",", "X").replace(".", ",").replace("X", ".") }}
+                            </strong>
+                        </div>
+                    </article>
+                {% endfor %}
+            </section>
+        {% else %}
+            <section class="historico-vazio">
+                <i class="fas fa-receipt"></i>
+                <h2>Nenhuma compra encontrada</h2>
+                <p>Você ainda não fez compras nesta loja.</p>
+
+                <a href="/loja/{{ loja.Url if loja.Url else loja.Id_Loja }}/produtos">
+                    Ver produtos
+                </a>
+            </section>
+        {% endif %}
+    </main>
+
+    {% include 'footer/footer.html' %}
+
+</body>
+</html>

@@ -74,8 +74,6 @@ async def CriarLoja(
         print(f"Erro: {e}")
         db.rollback()
         return RedirectResponse(url="/CadastroLoja?erro=sistema", status_code=303)
-    finally:
-        db.close()
 
 @router.get("/EditarLoja/{id_loja}", response_class=HTMLResponse)
 async def editar_loja(
