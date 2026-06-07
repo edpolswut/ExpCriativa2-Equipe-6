@@ -90,30 +90,20 @@ button{
     font-size: 1rem;
 }
 
-button[type="submit"]{
+button[type="submit"],
+#voltar{
     width: 100%;
     padding: 12px;
     margin-top: 10px;
     background: var(--primaria);
     color: black;
     font-weight: bold;
+    border-radius: 10px;
 }
 
-button[type="submit"]:hover{
-    background: var(--hover);
-}
-
-#voltar{
-    width: 100%;
-    padding: 12px;
-    margin-top: 12px;
-    background: var(--herobtn);
-    color: white;
-    font-weight: bold;
-}
-
+button[type="submit"]:hover,
 #voltar:hover{
-    background: var(--herohover);
+    background: var(--hover);
 }
 
 a{

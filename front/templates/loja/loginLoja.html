@@ -8,15 +8,15 @@
     <style>
         :root{
             --primaria: {% if loja.Cor_Principal %}{{ loja.Cor_Principal }}{% else %}#0b3d91{% endif %};
-            --secundaria: {% if loja.Cor_Secundaria %}{{ loja.Cor_Secundaria }}{% else %}#FFD166{% endif %};
+            --secundaria: {% if loja.Cor_Secundaria %}{{ loja.Cor_Secundaria }}{% else %}#ffd700{% endif %};
             --hover: #e6b84f;
             --herobtn: #494949;
             --herohover: #292929;
+            --fundo: linear-gradient(135deg, var(--primaria) 0%, var(--secundaria) 100%);
         }
         
-        /* Calcular versão mais clara da cor primária para o fundo */
         body {
-            background: linear-gradient(135deg, var(--primaria)15 0%, var(--primaria)08 100%);
+            background: var(--fundo);
         }
         
         .box {
