@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes do Produto - BrinquedoShop</title>
+    <link rel="stylesheet" href="produto.css">
+    <link rel="stylesheet" href="../mainpage.css">
+</head>
+<body>
+    <div id="header-container"></div> 
+
+    <main class="product-page">
+        <div class="product-gallery">
+            <div class="main-image-container">
+                <img id="imagem-principal" src="../images/big.jpg" alt="Imagem Principal">
+            </div>
+            
+            <div class="thumbnails">
+                <img src="../images/big.jpg" alt="Foto 1" class="thumb active" onclick="trocarImagem(this)">
+                <img src="images\foto2.jpg" alt="Foto 2" class="thumb" onclick="trocarImagem(this)">
+                <img src="images\foto3.jpg" alt="Foto 3" class="thumb" onclick="trocarImagem(this)">
+            </div>
+        </div>
+
+        <div class="product-details">
+            <span class="produto-condicao">Novo | +1000 vendidos</span>
+            <h1>Big Chungus</h1>
+            
+            <div class="price-box">
+                <span class="old-price">R$ 639,81</span>
+                <span class="current-price">R$ 339,99</span>
+                <span class="installments">em 12x de R$ 33,33 sem juros</span>
+            </div>
+
+            <button class="btn-comprar">Comprar Agora</button>
+
+            <div class="description-box">
+                <h3>Descrição do Produto</h3>
+                <p>é um bonecão.</p>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="produto.js"></script>
+    <script src="../mainpage.js"></script>
+</body>
+</html>
