@@ -1,0 +1,203 @@
+import pymysql
+import base64
+import gerencProdutos
+
+from mangum import Mangum
+from fastapi import FastAPI, Request, Form, Depends
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
+import os
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
+from database import get_db
+
+#Hash
+def gerar_hash(senha: str) -> str:
+    salt = os.urandom(16)
+
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=64,
+        salt=salt,
+        iterations=100_000,
+    )
+
+    hash_bytes = kdf.derive(senha.encode())
+
+    # junta salt + hash e codifica
+    return base64.b64encode(salt + hash_bytes).decode()
+
+
+def verificar_senha(senha: str, hash_salvo: str) -> bool:
+    decoded = base64.b64decode(hash_salvo.encode())
+
+    salt = decoded[:16]
+    hash_original = decoded[16:]
+
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=64,
+        salt=salt,
+        iterations=100_000,
+    )
+
+    try:
+        kdf.verify(senha.encode(), hash_original)
+        return True
+    except Exception:
+        return False
+
+templates = Jinja2Templates(directory="front/templates")
+
+app = FastAPI()
+
+from starlette.middleware.sessions import SessionMiddleware
+app.add_middleware(SessionMiddleware, secret_key="teste123")
+
+app.mount("/front", StaticFiles(directory="front"), name="view")
+app.include_router(gerencProdutos.router)
+
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    #if request.session.get("user_logged_in"):
+        #return RedirectResponse(url="/mainpage", status_code=303)
+
+    #login_error = request.session.pop("login_error", None)
+    #show_login_modal = request.session.pop("show_login_modal", False)
+
+    return templates.TemplateResponse("index.html", {
+        "request": request#,
+        #"login_error": login_error,
+        #"show_login_modal": "block" if show_login_modal else "none"
+    })
+
+@app.get("/cadastro", response_class=HTMLResponse)
+async def cadastro(request: Request):
+    return templates.TemplateResponse("cadastro.html", {
+        "request": request
+    })
+
+@app.get("/login", response_class=HTMLResponse)
+async def login(request: Request):
+    return templates.TemplateResponse("login.html", {
+        "request": request
+    })
+
+@app.get("/CadastroLoja", response_class=HTMLResponse)
+async def cadastroLoja(request: Request):
+
+    return templates.TemplateResponse("cadastroLoja.html", {
+        "request": request
+    })
+
+@app.get("/perfil", response_class=HTMLResponse)
+async def perfil(request: Request, db = Depends(get_db)):
+
+    #muda a página perfil pelo login feito
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=303)
+
+    with db.cursor(pymysql.cursors.DictCursor) as cursor:
+        cursor.execute("SELECT Nome, Email FROM Usuario WHERE Id_Usuario = %s", (user_id,))
+        usuario = cursor.fetchone()
+
+    return templates.TemplateResponse("perfil.html", {
+        "request": request,
+        "usuario": usuario
+    })
+
+#Insert de usuário
+@app.post("/CriarUsuario", name="CriarUsuario")
+async def CriarUsuario(
+    request: Request,
+    Nome: str = Form(...),
+    CPF: str = Form(...), 
+    Email: str = Form(...), 
+    Senha: str = Form(...), 
+    db = Depends(get_db)
+):
+    try:
+        with db.cursor() as cursor:
+
+            cursor.execute("SELECT Email FROM Usuario WHERE Email = %s", (Email,)) # executa um comando SQL, %s é um placeholder para evitar SQL injection
+            if cursor.fetchone():   
+                return RedirectResponse(url="/forms", status_code=303)
+
+            senha_hash = gerar_hash(Senha)
+
+            sql = "INSERT INTO Usuario (Nome, Cpf, Email, Senha_Hash, Dat_Criacao, Status) VALUES (%s, %s, %s, %s, current_date(), 1)"
+            cursor.execute(sql, (Nome, CPF, Email, senha_hash))
+            db.commit()
+
+            return RedirectResponse(url="/", status_code=303)
+
+    except Exception as e: 
+        print("ERRO AO CRIAR USUARIO:", e)
+        return RedirectResponse(url="/", status_code=303)
+
+    finally:
+        db.close()
+
+#Login
+@app.post("/Login")
+async def Login(
+    request: Request,
+    Email: str = Form(...),
+    Senha: str = Form(...),
+    db = Depends(get_db)
+):
+    try:
+        with db.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT * FROM Usuario WHERE Email = %s", (Email,))
+            usuario = cursor.fetchone()
+
+            if not usuario:
+                return RedirectResponse(url="/login?erro=1", status_code=303)
+
+            if not verificar_senha(Senha, usuario["Senha_Hash"]):
+                return RedirectResponse(url="/login?erro=1", status_code=303)
+
+            request.session["user_id"] = usuario["Id_Usuario"]
+            request.session["user_nome"] = usuario["Nome"]
+
+            return RedirectResponse(url="/perfil", status_code=303)
+
+    except Exception as e:
+        print("ERRO VERIFY:", e)
+        return False
+
+
+@app.get("/mainpage", name="mainpage", response_class=HTMLResponse)
+async def mainpage(request: Request, db = Depends(get_db)):
+    with db.cursor(pymysql.cursors.DictCursor) as cursor:
+        sql_produtos = """
+            SELECT Id_Produto, Nome, Preco, Qtd_Estoque 
+            FROM Produto 
+            WHERE fk_Loja_Id_Loja = 1 AND Status = 1
+            ORDER BY Nome
+        """
+        cursor.execute(sql_produtos)
+        produtos = cursor.fetchall()
+
+        for prod in produtos:
+            sql_imagens = "SELECT Imagem FROM Imagem_Produto WHERE fk_Produto_Id_Produto = %s"
+            cursor.execute(sql_imagens, (prod["Id_Produto"],))
+            imagens_blob = cursor.fetchall()
+            
+            prod["lista_imagens"] = [
+                base64.b64encode(img["Imagem"]).decode('utf-8') 
+                for img in imagens_blob if img["Imagem"]
+            ]
+
+    return templates.TemplateResponse("mainpage.html", {
+        "request": request, 
+        "produtos": produtos
+    })
+
+handler = Mangum(app)
